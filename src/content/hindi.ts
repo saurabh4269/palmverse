@@ -5,28 +5,10 @@
  * a native Hindi speaker should review before a public release.
  */
 export const HINDI: Record<string, string> = {
-  "Namaste! Come, sit. I am Panditji, and I have spent a long, happy time with old books about hands.":
-    "नमस्ते! आइए, बैठिए। मैं पंडितजी हूँ, और मैंने हाथों पर लिखी पुरानी किताबों के साथ लंबा, सुखद समय बिताया है।",
-  "In India this art is called हस्त रेखा, Hast Rekha, a branch of Samudrika Shastra, the old study of the body's marks.":
-    "भारत में इस कला को हस्त रेखा कहते हैं। यह सामुद्रिक शास्त्र की एक शाखा है, यानी शरीर के चिह्नों का पुराना अध्ययन।",
-  "Today we read your palm as culture and story, not as a forecast. Think of it as a conversation with tradition.":
-    "आज हम आपकी हथेली को संस्कृति और कहानी की तरह पढ़ेंगे, भविष्यवाणी की तरह नहीं। इसे परंपरा से एक बातचीत समझिए।",
-  "Today the tradition would light your Guru Parvat (गुरु पर्वत), ambition and leadership.":
-    "आज परंपरा आपका गुरु पर्वत जगाएगी: महत्वाकांक्षा और नेतृत्व।",
-  "Today the tradition would light your Shani Parvat (शनि पर्वत), focus, patience and study.":
-    "आज परंपरा आपका शनि पर्वत जगाएगी: एकाग्रता, धैर्य और अध्ययन।",
-  "Today the tradition would light your Surya Parvat (सूर्य पर्वत), creativity, charm and a love of beauty.":
-    "आज परंपरा आपका सूर्य पर्वत जगाएगी: रचनात्मकता, आकर्षण और सुंदरता से प्रेम।",
-  "Today the tradition would light your Budh Parvat (बुध पर्वत), wit, speech and business sense.":
-    "आज परंपरा आपका बुध पर्वत जगाएगी: हाज़िरजवाबी, वाणी और व्यापार की समझ।",
-  "Today the tradition would light your Mangal Parvat (upper) (मंगल पर्वत (ऊपरी)), composure and steady courage.":
-    "आज परंपरा आपका ऊपरी मंगल पर्वत जगाएगी: संयम और स्थिर साहस।",
-  "Today the tradition would light your Chandra Parvat (चंद्र पर्वत), imagination and inventiveness.":
-    "आज परंपरा आपका चंद्र पर्वत जगाएगी: कल्पना और नई सूझ।",
-  "Today the tradition would light your Shukra Parvat (शुक्र पर्वत), warmth, friendship and love of beauty.":
-    "आज परंपरा आपका शुक्र पर्वत जगाएगी: स्नेह, मित्रता और सुंदरता से प्रेम।",
-  "Hold up either hand, palm toward you, a little below eye level. Many readers begin with the hand you write with.":
-    "अपना कोई भी हाथ उठाइए, हथेली अपनी ओर, आँखों से थोड़ा नीचे। बहुत से पंडित उसी हाथ से शुरू करते हैं जिससे आप लिखते हैं।",
+  "Namaste, I am Panditji. Let us read your palm the way the old Hast Rekha books do: as story and culture, never as a forecast.":
+    "नमस्ते, मैं पंडितजी हूँ। आइए, आपकी हथेली वैसे पढ़ें जैसे हस्त रेखा की पुरानी किताबें पढ़ती हैं: कहानी और संस्कृति की तरह, भविष्यवाणी की तरह कभी नहीं।",
+  "Now hold up your writing hand, palm toward you, a little below your eyes.":
+    "अब अपना लिखने वाला हाथ उठाइए, हथेली अपनी ओर, आँखों से थोड़ा नीचे।",
   "Shall we read your other hand? Hold it up, palm toward you.":
     "क्या आपका दूसरा हाथ भी पढ़ें? उसे उठाइए, हथेली अपनी ओर।",
   "Take your time. Raise your writing hand, palm facing you, fingers gently open.":

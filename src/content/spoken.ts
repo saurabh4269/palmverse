@@ -28,7 +28,6 @@ export function allSpokenLines(lang: 'en' | 'hi'): string[] {
     if (t && !out.includes(t)) out.push(t);
   };
   PANDIT.greeting.forEach(add);
-  MOUNTS.forEach((m) => add(todaysMountLine(m)));
   add(PANDIT.raisePalm);
   add(otherHandRaiseLine());
   add(PANDIT.raiseRetry);

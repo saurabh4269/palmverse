@@ -7,15 +7,12 @@
 import type { PanditScript } from './types.js';
 
 export const PANDIT: PanditScript = {
-  greeting: [
-    'Namaste! Come, sit. I am Panditji, and I have spent a long, happy time with old books about hands.',
-    'In India this art is called हस्त रेखा, Hast Rekha, a branch of Samudrika Shastra, the old study of the body\'s marks.',
-    'Today we read your palm as culture and story, not as a forecast. Think of it as a conversation with tradition.',
-  ],
+  // one line, then straight to your palm (device feedback: the intro was far too long)
+  greeting: ['Namaste, I am Panditji. Let us read your palm the way the old Hast Rekha books do: as story and culture, never as a forecast.'],
   disclaimer: 'A cultural entertainment. Not a forecast. Not advice.',
   privacy: 'I see only the positions of your hand joints. No camera images, and nothing leaves this headset.',
   todaysMount: 'Today the tradition would light your {mount}.',
-  raisePalm: 'Hold up either hand, palm toward you, a little below eye level. Many readers begin with the hand you write with.',
+  raisePalm: 'Now hold up your writing hand, palm toward you, a little below your eyes.',
   raiseRetry: 'Take your time. Raise your writing hand, palm facing you, fingers gently open.',
   scanning: 'Hold still a moment, please. Let me study the shape of your hand.',
   linesAppear: 'There. Here are the great rekhas as the tradition draws them: Jeevan, Mastishk, Hridaya and Bhagya.',

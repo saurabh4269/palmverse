@@ -34,7 +34,7 @@ import { GRAHA, GrahaOrb, WorldPortal, type WorldId } from './render/worlds.js';
 import { WORLD_NARRATION } from './content/worlds.js';
 import { HINDI } from './content/hindi.js';
 import { getLang, setLang, type Lang } from './core/lang.js';
-import { CARD_LINE, elementIntroLine, otherHandRaiseLine, pickedLine, todaysMountLine } from './content/spoken.js';
+import { CARD_LINE, elementIntroLine, otherHandRaiseLine, pickedLine } from './content/spoken.js';
 import { FONT_BODY, Label, loadFonts } from './render/text.js';
 import { Hint, Subtitles } from './render/ui.js';
 
@@ -317,7 +317,6 @@ export class HastRekhaSystem extends createSystem({}) {
     this.phaseT = 2.6;
     log('lang', { lang: this.lang });
     for (const l of PANDIT.greeting) this.say(l);
-    this.say(todaysMountLine(MOUNT_TEXT[todaysMountIndex(new Date())]));
   }
 
   // ───────────────────────── stage ─────────────────────────
@@ -485,10 +484,10 @@ export class HastRekhaSystem extends createSystem({}) {
         this.setting.dome.opacityTarget = 0.96;
         this.sound.setDrone(true);
         this.sound.bell(392);
-        this.intro.setText(`हस्त रेखा  ·  Hast Rekha\n${PANDIT.disclaimer}\n${PANDIT.privacy}`);
+        // today's mount is shown, not spoken: the voice gets you to your palm fast
+        this.intro.setText(`हस्त रेखा  ·  Hast Rekha\n${PANDIT.disclaimer}\n${PANDIT.privacy}\nToday's mount: ${today.name_roman} (${today.name_hi})`);
         const returning = this.saveData.readings.length > 0;
         for (const l of PANDIT.greeting) this.say(l);
-        this.say(todaysMountLine(today));
         log('welcome', { returning: returning ? 1 : 0, today: today.id });
         break;
       }
@@ -497,7 +496,8 @@ export class HastRekhaSystem extends createSystem({}) {
         if (this.immersive && (Math.abs(this.headWorld.y - this.H) > 0.08 || Math.hypot(this.headWorld.x - this.stage.position.x, this.headWorld.z - this.stage.position.z) > 0.25)) this.anchorStage();
         this.intro.opacity = 0;
         this.setting.dome.opacityTarget = 0.6; // let the room (and your real hand) in
-        this.say(this.readCount > 0 ? otherHandRaiseLine() : PANDIT.raisePalm);
+        // a palm already up (raised during the greeting) skips the prompt
+        if (!this.readable('right') && !this.readable('left')) this.say(this.readCount > 0 ? otherHandRaiseLine() : PANDIT.raisePalm);
         this.hint.show('Hold up your palm, facing you  ✋', new Vector3(0, this.H - 0.32, -0.45), 0);
         this.retrySaid = false;
         this.readyT = 0;
@@ -562,6 +562,13 @@ export class HastRekhaSystem extends createSystem({}) {
         this.btnNext.show(t > 2.5);
         if (this.pressed === 'lang' || this.keys.has('l')) this.switchLang();
         if ((t > 3 && this.talkLeft() <= 0) || nextPressed || this.pressed === 'next') this.go('raise');
+        // a palm held up during the greeting goes straight on
+        else if (t > 2 && (this.readable('right') || this.readable('left'))) {
+          this.subs.clear();
+          this.voice.stop();
+          this.talkUntil = this.time;
+          this.go('raise');
+        }
         break;
       case 'raise': {
         let side: Side | null = null;
