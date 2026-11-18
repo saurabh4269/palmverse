@@ -123,6 +123,79 @@ export class Sound {
     for (let i = 0; i < 5; i++) this.tone(262 * Math.pow(2, BHUPALI[5 - i] / 12) * 2, 1.0, 0.04, 'sine', i * 0.1);
   }
 
+  /**
+   * A world's ambience (design pack §3.1): a soft pad in the world's notes, a slow bell, and for
+   * the life world flowing water (filtered noise). `null` fades it out. Synthesised, nothing to license.
+   */
+  setWorld(kind: 'heart' | 'life' | 'head' | 'fate' | 'graha' | null): void {
+    const c = this.ctx, m = this.master;
+    if (!c || !m) return;
+    if (this.world) {
+      const w = this.world;
+      this.world = null;
+      clearInterval(w.timer);
+      w.gain.gain.cancelScheduledValues(c.currentTime);
+      w.gain.gain.setTargetAtTime(0, c.currentTime, 0.4);
+      setTimeout(() => w.nodes.forEach((n) => n.stop()), 2500);
+    }
+    if (!kind) return;
+    const P: Record<string, { notes: number[]; bell: number; every: number; water?: boolean }> = {
+      heart: { notes: [0, 4, 7], bell: 523, every: 4.5 },
+      life: { notes: [0, 7], bell: 392, every: 6, water: true },
+      head: { notes: [7, 12, 16], bell: 1047, every: 3.2 },
+      fate: { notes: [-12, -5, 0], bell: 262, every: 7 },
+      graha: { notes: [0, 7, 12], bell: 659, every: 5.5 },
+    };
+    const p = P[kind];
+    const gain = c.createGain();
+    gain.gain.value = 0;
+    gain.connect(m);
+    gain.gain.setTargetAtTime(0.06, c.currentTime + 0.8, 1.2);
+    const nodes: AudioScheduledSourceNode[] = [];
+    p.notes.forEach((st, i) => {
+      const o = c.createOscillator();
+      o.type = 'sine';
+      o.frequency.value = 196 * Math.pow(2, st / 12);
+      o.detune.value = (i - 1) * 6;
+      const g = c.createGain();
+      g.gain.value = 0.35 / p.notes.length;
+      // a slow swell on each voice, out of phase, so the pad breathes
+      const lfo = c.createOscillator(), lg = c.createGain();
+      lfo.frequency.value = 0.07 + i * 0.03;
+      lg.gain.value = 0.12 / p.notes.length;
+      lfo.connect(lg).connect(g.gain);
+      o.connect(g).connect(gain);
+      o.start();
+      lfo.start();
+      nodes.push(o, lfo);
+    });
+    if (p.water) {
+      const len = c.sampleRate * 2, buf = c.createBuffer(1, len, c.sampleRate), d = buf.getChannelData(0);
+      for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+      const n = c.createBufferSource();
+      n.buffer = buf;
+      n.loop = true;
+      const bp = c.createBiquadFilter();
+      bp.type = 'bandpass';
+      bp.frequency.value = 900;
+      bp.Q.value = 0.8;
+      const lfo = c.createOscillator(), lg = c.createGain();
+      lfo.frequency.value = 0.23;
+      lg.gain.value = 400;
+      lfo.connect(lg).connect(bp.frequency);
+      const g = c.createGain();
+      g.gain.value = 0.18;
+      n.connect(bp).connect(g).connect(gain);
+      n.start();
+      lfo.start();
+      nodes.push(n, lfo);
+    }
+    const timer = setInterval(() => this.bell(p.bell, 0.05), p.every * 1000);
+    this.world = { gain, nodes, timer };
+  }
+
+  private world: { gain: GainNode; nodes: AudioScheduledSourceNode[]; timer: ReturnType<typeof setInterval> } | null = null;
+
   /** Tanpura-like drone (Pa–Sa–Sa–Sa), very soft, while the pavilion is up. */
   setDrone(on: boolean): void {
     const c = this.ctx, m = this.master;

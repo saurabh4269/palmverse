@@ -13,7 +13,7 @@ Before pasting, replace any sentence marked ⚠ with what you actually saw on th
 ## Devpost text
 
 ### Tagline
-A pandit reads your real palm: glowing lines and mounts on your own hand, in mixed reality.
+A pandit reads your real palm: the lines glow on your own hand, and touching one opens its world around you.
 
 ### Inspiration
 In India, *hast rekha*, palm-line reading, is part of Samudrika Shastra, the old study of the body's marks. Most of us have watched a relative or a street-side pandit trace someone's palm with a finger and tell a story. Palm readers exist as phone apps, but they read a photo. We wanted the real moment: you hold up your own hand, and the lines light up on it.
@@ -23,6 +23,9 @@ In India, *hast rekha*, palm-line reading, is part of Samudrika Shastra, the old
 - **Your palm becomes the page.** Hold your palm up and it is measured from hand tracking alone. The four great *rekhas* (Jeevan, Mastishk, Hridaya, Bhagya) draw themselves onto your hand and follow it as you move. Panditji names your hand's element (Earth, Air, Fire or Water) from its shape.
 - **Seven mounts, by touch.** The seven *parvat* light up with Devanagari sigils. Touch one with a fingertip of your other hand to hear what the old books say about it.
 - **You read your own palm.** For each line, you look at your real palm and poke the card whose shape matches it. The candidate glows on your hand while you hover over its card.
+- **Touch a line, enter its world.** Your lines breathe with light and embers. Touch one, or pinch near it: a bell rings, a ripple runs along the line, an orb swells over your palm, the room turns faintly gold, and the line's world dissolves open around you. Lotuses open on a dusk ocean for the heart line, a banyan of light grows over a river for the life line, a constellation joins star by star for the head line, and Shani's ringed planet rises over a path of light for the fate line. Your real hands stay visible inside, and Panditji tells you what the tradition reads in that line. Make a fist and the world folds back into your palm.
+- **The grahas.** When you touch a mount, its graha (planet) rises out of your palm in its Navagraha gem colour. In explore, touching a mount opens that graha's sky.
+- **A voice from within.** Panditji's lines are pre-rendered in an original designed voice, with temple reverb, a low octave and a tanpura bed, in English or Hindi.
 - **A reading, then a card to keep.** Every sentence of the reading is traced to a cited rule from Cheiro (1916), Benham (1900) or modern Indian guides. You leave with a Rekha card, saved in the browser and downloadable afterwards. Read your other hand and he compares the two.
 - **Culture, not prediction.** The welcome card says so. Claims about death, illness, fertility and the like are filtered out in code. Before signing off, Panditji explains the Barnum effect.
 - **Private by design.** No camera, no upload, no account. The app sees only your hand-joint positions.
@@ -36,7 +39,10 @@ In India, *hast rekha*, palm-line reading, is part of Samudrika Shastra, the old
 - **Rulebook:** a 63-feature rulebook, cited line by line from public-domain texts, with sensitive claims flagged. A rule engine drops any reading that is unresolved, marked "omit", or matches a banned-claims pattern. It is fuzzed with 4,000 input combinations in unit tests.
 - **Panditji:** generated from MakeHuman/MPFB (CC0) in a headless Blender script with a code-built kurta, shawl and beard. He is animated procedurally: breathing, blinks, gaze on your palm, jaw while speaking, namaste.
 - **Text:** Devanagari is drawn with Canvas2D so the browser shapes it properly. Sound is synthesised with Web Audio, including bell partials, a tanpura-like drone and mount tones on the Bhupali scale.
-- **Testing:** an emulator end-to-end test plays the whole reading with emulated hands (44 checks), alongside about 2,900 unit checks.
+- **Touch without physics:** the other hand's fingertip is projected into palm space and compared with each line's polyline, with hysteresis, a 140 ms dwell, pinch-to-select and a grace period for dropped tracking frames. Light and sound stand in for haptics.
+- **Portal worlds:** an inside-out sky dissolves open from the palm's direction. Each world is one procedural hero mesh, one particle system and a title, about 7 draw calls. Instanced spheres on the hand joints write alpha 0, so passthrough shows your real hands inside the world.
+- **Voice:** ElevenLabs Voice Design (an original voice, not a clone), pre-rendered per line, then an ffmpeg chain (octave layers, chorus, a synthetic stone-temple impulse response, a tanpura bed). No API calls at runtime.
+- **Testing:** an emulator end-to-end test plays the whole reading with emulated hands, including touching a line, entering its world and closing it with a fist (56 checks; 65 with every world). About 3,200 unit checks run alongside it.
 
 ### Challenges we ran into
 - **No creases from hand tracking.** Joints give the hand's geometry but not its lines. Rather than pretend to detect lines, we made reading your own palm the interaction: you compare your crease with glowing candidates and choose.
@@ -58,11 +64,10 @@ In India, *hast rekha*, palm-line reading, is part of Samudrika Shastra, the old
 ### What's next
 - **Layer 3, a real crease scan.** If Quest Browser exposes the passthrough camera to the web (our `probe.html` checks this), or by building a native version with the Passthrough Camera API, we would capture a still palm, rectify it with the joints, and trace the creases inside the same corridors with our offline pipeline. The confirmation cards would then start from your actual lines.
 - Auspicious marks (*shubh chinh*: fish, conch, lotus) from Brihat Samhita, the classical Indian layer.
-- A Hindi voice and captions.
 - Calibrating the hand-shape thresholds on real Quest hand data.
 
 ### Built with
-IWSDK · WebXR (hand tracking, immersive-ar passthrough) · three.js · TypeScript · Vite · Web Audio API · Web Speech API · Canvas 2D · Blender · MakeHuman / MPFB · Python (IWSDK emulator automation) · MediaPipe and OpenCV/scikit-image (offline research pipeline) · Fontsource-bundled OFL fonts (Mukta, Rozha One, Tiro Devanagari Hindi)
+IWSDK · WebXR (hand tracking, immersive-ar passthrough) · three.js · TypeScript · Vite · Web Audio API · ElevenLabs Voice Design (pre-rendered) · ffmpeg · Web Speech API (fallback) · Canvas 2D · Blender · MakeHuman / MPFB · Python (IWSDK emulator automation) · MediaPipe and OpenCV/scikit-image (offline research pipeline) · Fontsource-bundled OFL fonts (Mukta, Rozha One, Tiro Devanagari Hindi)
 
 ---
 
@@ -77,10 +82,13 @@ Record on a Quest 3 using the headset's own capture, in a well-lit room with a p
 | 4 | 0:25–0:35 | Disclaimer and privacy card readable on screen: "A cultural entertainment. Not a forecast." / "I see only the positions of your hand joints." | Say it early, so judges know the framing. |
 | 5 | 0:35–0:50 | Turn your hand slowly: the lines follow it. Panditji names the element. | Shows the tracking working, not a sticker. |
 | 6 | 0:50–1:15 | The seven mounts light up. Your other fingertip touches Guru Parvat; the plate "गुरु पर्वत · Jupiter" appears and the tone plays. Then touch one more mount. | The two-hand moment. Do a few takes, because occlusion may drop tracking. |
-| 7 | 1:15–1:35 | Line cards: hover one (the candidate glows on your palm), glance at your real palm, poke the matching card. Repeat quickly for one more line. | Shows "you read your own palm". |
-| 8 | 1:35–1:50 | The reading: one sentence with its line highlighted. Captions visible. | Keep the voice audible. |
-| 9 | 1:50–2:05 | The Rekha card appears. Poke "Read my other hand" and switch hands; Panditji comments on the difference. | |
-| 10 | 2:05–2:15 | Back on the 2D page: the saved card and its Download link. End card: "Hands only · seated · 5 minutes · Quest 3 / 3S · in your browser". | |
+| 7 | 1:15–1:25 | Line cards: hover one (the candidate glows on your palm), glance at your real palm, poke the matching card. | Shows "you read your own palm". Keep it short. |
+| 8 | 1:25–1:32 | **The lines breathe.** Bring your other fingertip close to the heart line: it brightens and shimmers. Touch it: ripple, bell. | The hero beat starts. Slow, steady hands. |
+| 9 | 1:32–1:50 | **The heart world.** Orb over the palm, the room tints gold, the dusk ocean dissolves open from the palm and surrounds you; lotuses open. Panditji's voice from within, caption visible. Show your real hand inside the world. | The money shot. Look at the palm first, then lift your gaze to the moon. |
+| 10 | 1:50–1:58 | **Fist.** The world folds back into your palm; the lines relight in order. Touch the life line: the banyan grows out of the ground. | |
+| 11 | 1:58–2:04 | Flash cuts: the constellation joining; Shani's ringed planet over the path of light; a mount's graha rising from the palm. | One second each. |
+| 12 | 2:04–2:12 | The Rekha card appears. Then the 2D page with the saved card. | |
+| 13 | 2:12–2:20 | End card: "हस्त रेखा · Hast Rekha. Hands only · seated · Quest 3 / 3S · in your browser". | |
 
 Don'ts:
 - Don't narrate or caption the lines as "detected" or "scanned". The opening lines are the tradition's map, and you then choose your own.
@@ -93,6 +101,8 @@ Take them on the headset. The emulator stills in `artifacts/shot-*` are fine for
 2. Mounts lit with Devanagari sigils on the palm, and the mount plate (for example शुक्र पर्वत · Venus) above the fingers.
 3. The other hand's fingertip touching a mount.
 4. The line-choice cards with one candidate previewed on the palm.
+4b. **Inside the heart world**: the dusk ocean and lotuses, with the real hand visible and the lines on it. Also the banyan, the constellation and Shani's planet.
+4c. A graha rising from a touched mount.
 5. Panditji in the pavilion with the room visible below the dome (shows passthrough).
 6. The Rekha card (export the 1080×1350 JPEG from the 2D page gallery).
 7. The 2D landing page with the "Culture, not prediction" and "Privacy" box.

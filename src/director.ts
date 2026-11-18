@@ -916,6 +916,7 @@ export class HastRekhaSystem extends createSystem({}) {
     const c = q(f, 0.55, 0.1, 0.01);
     this.palmPt.set(c[0], c[1], c[2]);
     this.portal.open(id as WorldId, this.palmPt, this.headWorld);
+    this.sound.setWorld(id);
     this.worldLine = id;
     this.worldT = 0;
     this.worldSaid = false;
@@ -943,6 +944,7 @@ export class HastRekhaSystem extends createSystem({}) {
     this.sound.bowl(220);
     const c = q(f, MOUNT_CENTROIDS[i][0], MOUNT_CENTROIDS[i][1], 0.01);
     this.palmPt.set(c[0], c[1], c[2]);
+    this.sound.setWorld('graha');
     this.portal.open('graha', this.palmPt, this.headWorld, { color: g.color, title: [`${hi} ग्रह`, `${ro} · ${m.planet}`], ring: m.id === 'saturn', sun: m.id === 'sun_apollo' });
     this.worldLine = 'graha';
     this.worldMount = i;
@@ -999,6 +1001,7 @@ export class HastRekhaSystem extends createSystem({}) {
     this.worldLine = null;
     this.portal.close();
     this.sound.fold();
+    this.sound.setWorld(null);
     this.setting.appearTarget = 1;
     if (reason !== 'told') {
       this.subs.clear();
