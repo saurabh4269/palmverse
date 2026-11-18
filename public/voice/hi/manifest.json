@@ -1,0 +1,486 @@
+{
+ "lines": {
+  "021b6a11": {
+   "d": 5.71,
+   "f": "021b6a11.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "03706e2b": {
+   "d": 14.49,
+   "f": "03706e2b.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "03967388": {
+   "d": 18.11,
+   "f": "03967388.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "04651847": {
+   "d": 11.33,
+   "f": "04651847.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "0cf10cc8": {
+   "d": 12.59,
+   "f": "0cf10cc8.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "10d714f1": {
+   "d": 17.6,
+   "f": "10d714f1.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "1379d85e": {
+   "d": 18.34,
+   "f": "1379d85e.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "16d09e7f": {
+   "d": 10.59,
+   "f": "16d09e7f.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "18891ae7": {
+   "d": 17.65,
+   "f": "18891ae7.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "195b69b5": {
+   "d": 12.96,
+   "f": "195b69b5.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "1a8a34e6": {
+   "d": 11.01,
+   "f": "1a8a34e6.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "1d6844eb": {
+   "d": 6.04,
+   "f": "1d6844eb.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "1e295860": {
+   "d": 15.56,
+   "f": "1e295860.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "1f4abe2a": {
+   "d": 4.97,
+   "f": "1f4abe2a.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "2065b26f": {
+   "d": 10.77,
+   "f": "2065b26f.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "218c3c64": {
+   "d": 18.25,
+   "f": "218c3c64.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "2426058f": {
+   "d": 12.17,
+   "f": "2426058f.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "2bcc75a9": {
+   "d": 12.07,
+   "f": "2bcc75a9.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "2dec430a": {
+   "d": 14.68,
+   "f": "2dec430a.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "2fa543a3": {
+   "d": 16.07,
+   "f": "2fa543a3.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "342375f2": {
+   "d": 13.47,
+   "f": "342375f2.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "3910a317": {
+   "d": 15.09,
+   "f": "3910a317.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "3a077bba": {
+   "d": 16.95,
+   "f": "3a077bba.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "3d88c382": {
+   "d": 15.42,
+   "f": "3d88c382.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "4018fdeb": {
+   "d": 6.97,
+   "f": "4018fdeb.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "41d97189": {
+   "d": 17.37,
+   "f": "41d97189.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "45732624": {
+   "d": 13.75,
+   "f": "45732624.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "472903dc": {
+   "d": 5.02,
+   "f": "472903dc.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "4c3fcaca": {
+   "d": 12.68,
+   "f": "4c3fcaca.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "4fbf98c6": {
+   "d": 17.41,
+   "f": "4fbf98c6.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "503e18b3": {
+   "d": 11.7,
+   "f": "503e18b3.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "54053ffa": {
+   "d": 10.68,
+   "f": "54053ffa.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "5484f1bc": {
+   "d": 20.15,
+   "f": "5484f1bc.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "54b14507": {
+   "d": 8.54,
+   "f": "54b14507.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "5834ae72": {
+   "d": 4.83,
+   "f": "5834ae72.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "588cc63f": {
+   "d": 7.2,
+   "f": "588cc63f.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "5a377005": {
+   "d": 20.48,
+   "f": "5a377005.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "61e194c7": {
+   "d": 16.3,
+   "f": "61e194c7.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "647ef87a": {
+   "d": 21.08,
+   "f": "647ef87a.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "64a2c5a3": {
+   "d": 11.47,
+   "f": "64a2c5a3.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "64b2bfed": {
+   "d": 11.52,
+   "f": "64b2bfed.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "652cd613": {
+   "d": 5.39,
+   "f": "652cd613.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "67c4fe42": {
+   "d": 13.93,
+   "f": "67c4fe42.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "697daeac": {
+   "d": 7.01,
+   "f": "697daeac.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "6a9315c2": {
+   "d": 21.78,
+   "f": "6a9315c2.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "6bce3fa8": {
+   "d": 18.85,
+   "f": "6bce3fa8.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "6cb4866d": {
+   "d": 13.89,
+   "f": "6cb4866d.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "6faa741c": {
+   "d": 17.09,
+   "f": "6faa741c.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "7046a6b7": {
+   "d": 15.28,
+   "f": "7046a6b7.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "717e4e5f": {
+   "d": 17.46,
+   "f": "717e4e5f.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "73f9f138": {
+   "d": 17.55,
+   "f": "73f9f138.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "742f32bf": {
+   "d": 21.22,
+   "f": "742f32bf.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "74f73feb": {
+   "d": 4.46,
+   "f": "74f73feb.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "79776145": {
+   "d": 13.89,
+   "f": "79776145.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "7995c341": {
+   "d": 12.07,
+   "f": "7995c341.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "7a55cc6f": {
+   "d": 16.3,
+   "f": "7a55cc6f.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "80ef7cc4": {
+   "d": 14.12,
+   "f": "80ef7cc4.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "85f87094": {
+   "d": 19.27,
+   "f": "85f87094.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "8a8d6de7": {
+   "d": 15.14,
+   "f": "8a8d6de7.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "8a922f33": {
+   "d": 15.51,
+   "f": "8a922f33.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "9404344a": {
+   "d": 13.37,
+   "f": "9404344a.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "96bb033b": {
+   "d": 20.67,
+   "f": "96bb033b.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "9c213c9f": {
+   "d": 5.15,
+   "f": "9c213c9f.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "a23f90d8": {
+   "d": 17.23,
+   "f": "a23f90d8.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "a262c5e1": {
+   "d": 14.72,
+   "f": "a262c5e1.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "a3982cbb": {
+   "d": 4.41,
+   "f": "a3982cbb.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "a5897ae0": {
+   "d": 7.52,
+   "f": "a5897ae0.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "adeb8bf6": {
+   "d": 15.28,
+   "f": "adeb8bf6.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "ae46865a": {
+   "d": 7.85,
+   "f": "ae46865a.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "af9923e0": {
+   "d": 11.89,
+   "f": "af9923e0.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "b4991fe3": {
+   "d": 12.21,
+   "f": "b4991fe3.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "b944d405": {
+   "d": 20.48,
+   "f": "b944d405.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "baa2eefb": {
+   "d": 18.2,
+   "f": "baa2eefb.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "bf6cfecd": {
+   "d": 22.06,
+   "f": "bf6cfecd.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "c68ab71a": {
+   "d": 6.73,
+   "f": "c68ab71a.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "cc3086eb": {
+   "d": 15.56,
+   "f": "cc3086eb.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "cc6b60b8": {
+   "d": 18.44,
+   "f": "cc6b60b8.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "cefa0094": {
+   "d": 19.78,
+   "f": "cefa0094.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "d0b826bc": {
+   "d": 19.69,
+   "f": "d0b826bc.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "d1cbe801": {
+   "d": 20.99,
+   "f": "d1cbe801.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "d288d902": {
+   "d": 15.84,
+   "f": "d288d902.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "d3abeaa5": {
+   "d": 20.15,
+   "f": "d3abeaa5.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "d439399b": {
+   "d": 21.73,
+   "f": "d439399b.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "d64b1a42": {
+   "d": 12.63,
+   "f": "d64b1a42.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "dde8a096": {
+   "d": 6.87,
+   "f": "dde8a096.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "e1f7b563": {
+   "d": 15.09,
+   "f": "e1f7b563.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "e273e810": {
+   "d": 12.91,
+   "f": "e273e810.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "e2b0db00": {
+   "d": 15.6,
+   "f": "e2b0db00.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "e2d59ea3": {
+   "d": 6.69,
+   "f": "e2d59ea3.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "e734ada8": {
+   "d": 15.05,
+   "f": "e734ada8.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "ed61a040": {
+   "d": 13.61,
+   "f": "ed61a040.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "eefae286": {
+   "d": 17.37,
+   "f": "eefae286.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "f114cdf3": {
+   "d": 12.72,
+   "f": "f114cdf3.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "f5f70405": {
+   "d": 16.76,
+   "f": "f5f70405.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "fdffbddd": {
+   "d": 18.62,
+   "f": "fdffbddd.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  },
+  "ff968816": {
+   "d": 4.5,
+   "f": "ff968816.mp3",
+   "src": "elevenlabs:gh3LOp3WXKetUKONuDCK"
+  }
+ },
+ "model": "eleven_multilingual_v2",
+ "voice": "Panditji (Hast Rekha, designed)"
+}

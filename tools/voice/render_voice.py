@@ -6,6 +6,9 @@ Pre-render every line Panditji speaks with ElevenLabs, then the divine chain.
   python3 tools/voice/render_voice.py --key-file K --design           # once: design an original voice
   python3 tools/voice/render_voice.py --key-file K [--lang en|hi] [--limit N]   # render missing clips
   python3 tools/voice/render_voice.py --rechain [--lang en]           # re-run divine.sh on the raw takes (no API)
+  python3 tools/voice/render_voice.py --piper <model.onnx> --piper-python <python>   # offline interim voice (Piper)
+
+Each clip records its source (`src`); rendering with a different engine replaces the clips from the other one.
 
 Output: public/voice/<lang>/<hash>.mp3 and public/voice/<lang>/manifest.json
         {"voice": ..., "lines": {"<hash>": {"f": "<hash>.mp3", "d": <speech seconds>}}}
@@ -120,16 +123,21 @@ def main() -> None:
     ap.add_argument('--limit', type=int, default=0)
     ap.add_argument('--only', default='', help='regex: render only lines whose text matches')
     ap.add_argument('--model', default='eleven_multilingual_v2')
+    ap.add_argument('--piper', help='offline: a Piper .onnx voice (e.g. en_GB-alba-medium.onnx) instead of ElevenLabs')
+    ap.add_argument('--piper-python', default='python3', help='a python with piper-tts installed')
+    ap.add_argument('--length-scale', default='1.12', help='Piper: >1 speaks slower')
     a = ap.parse_args()
     key = open(a.key_file).read().strip() if a.key_file else ''
-    raw_dir = os.path.join(HERE, 'raw', a.lang)
+    engine = f'piper:{os.path.basename(a.piper)[:-5]}' if a.piper else None
+    raw_dir = os.path.join(HERE, 'raw', a.lang + ('-piper' if a.piper else ''))
     out_dir = os.path.join(ROOT, 'public', 'voice', a.lang)
     os.makedirs(raw_dir, exist_ok=True)
     os.makedirs(out_dir, exist_ok=True)
     if a.design:
         design(key, os.path.join(HERE, 'raw', 'design'))
         return
-    voice = json.load(open(VOICE_JSON))
+    voice = json.load(open(VOICE_JSON)) if not a.piper else {'name': engine, 'voice_id': engine}
+    engine = engine or f'elevenlabs:{voice["voice_id"]}'
     lines = json.load(open(a.lines))[a.lang]
     man_path = os.path.join(out_dir, 'manifest.json')
     man = json.load(open(man_path)) if os.path.exists(man_path) else {'lines': {}}
@@ -141,23 +149,34 @@ def main() -> None:
         raw, out = os.path.join(raw_dir, h + '.mp3'), os.path.join(out_dir, h + '.mp3')
         if a.only and not re.search(a.only, text):
             continue
+        stale = h in man['lines'] and man['lines'][h].get('src') not in (None, engine) and not a.rechain
         if not os.path.exists(raw):
-            if a.rechain or not key:
+            if a.rechain or not (key or a.piper):
                 continue
             if a.limit and done >= a.limit:
                 break
-            audio = call(key, f'/v1/text-to-speech/{voice["voice_id"]}?output_format=mp3_44100_128', {
+            if a.piper:
+                wav = raw[:-4] + '.wav'
+                subprocess.run([a.piper_python, '-m', 'piper', '-m', a.piper, '-f', wav, '--length-scale', a.length_scale, '--noise-scale', '0.5', '--noise-w-scale', '0.6'], input=spoken(text, a.lang), text=True, check=True, capture_output=True)
+                subprocess.run(['ffmpeg', '-y', '-hide_banner', '-loglevel', 'error', '-i', wav, '-c:a', 'libmp3lame', '-b:a', '128k', raw], check=True)
+                os.remove(wav)
+                done += 1
+                print(f'piper {h}: {text[:60]}', flush=True)
+                audio = None
+            else:
+                audio = call(key, f'/v1/text-to-speech/{voice["voice_id"]}?output_format=mp3_44100_128', {
                 'text': spoken(text, a.lang), 'model_id': a.model,
                 'voice_settings': {'stability': 0.62, 'similarity_boost': 0.8, 'style': 0.15, 'use_speaker_boost': True, 'speed': 0.92},
                 **({'language_code': 'hi'} if a.lang == 'hi' else {}),
             }, accept='audio/mpeg')
-            with open(raw, 'wb') as f:
-                f.write(audio)
-            done += 1
-            print(f'tts {h} {len(text)} chars: {text[:60]}', flush=True)
-        if a.rechain or not os.path.exists(out) or h not in man['lines']:
+            if audio is not None:
+                with open(raw, 'wb') as f:
+                    f.write(audio)
+                done += 1
+                print(f'tts {h} {len(text)} chars: {text[:60]}', flush=True)
+        if a.rechain or stale or not os.path.exists(out) or h not in man['lines']:
             chain(raw, out)
-            man['lines'][h] = {'f': h + '.mp3', 'd': round(duration(raw), 2)}
+            man['lines'][h] = {'f': h + '.mp3', 'd': round(duration(raw), 2), 'src': engine}
     # drop clips for lines that no longer exist
     keep = {fnv1a(t) for t in lines}
     for h in list(man['lines']):
