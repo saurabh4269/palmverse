@@ -37,7 +37,7 @@ function basisTranscoder(): Plugin {
 
 export default defineConfig({
   plugins: [iwsdkDev(), questDebug(), basisTranscoder()],
-  server: { host: '0.0.0.0', port: 8087, open: false },
+  server: { host: '0.0.0.0', port: Number(process.env.PORT) || 8087, open: false },
   build: {
     outDir: 'dist',
     sourcemap: process.env.NODE_ENV !== 'production',
