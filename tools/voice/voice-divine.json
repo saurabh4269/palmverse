@@ -1,0 +1,7 @@
+{
+  "voice_id": "21m00Tcm4TlvDq8ikWAM",
+  "name": "Aakashvani (stand-in: ElevenLabs premade 'Rachel')",
+  "description": "Stand-in for the opening voice. ElevenLabs Voice Design timed out repeatedly on 18 Nov 2026, so the opening uses a calm premade narrator voice through the lighter chain. Re-run `render_voice.py --set divine --design` and then `--set divine --lang en|hi` to replace it with a designed voice.",
+  "method": "ElevenLabs premade voice (no cloning)",
+  "created": "2026-11-18"
+}
