@@ -944,6 +944,8 @@ export const GRAHA: Record<string, { color: string; look: number }> = {
   mars_upper: { color: '#E5533D', look: 0 }, // Mangal, red coral
   luna_moon: { color: '#EAF2FF', look: 3 }, // Chandra, pearl: crescent
   venus: { color: '#FFE3EF', look: 4 }, // Shukra, diamond: sparkling
+  rahu: { color: '#6E6A9E', look: 0 }, // Rahu, hessonite: the smoky shadow graha
+  ketu: { color: '#C08A5C', look: 0 }, // Ketu, cat's eye
 };
 
 /**
@@ -1026,11 +1028,25 @@ export class GrahaOrb {
     this.mesh.visible = false;
   }
 
-  /** Raise the graha of mount `id` (seconds to stay up: `life`). */
-  rise(id: string, life = 9): void {
+  /** Colour and look of graha `id`. */
+  setGraha(id: string): void {
     const g = GRAHA[id] ?? GRAHA.jupiter;
     (this.mat.uniforms.uColor.value as Color).set(g.color);
     this.mat.uniforms.uLook.value = g.look;
+  }
+
+  /** Drive the orb directly (the opening ring): world position, diameter in metres, opacity. */
+  place(pos: Vector3, size: number, opacity: number, time: number): void {
+    this.mesh.visible = opacity > 0.005;
+    this.mesh.position.copy(pos);
+    this.mesh.scale.setScalar(size * 1.6);
+    this.mat.uniforms.uTime.value = time;
+    this.mat.uniforms.uOpacity.value = opacity;
+  }
+
+  /** Raise the graha of mount `id` (seconds to stay up: `life`). */
+  rise(id: string, life = 9): void {
+    this.setGraha(id);
     this.t = 0;
     this.life = life;
   }
@@ -1054,5 +1070,52 @@ export class GrahaOrb {
     this.mesh.scale.setScalar(0.026 * (0.3 + 0.7 * k) * 1.6 * 2);
     this.mat.uniforms.uTime.value = this.time;
     this.mat.uniforms.uOpacity.value = k;
+  }
+}
+
+
+/** The navagraha in their traditional order, with the opening ring's sizes (diameter, metres). */
+const NAVAGRAHA: [string, number][] = [
+  ['sun_apollo', 0.2], ['luna_moon', 0.09], ['mars_upper', 0.08], ['mercury', 0.07], ['jupiter', 0.13],
+  ['venus', 0.09], ['saturn', 0.12], ['rahu', 0.08], ['ketu', 0.08],
+];
+
+/**
+ * The opening: the nine grahas revolve slowly around the seated viewer, at about arm's length
+ * and a little below the eyes, while the Aakashvani voice speaks; then they fade. 9 draw calls,
+ * only while visible.
+ */
+export class GrahaRing {
+  readonly group = new Group();
+  private readonly orbs: GrahaOrb[] = [];
+  private t = 0;
+  private alpha = 0;
+  want = 0;
+  private readonly p = new Vector3();
+
+  constructor() {
+    this.group.name = 'graha-ring';
+    for (const [id] of NAVAGRAHA) {
+      const o = new GrahaOrb();
+      o.setGraha(id);
+      o.mesh.renderOrder = 23;
+      this.orbs.push(o);
+      this.group.add(o.mesh);
+    }
+  }
+
+  update(dt: number, head: Vector3): void {
+    this.t += dt;
+    this.alpha += (this.want - this.alpha) * (1 - Math.exp(-dt * (this.want > this.alpha ? 0.9 : 1.6)));
+    const a = this.alpha < 0.004 ? 0 : this.alpha;
+    this.orbs.forEach((o, i) => {
+      if (!a) return o.place(this.p.copy(head), 0, 0, this.t);
+      const ang = this.t * 0.16 + (i / NAVAGRAHA.length) * Math.PI * 2;
+      const r = 1.05 + 0.18 * Math.sin(i * 1.7);
+      // they spiral in a little as they appear
+      const rr = r * (1.35 - 0.35 * a);
+      this.p.set(head.x + Math.cos(ang) * rr, head.y - 0.12 + 0.16 * Math.sin(ang * 2 + i), head.z + Math.sin(ang) * rr);
+      o.place(this.p, NAVAGRAHA[i][1], a, this.t + i);
+    });
   }
 }

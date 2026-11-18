@@ -33,6 +33,16 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))
 API = 'https://api.elevenlabs.io'
 VOICE_JSON = os.path.join(HERE, 'voice.json')
+VOICE_DIVINE_JSON = os.path.join(HERE, 'voice-divine.json')
+# the opening voice (Aakashvani): calmer, ageless, from the sky; a lighter chain (less drone, a little less weight)
+DIVINE_DESCRIPTION = (
+    'A calm, ageless, otherworldly voice, gentle and serene, softly resonant, like a voice heard from the night sky '
+    'over an Indian temple. Neither old nor young, warm, slow, intimate and hushed, perfectly clear diction, '
+    'a soft Indian English accent, deeply peaceful, never dramatic or theatrical.'
+)
+DIVINE_SAMPLE = ('The nine grahas turn around you, as they turn through every old story of India. '
+                 'Their names are written on the hills of your palm. Sit, and breathe, and let the reading begin.')
+DIVINE_CHAIN_ENV = {'DIVINE_DRONE_DB': '-60', 'DIVINE_SUB': '0.10', 'DIVINE_WHISPER': '0.14', 'DIVINE_FIFTH': '0.06', 'DIVINE_WET': '0.8'}
 DESCRIPTION = (
     'An elderly Indian man in his seventies, a gentle and learned scholar of old Sanskrit books. '
     'Deep, warm, slow and calm voice with a soft Indian English accent; unhurried, kind and a little breathy, '
@@ -64,7 +74,7 @@ def call(key: str, path: str, body: dict | None = None, accept='application/json
     req.add_header('Accept', accept)
     for attempt in range(4):
         try:
-            with urllib.request.urlopen(req, timeout=120) as r:
+            with urllib.request.urlopen(req, timeout=240) as r:
                 return r.read()
         except urllib.error.HTTPError as e:
             msg = e.read().decode('utf-8', 'replace')[:400]
@@ -75,8 +85,9 @@ def call(key: str, path: str, body: dict | None = None, accept='application/json
     raise SystemExit('unreachable')
 
 
-def design(key: str, out_dir: str) -> None:
+def design(key: str, out_dir: str, description: str = DESCRIPTION, sample: str = SAMPLE, voice_json: str = VOICE_JSON, name: str = 'Panditji (Hast Rekha, designed)') -> None:
     """Voice Design: three previews from the description; keep all three as files, save the first as the voice."""
+    DESCRIPTION, SAMPLE, VOICE_JSON = description, sample, voice_json  # noqa: N806
     os.makedirs(out_dir, exist_ok=True)
     body = {'voice_description': DESCRIPTION, 'text': SAMPLE, 'model_id': 'eleven_multilingual_ttv_v2'}
     try:
@@ -92,9 +103,9 @@ def design(key: str, out_dir: str) -> None:
             f.write(base64.b64decode(p['audio_base_64']))
     pick = previews[int(os.environ.get('PICK', '0'))]
     v = json.loads(call(key, '/v1/text-to-voice', {
-        'voice_name': 'Panditji (Hast Rekha, designed)', 'voice_description': DESCRIPTION, 'generated_voice_id': pick['generated_voice_id'],
+        'voice_name': name, 'voice_description': DESCRIPTION, 'generated_voice_id': pick['generated_voice_id'],
     }))
-    meta = {'voice_id': v['voice_id'], 'name': 'Panditji (Hast Rekha, designed)', 'description': DESCRIPTION,
+    meta = {'voice_id': v['voice_id'], 'name': name, 'description': DESCRIPTION,
             'method': 'ElevenLabs Voice Design (text description, no cloning)', 'created': time.strftime('%Y-%m-%d')}
     with open(VOICE_JSON, 'w') as f:
         json.dump(meta, f, indent=2)
@@ -106,10 +117,10 @@ def duration(path: str) -> float:
     return float(out.strip() or 0)
 
 
-def chain(raw: str, out: str) -> None:
+def chain(raw: str, out: str, env: dict | None = None) -> None:
     wav = raw[:-4] + '.wav'
     subprocess.run(['ffmpeg', '-y', '-hide_banner', '-loglevel', 'error', '-i', raw, '-ac', '1', '-ar', '44100', wav], check=True)
-    subprocess.run([os.path.join(HERE, 'divine.sh'), wav, out], check=True)
+    subprocess.run([os.path.join(HERE, 'divine.sh'), wav, out], check=True, env={**os.environ, **(env or {})})
     os.remove(wav)
 
 
@@ -126,23 +137,31 @@ def main() -> None:
     ap.add_argument('--piper', help='offline: a Piper .onnx voice (e.g. en_GB-alba-medium.onnx) instead of ElevenLabs')
     ap.add_argument('--piper-python', default='python3', help='a python with piper-tts installed')
     ap.add_argument('--length-scale', default='1.12', help='Piper: >1 speaks slower')
+    ap.add_argument('--set', default='pandit', choices=['pandit', 'divine'], help="divine: the opening lines, in the Aakashvani voice (voice-divine.json)")
     a = ap.parse_args()
     key = open(a.key_file).read().strip() if a.key_file else ''
     engine = f'piper:{os.path.basename(a.piper)[:-5]}' if a.piper else None
-    raw_dir = os.path.join(HERE, 'raw', a.lang + ('-piper' if a.piper else ''))
+    divine = a.set == 'divine'
+    raw_dir = os.path.join(HERE, 'raw', a.lang + ('-piper' if a.piper else '') + ('-divine' if divine else ''))
     out_dir = os.path.join(ROOT, 'public', 'voice', a.lang)
     os.makedirs(raw_dir, exist_ok=True)
     os.makedirs(out_dir, exist_ok=True)
     if a.design:
-        design(key, os.path.join(HERE, 'raw', 'design'))
+        if divine:
+            design(key, os.path.join(HERE, 'raw', 'design-divine'), DIVINE_DESCRIPTION, DIVINE_SAMPLE, VOICE_DIVINE_JSON, 'Aakashvani (Hast Rekha, designed)')
+        else:
+            design(key, os.path.join(HERE, 'raw', 'design'))
         return
-    voice = json.load(open(VOICE_JSON)) if not a.piper else {'name': engine, 'voice_id': engine}
+    voice = json.load(open(VOICE_DIVINE_JSON if divine else VOICE_JSON)) if not a.piper else {'name': engine, 'voice_id': engine}
     engine = engine or f'elevenlabs:{voice["voice_id"]}'
-    lines = json.load(open(a.lines))[a.lang]
+    data = json.load(open(a.lines))
+    lines = data[('divine_' if divine else '') + a.lang]
+    chain_env = DIVINE_CHAIN_ENV if divine else None
     man_path = os.path.join(out_dir, 'manifest.json')
     man = json.load(open(man_path)) if os.path.exists(man_path) else {'lines': {}}
-    man['voice'] = voice['name']
-    man['model'] = a.model
+    if not divine:
+        man['voice'] = voice['name']
+        man['model'] = a.model
     done = 0
     for text in lines:
         h = fnv1a(text)
@@ -175,10 +194,10 @@ def main() -> None:
                 done += 1
                 print(f'tts {h} {len(text)} chars: {text[:60]}', flush=True)
         if a.rechain or stale or not os.path.exists(out) or h not in man['lines']:
-            chain(raw, out)
+            chain(raw, out, chain_env)
             man['lines'][h] = {'f': h + '.mp3', 'd': round(duration(raw), 2), 'src': engine}
     # drop clips for lines that no longer exist
-    keep = {fnv1a(t) for t in lines}
+    keep = {fnv1a(t) for t in data[a.lang] + data.get('divine_' + a.lang, [])}
     for h in list(man['lines']):
         if h not in keep:
             man['lines'].pop(h)

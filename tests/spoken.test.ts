@@ -1,5 +1,5 @@
 /** Every pre-renderable line is safe, unique and hashed the same way as tools/voice/render_voice.py. */
-import { allSpokenLines } from '../src/content/spoken.js';
+import { allSpokenLines, OPENING } from '../src/content/spoken.js';
 import { WORLD_NARRATION } from '../src/content/worlds.js';
 import { PANDIT } from '../src/content/script.js';
 import { isSafeText } from '../src/core/rules.js';
@@ -25,4 +25,9 @@ check('every line has Hindi', hi.length === en.length, `${hi.length}/${en.length
 check('no stale Hindi entries', Object.keys(HINDI).every((k) => en.includes(k)), Object.keys(HINDI).filter((k) => !en.includes(k)).slice(0, 3).join(' | '));
 for (const t of hi) check(`Devanagari: ${t.slice(0, 20)}`, /[\u0900-\u097F]/.test(t) && !/[A-Za-z]{3,}/.test(t), t);
 check('Hindi hashes unique', new Set(hi.map(fnv1a)).size === hi.length);
+for (const o of OPENING) {
+  check(`opening safe: ${o.en.slice(0, 30)}`, isSafeText(o.en));
+  check(`opening Hindi in Devanagari`, /[\u0900-\u097F]/.test(o.hi) && !/[A-Za-z]{3,}/.test(o.hi), o.hi);
+  check('opening not a Panditji line', !en.includes(o.en));
+}
 done(`spoken (${en.length} lines, ${en.reduce((a, t) => a + t.length, 0)} chars)`);

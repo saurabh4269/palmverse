@@ -30,11 +30,11 @@ import { LINE_COLORS, MOUNT_ORDER, PalmOverlay } from './render/palm-overlay.js'
 import { Pandit } from './render/pandit.js';
 import { renderShareCard } from './render/share-card.js';
 import { gpuStats } from './render/gpu-stats.js';
-import { GRAHA, GrahaOrb, WorldPortal, type WorldId } from './render/worlds.js';
+import { GRAHA, GrahaOrb, GrahaRing, WorldPortal, type WorldId } from './render/worlds.js';
 import { WORLD_NARRATION } from './content/worlds.js';
 import { HINDI } from './content/hindi.js';
 import { getLang, setLang, type Lang } from './core/lang.js';
-import { CARD_LINE, elementIntroLine, otherHandRaiseLine, pickedLine } from './content/spoken.js';
+import { CARD_LINE, elementIntroLine, OPENING, otherHandRaiseLine, pickedLine } from './content/spoken.js';
 import { FONT_BODY, Label, loadFonts } from './render/text.js';
 import { Hint, Subtitles } from './render/ui.js';
 
@@ -160,11 +160,21 @@ export class HastRekhaSystem extends createSystem({}) {
   private shimmerT = 0;
   private portal = new WorldPortal();
   private graha = new GrahaOrb();
+  /** the opening: the nine grahas revolve around you while Aakashvani speaks (once per session) */
+  private grahaRing = new GrahaRing();
+  private openingUntil = -1;
+  private openingDone = false;
   private grahaIdx = -1;
   private readonly grahaBase = new Vector3();
   private readonly grahaN = new Vector3();
   private worldLine: TouchId | 'graha' | null = null;
   private worldMount = -1;
+  /** the mounts lesson: each poked mount opens its planet's world (auto-closes when told) */
+  private worldEdu = false;
+  private eduIntroSaid = false;
+  private mountsDoneSaid = false;
+  private pendingMount = -1;
+  private pendingMountT = 0;
   private mountCand = -1;
   private mountT = 0;
   private worldT = 0;
@@ -201,6 +211,7 @@ export class HastRekhaSystem extends createSystem({}) {
     // the portal world is centred on the head in world space, like the overlay
     this.world.createTransformEntity(this.portal.group, { persistent: true });
     this.world.createTransformEntity(this.graha.mesh, { persistent: true });
+    this.world.createTransformEntity(this.grahaRing.group, { persistent: true });
 
     this.subs = new Subtitles(this.stage, new Vector3(0, 0.96, -0.92));
     this.hint = new Hint(this.stage);
@@ -267,10 +278,14 @@ export class HastRekhaSystem extends createSystem({}) {
     this.updateOverlay(dt);
 
     this.setting.update(dt, this.headLocal);
-    this.pandit.talking = this.time < this.talkUntil;
+    // during the opening the voice is Aakashvani's, not his
+    const opening = this.time < this.openingUntil;
+    this.pandit.talking = this.time < this.talkUntil && !opening;
+    this.grahaRing.want = this.time < this.openingUntil - 0.6 ? 1 : 0;
+    this.grahaRing.update(dt, this.headWorld);
     this.pandit.fadeTarget = this.setting.appearTarget;
     this.pandit.gesture =
-      this.phase === 'welcome' && this.phaseT < 4 ? 'namaste' : this.phase === 'end' && this.phaseT < 5 ? 'namaste' : this.pandit.talking && this.phase !== 'raise' && this.phase !== 'lines' ? 'explain' : 'rest';
+      this.phase === 'welcome' && this.time - Math.max(0, this.openingUntil) < 4 && !opening ? 'namaste' : this.phase === 'end' && this.phaseT < 5 ? 'namaste' : this.pandit.talking && this.phase !== 'raise' && this.phase !== 'lines' ? 'explain' : 'rest';
     this.pandit.update(dt);
     this.pandit.bakeShadowIfReady(this.renderer);
     this.subs.update(dt, this.immersive ? this.player.head : this.camera);
@@ -452,6 +467,15 @@ export class HastRekhaSystem extends createSystem({}) {
     return dur;
   }
 
+  /** A line in another voice (the opening's Aakashvani): its clip is in the same manifest, keyed by its text. */
+  private sayAs(text: string, who: 'akash'): number {
+    const clip = this.voice.say(text, this.lang === 'hi' ? 'hi' : 'en');
+    const dur = this.subs.say(text, who, clip ?? undefined);
+    this.talkUntil = Math.max(this.talkUntil, this.time) + dur;
+    log('say', { who, dur, clip: clip ? 1 : 0 }, { text });
+    return dur;
+  }
+
   private talkLeft(): number {
     return Math.max(0, this.talkUntil - this.time);
   }
@@ -459,6 +483,8 @@ export class HastRekhaSystem extends createSystem({}) {
   // ───────────────────────── phases ─────────────────────────
 
   private go(p: Phase): void {
+    if (this.worldLine) this.closeWorld('phase');
+    this.pendingMount = -1;
     log('phase', { from: this.phase, to: p });
     this.phase = p;
     this.phaseT = 0;
@@ -487,6 +513,14 @@ export class HastRekhaSystem extends createSystem({}) {
         // today's mount is shown, not spoken: the voice gets you to your palm fast
         this.intro.setText(`हस्त रेखा  ·  Hast Rekha\n${PANDIT.disclaimer}\n${PANDIT.privacy}\nToday's mount: ${today.name_roman} (${today.name_hi})`);
         const returning = this.saveData.readings.length > 0;
+        if (!this.openingDone && this.immersive) {
+          this.openingDone = true;
+          let d = 0;
+          for (const o of OPENING) d += this.sayAs(this.lang === 'hi' ? o.hi : o.en, 'akash');
+          this.openingUntil = this.time + d;
+          this.grahaRing.want = 1;
+          log('opening', { dur: +d.toFixed(1) });
+        } else this.openingUntil = this.time;
         for (const l of PANDIT.greeting) this.say(l);
         log('welcome', { returning: returning ? 1 : 0, today: today.id });
         break;
@@ -518,6 +552,9 @@ export class HastRekhaSystem extends createSystem({}) {
       }
       case 'mounts':
         this.mountSeq = 0;
+        this.eduIntroSaid = false;
+        this.mountsDoneSaid = false;
+        this.pendingMount = -1;
         this.say(PANDIT.mountsIntro);
         // the busiest moment (overlay + sigils + plate + Panditji talking): a headset has no 'g' key
         if (import.meta.env.DEV) setTimeout(() => log('gpu', { ...gpuStats(this.scene, this.renderer) }), 1500);
@@ -562,7 +599,7 @@ export class HastRekhaSystem extends createSystem({}) {
         if (this.pressed === 'lang' || this.keys.has('l')) this.switchLang();
         if ((t > 3 && this.talkLeft() <= 0) || nextPressed || this.pressed === 'next') this.go('raise');
         // a palm held up during the greeting goes straight on
-        else if (t > 2 && (this.readable('right') || this.readable('left'))) {
+        else if (t > 2 && this.time > this.openingUntil && (this.readable('right') || this.readable('left'))) {
           this.subs.clear();
           this.voice.stop();
           this.talkUntil = this.time;
@@ -659,6 +696,7 @@ export class HastRekhaSystem extends createSystem({}) {
 
   private updateMounts(dt: number, next: boolean): void {
     const t = this.phaseT;
+    if (this.worldLine) this.updateWorld(dt, this.readable(this.readSide));
     // light them one by one
     const step = 0.75;
     const lit = Math.min(7, Math.floor((t - 0.4) / step) + 1);
@@ -719,19 +757,31 @@ export class HastRekhaSystem extends createSystem({}) {
       this.overlay.sigils.pulse[cand] = 1;
       this.sound.ting(cand + 2);
       this.plate.set(m.name_hi, m.name_roman, m.planet, m.short);
-      this.subs.clear();
-      this.voice.stop();
-      this.talkUntil = this.time;
-      const d = this.say(m.text);
-      // its graha rises out of the palm while he tells it
-      this.grahaIdx = cand;
-      this.graha.rise(m.id, Math.max(4, d));
+      // the room gives way to its planet's world, and he tells the mount from inside it;
+      // poking another mount from inside switches worlds
+      if (this.worldLine) {
+        this.closeWorld('switch');
+        this.pendingMount = cand;
+        this.pendingMountT = 2.5;
+      } else this.openMount(cand, true);
       this.mountHeard.add(cand);
       this.saveData.mountsHeard = Array.from(new Set([...this.saveData.mountsHeard, m.id]));
       log('mount-poke', { id: m.id, heard: this.mountHeard.size });
-      if (this.mountHeard.size === 7) this.say(PANDIT.mountsDone);
     }
-    if (this.pressed === 'next' || (this.mountHeard.size === 7 && this.talkLeft() <= 0)) this.go('lines');
+    if (this.pendingMount >= 0) {
+      this.pendingMountT -= dt;
+      if (this.pendingMountT <= 0) this.pendingMount = -1;
+      else if (!this.worldLine && !this.portal.isOpen) {
+        const i = this.pendingMount;
+        this.pendingMount = -1;
+        this.openMount(i, true);
+      }
+    }
+    if (this.mountHeard.size === 7 && !this.worldLine && this.pendingMount < 0 && !this.mountsDoneSaid) {
+      this.mountsDoneSaid = true;
+      this.say(PANDIT.mountsDone);
+    }
+    if (this.pressed === 'next' || (this.mountsDoneSaid && !this.worldLine && this.talkLeft() <= 0)) this.go('lines');
   }
 
   // ───────────────────────── lines (Layer 2) ─────────────────────────
@@ -994,7 +1044,7 @@ export class HastRekhaSystem extends createSystem({}) {
   }
 
   /** A mount was touched in explore: its graha's sky opens around you. */
-  private openMount(i: number): void {
+  private openMount(i: number, edu = false): void {
     if (this.worldLine || this.portal.isOpen) return;
     const f = this.readable(this.readSide);
     if (!f) return;
@@ -1013,6 +1063,7 @@ export class HastRekhaSystem extends createSystem({}) {
     this.portal.open('graha', this.palmPt, this.headWorld, { color: g.color, title: [`${hi} ग्रह`, `${ro} · ${m.planet}`], ring: m.id === 'saturn', sun: m.id === 'sun_apollo' });
     this.worldLine = 'graha';
     this.worldMount = i;
+    this.worldEdu = edu;
     this.worldT = 0;
     this.worldSaid = false;
     this.worldGpuLogged = false;
@@ -1039,10 +1090,13 @@ export class HastRekhaSystem extends createSystem({}) {
       // the voice begins once the world has started to surround you (design pack §2.4)
       this.worldSaid = true;
       const n = WORLD_NARRATION[id as WorldId];
-      this.say(n.intro);
+      // the mounts lesson: the graha intro once, then just each mount; it closes by itself when told
+      const edu = id === 'graha' && this.worldEdu;
+      if (!edu || !this.eduIntroSaid) this.say(n.intro);
+      if (edu) this.eduIntroSaid = true;
       const text = id === 'graha' ? MOUNT_TEXT[this.worldMount].text : this.lineItem(id)?.text;
       if (text) this.say(text);
-      this.say(n.outro);
+      if (!edu) this.say(n.outro);
     }
     if (import.meta.env.DEV && !this.worldGpuLogged && this.worldT > 4) {
       this.worldGpuLogged = true;

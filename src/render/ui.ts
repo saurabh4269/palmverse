@@ -15,7 +15,7 @@ const SUB_DOWN = (18 * Math.PI) / 180;
 const SUB_WIDTH = 0.46; // m → ~26° wide at 1 m
 const PAGE_CHARS = 64; // ~2 lines
 
-export type Voice = 'pandit' | 'whisper' | 'narrator';
+export type Voice = 'pandit' | 'whisper' | 'narrator' | 'akash';
 
 interface Page {
   text: string;
@@ -127,14 +127,14 @@ export class Subtitles {
   }
 
   private show(p: Page): void {
-    const whisper = p.voice === 'whisper';
+    const whisper = p.voice === 'whisper' || p.voice === 'akash';
     this.card.setText(p.text, {
-      italic: whisper,
+      italic: p.voice === 'whisper',
       color: whisper ? '#efe0ff' : '#fff6e2',
       background: whisper ? 'rgba(34,14,52,0.9)' : 'rgba(22,9,5,0.9)',
       border: whisper ? 'rgba(186,150,255,0.9)' : 'rgba(230,180,90,0.95)',
     });
-    this.tag.setText(p.voice === 'pandit' ? 'PANDITJI' : whisper ? 'A WHISPER' : '', {
+    this.tag.setText(p.voice === 'pandit' ? 'PANDITJI' : p.voice === 'akash' ? 'AAKASHVANI' : whisper ? 'A WHISPER' : '', {
       color: whisper ? '#cdb6ff' : '#ffd57a',
     });
   }

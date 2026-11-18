@@ -21,6 +21,16 @@ const ACKS = ['Good.', 'I see.', 'Ah.', 'Yes.', 'Hmm, good.'];
 export const pickedLine = (i: number, label: string): string => `${ACKS[i % ACKS.length]} ${label}.`;
 export const CARD_LINE = 'Here is your Rekha card. It is saved on this headset only. After you leave, you can download it from this page.';
 
+/**
+ * The opening: a second, calmer voice from the sky (Aakashvani, आकाशवाणी) while the nine grahas turn
+ * around you. Rendered with its own designed voice (tools/voice/render_voice.py --set divine).
+ */
+export const OPENING: { en: string; hi: string }[] = [
+  { en: 'The nine grahas turn around you, as they turn through every old story of India.', hi: 'नौ ग्रह आपके चारों ओर घूम रहे हैं, जैसे वे भारत की हर पुरानी कहानी में घूमते हैं।' },
+  { en: 'Their names are written on the hills of your palm. Sit, and let Panditji read them.', hi: 'उनके नाम आपकी हथेली के पर्वतों पर लिखे हैं। बैठिए, पंडितजी उन्हें पढ़ेंगे।' },
+];
+export const openingLines = (lang: 'en' | 'hi'): string[] => OPENING.map((o) => o[lang]);
+
 export function allSpokenLines(lang: 'en' | 'hi'): string[] {
   if (lang === 'hi') return allSpokenLines('en').map((t) => HINDI[t]).filter((t): t is string => !!t);
   const out: string[] = [];
