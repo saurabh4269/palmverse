@@ -71,6 +71,30 @@ IWSDK · WebXR (hand tracking, immersive-ar passthrough) · three.js · TypeScri
 
 ---
 
+## Demo video as cut (18 Nov 2026, v1)
+The film is cut from one real Quest 3 session: `artifacts/demo/hast-rekha-demo.mp4` (2:25, not committed). Its beat table, script and audit are copied to `docs/demo/beats.md` and `docs/demo/AUDIT.md`. The user uploads it.
+
+### Upload title and description
+
+**Title:** Hast Rekha: Indian palmistry on your real palm (Meta Quest 3, hands only)
+
+**Description:**
+Hast Rekha (हस्त रेखा) is a mixed-reality reading of your own palm on Meta Quest 3, told as culture and story, not prediction. You hold up your real hand. Glowing lines and the seven planetary mounts appear on your skin. Touch a mount and its planet's world opens around you. Pick the shapes closest to your own lines, then touch a line to step into its world: a lotus pond for the heart line, a banyan by a river for the life line, a road of light under Shani for the fate line. Close your fist and the world folds back into your palm. You leave with a Rekha card.
+
+Your real palm is the canvas: this only works on a headset that tracks your hands. Hands only, seated, no controllers. WebXR (Immersive Web SDK) in Quest Browser.
+
+Privacy: the app uses only hand-joint positions from the headset's hand tracking. It has no camera access and uploads nothing.
+
+About this video:
+- Real footage from one continuous session on a physical Meta Quest 3 (Quest Browser), cut for length. There are no speed-ups or slow-downs, and no AI-generated video.
+- One cut puts audio from about 12 s later in the same session over the Rekha card shot (Panditji's farewell line). One world (Budh's, closed with a fist) appears after the lotus world, although in the session it came before.
+- People in the background of the passthrough room are blurred.
+- Panditji's voice, the opening voice, the narrator and the music are AI-generated with ElevenLabs (Voice Design, text-to-speech and Music). Panditji is an original character generated with MakeHuman/MPFB in Blender.
+- The banyan model is "Vine Covered Tree" by Zacharylll (CC-BY 3.0, Poly Pizza), adapted.
+- Hast Rekha is an entertainment and culture experience, not a forecast or advice.
+
+Made for the Meta VR Start Developer Competition 2026 (Entertainment track).
+
 ## Trailer shot list (under 3 minutes)
 Record on a Quest 3 using the headset's own capture, in a well-lit room with a plain table. Use real gameplay only, with no AI-generated video. Target 1:45 to 2:15.
 
