@@ -215,6 +215,26 @@ check('fist closes the world', m and m.group(1) == 'fist', m.group(0) if m else 
 time.sleep(0.5)
 shot('world-fold')
 park_poker()
+# ---- a mount opens its graha's sky (Surya, the Sun: well clear of every line)
+time.sleep(2.0)
+m = wait_for(r'layout phase=explore .*"mounts":\[\{', 10)
+mnt = {x['id']: x for x in field(m, 'layout')['mounts']}['sun_apollo']
+p, n = mnt['p'], mnt['n']
+mark()
+tip_to(POKE, [p[i] + n[i] * 0.04 for i in range(3)], 0.4)
+tip_to(POKE, jit([p[i] + n[i] * 0.003 for i in range(3)]), 0.3)
+m = wait_for(r'world-open line=graha mount=(\w+)', 5)
+check('mount opens its graha world', m and m.group(1) == 'sun_apollo', m.group(0) if m else '')
+tip_to(POKE, [p[i] + n[i] * 0.08 for i in range(3)], 0.3)
+park_poker()
+time.sleep(3.5)
+head(0)
+time.sleep(0.5)
+shot('world-graha-sun')
+head(-30)
+cli('xr', 'set-hand-pose', payload={'device': POKE, 'poseId': 'fist'})
+check('fist closes the graha world', bool(wait_for(r'world-close line=graha', 5)))
+park_poker()
 if args.worlds:
     for wl in ('life', 'head', 'fate'):
         if wl not in ls:

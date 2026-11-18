@@ -21,6 +21,10 @@ export const WORLD_NARRATION: Record<WorldId, { intro: string; outro: string }> 
     intro: 'This is the world of your Mastishk Rekha, the head line. The tradition reads it as the way a mind likes to travel, the way stars are joined into a picture.',
     outro: 'Every constellation is a story someone chose to draw between the stars. Close your hand, and the sky returns to your palm.',
   },
+  graha: {
+    intro: 'Each mount carries the name of a graha, a planet of the old Indian sky. Here is the one that gives this mount its name.',
+    outro: 'The tradition counts nine grahas and gives each a gem and a colour, as you see here. Close your hand, and the sky returns to your palm.',
+  },
   fate: {
     intro: 'This is the world of your Bhagya Rekha. Its planet is Shani, the slow and patient one, whom the tradition sees as a teacher of steady effort.',
     outro: 'A path of light is something you walk, step by step. That is how the old books speak of this line. Close your hand, and the world returns to your palm.',

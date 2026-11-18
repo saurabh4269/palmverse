@@ -48,11 +48,13 @@ import {
 import type { Joints } from '../core/palm-frame.js';
 import { FONT_DISPLAY, Label } from './text.js';
 
-export type WorldId = 'heart' | 'life' | 'head' | 'fate';
+/** the four line worlds, and 'graha': a mount's planet in its own sky */
+export type WorldId = 'heart' | 'life' | 'head' | 'fate' | 'graha';
 export const WORLD_IDS: WorldId[] = ['heart', 'life', 'head', 'fate'];
-const KIND: Record<WorldId, number> = { heart: 0, life: 1, head: 2, fate: 3 };
+const KIND: Record<WorldId, number> = { heart: 0, life: 1, head: 2, fate: 3, graha: 4 };
 
 export const WORLD_PALETTE: Record<WorldId, { core: string; halo: string }> = {
+  graha: { core: '#F5B700', halo: '#0B0820' },
   heart: { core: '#FF5C8A', halo: '#3FD0D4' },
   life: { core: '#2FBF71', halo: '#FFD27A' },
   head: { core: '#DDE6FF', halo: '#4B4FD8' },
@@ -60,6 +62,7 @@ export const WORLD_PALETTE: Record<WorldId, { core: string; halo: string }> = {
 };
 
 export const WORLD_TITLE: Record<WorldId, [string, string]> = {
+  graha: ['ग्रह', 'Graha'],
   heart: ['हृदय रेखा', 'Hridaya · the heart line'],
   life: ['जीवन रेखा', 'Jeevan · the life line'],
   head: ['मस्तिष्क रेखा', 'Mastishk · the head line'],
@@ -172,6 +175,12 @@ function skyMaterial(): ShaderMaterial {
             float band = exp(-pow(dot(d, normalize(up + rt * 0.6)) * 3.0, 2.0));
             col = vec3(0.005, 0.006, 0.025) + uHalo * (0.12 * neb + 0.22 * band * neb);
             col += uCore * (stars(d, 90.0, 0.84) * 0.9 + stars(d, 45.0, 0.93) * 0.8);
+          } else if (uKind == 4) {
+            // graha: deep space tinted with the planet's gem colour, its light glowing from ahead
+            float neb = fbm(d * 2.2 + 7.0);
+            col = uHalo * (0.6 + 0.6 * neb) + uCore * pow(neb, 2.5) * 0.25;
+            col += vec3(0.9, 0.92, 1.0) * stars(d, 85.0, 0.85) * 0.8;
+            col += uCore * (pow(max(dot(d, normalize(fw + up * 0.06)), 0.0), 7.0) * 0.45 + pow(max(dot(d, normalize(fw + up * 0.06)), 0.0), 60.0) * 0.6);
           } else {
             // fate: deep space, a nebula, and a path of light crossing toward the ringed planet
             float neb = fbm(d * 2.0 + 3.0);
@@ -552,7 +561,7 @@ function saturnHero(): Mesh {
       }`,
     /* glsl */ `
       precision highp float;
-      uniform float uOpacity; uniform float uTime; uniform vec3 uCore; uniform vec3 uHalo;
+      uniform float uOpacity; uniform float uTime; uniform vec3 uCore; uniform vec3 uHalo; uniform float uRing; uniform float uSun;
       varying float vKind; varying vec3 vN; varying vec3 vL; varying vec3 vW;
       void main(){
         vec3 sunDir = normalize(vec3(0.4, 0.5, 0.3));
@@ -564,7 +573,10 @@ function saturnHero(): Mesh {
           float lit = 0.25 + 0.75 * max(dot(vN, sunDir), 0.0);
           float rim = pow(1.0 - abs(dot(normalize(cameraPosition - vW), vN)), 3.0);
           c = base * lit + vec3(1.0, 0.85, 0.5) * rim * 0.9;
+          // Surya shines by its own light
+          if (uSun > 0.5) c = mix(vec3(1.0, 0.95, 0.7), uCore, 0.25 + 0.5 * rim + 0.08 * sin(vL.x * 60.0 + uTime) * sin(vL.y * 55.0 - uTime * 0.7)) * 1.25 + uCore * rim * 1.2;
         } else {
+          if (uRing < 0.5) discard;
           float r = length(vL.xz);
           float t = (r - 0.58) / 0.42;
           float gaps = 0.55 + 0.45 * sin(t * 50.0) * sin(t * 13.0 + 1.0);
@@ -575,7 +587,7 @@ function saturnHero(): Mesh {
         }
         gl_FragColor = vec4(c * a, a);
       }`,
-    { uBase: { value: new Vector3() }, uFwd: { value: new Vector3() }, uRight: { value: new Vector3() } },
+    { uBase: { value: new Vector3() }, uFwd: { value: new Vector3() }, uRight: { value: new Vector3() }, uRing: { value: 1 }, uSun: { value: 0 } },
   );
   return new Mesh(g, mat);
 }
@@ -750,7 +762,7 @@ export class WorldPortal {
   private hero(id: WorldId): Mesh {
     let h = this.heroes.get(id);
     if (!h) {
-      h = id === 'heart' ? lotusHero() : id === 'life' ? banyanHero() : id === 'head' ? constellationHero() : saturnHero();
+      h = id === 'heart' ? lotusHero() : id === 'life' ? banyanHero() : id === 'head' ? constellationHero() : saturnHero(); // fate and graha: a planet
       h.name = `world-hero-${id}`;
       h.renderOrder = 6;
       h.frustumCulled = false;
@@ -765,7 +777,7 @@ export class WorldPortal {
   }
 
   /** Bloom the world out of the palm point `palm`, around the eye at `head`. */
-  open(id: WorldId, palm: Vector3, head: Vector3): void {
+  open(id: WorldId, palm: Vector3, head: Vector3, graha?: { color: string; title: [string, string]; ring: boolean; sun: boolean }): void {
     this.world = id;
     this.state = 'bloom';
     this.t = 0;
@@ -780,7 +792,7 @@ export class WorldPortal {
     this.right.crossVectors(this.fwd, this.up).normalize();
     this.sky.position.copy(head);
     this.sky.updateMatrixWorld();
-    const pal = WORLD_PALETTE[id];
+    const pal = graha ? { core: graha.color, halo: WORLD_PALETTE.graha.halo } : WORLD_PALETTE[id];
     const u = this.skyMat.uniforms;
     u.uCenter.value.copy(head);
     u.uOrigin.value.copy(this.origin);
@@ -808,9 +820,14 @@ export class WorldPortal {
     else if (id === 'life') base.copy(head).addScaledVector(this.fwd, 2.3).addScaledVector(this.up, -eyeToFloor);
     else if (id === 'head') base.copy(head).addScaledVector(this.fwd, 2.4).addScaledVector(this.up, -0.1);
     else base.copy(head).addScaledVector(this.fwd, 2.3).addScaledVector(this.right, 0.25).addScaledVector(this.up, 0.3);
+    if (hu.uRing) {
+      hu.uRing.value = id === 'fate' || graha?.ring ? 1 : 0;
+      hu.uSun.value = graha?.sun ? 1 : 0;
+    }
+    if (id === 'graha') base.copy(head).addScaledVector(this.fwd, 2.2).addScaledVector(this.up, 0.15);
     hu.uFwd.value.copy(this.fwd);
     hu.uRight.value.copy(this.right);
-    const [hi, en] = WORLD_TITLE[id];
+    const [hi, en] = graha?.title ?? WORLD_TITLE[id];
     this.title.setText(`${hi}\n${en}`);
     this.title.mesh.position.copy(head).addScaledVector(this.fwd, 1.25).addScaledVector(this.up, id === 'head' ? 0.98 : 0.5);
     this.title.mesh.lookAt(head);

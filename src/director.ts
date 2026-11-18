@@ -30,7 +30,7 @@ import { LINE_COLORS, MOUNT_ORDER, PalmOverlay } from './render/palm-overlay.js'
 import { Pandit } from './render/pandit.js';
 import { renderShareCard } from './render/share-card.js';
 import { gpuStats } from './render/gpu-stats.js';
-import { GrahaOrb, WorldPortal, type WorldId } from './render/worlds.js';
+import { GRAHA, GrahaOrb, WorldPortal, type WorldId } from './render/worlds.js';
 import { WORLD_NARRATION } from './content/worlds.js';
 import { CARD_LINE, elementIntroLine, otherHandRaiseLine, pickedLine, todaysMountLine } from './content/spoken.js';
 import { FONT_BODY, Label, loadFonts } from './render/text.js';
@@ -53,6 +53,11 @@ type TouchId = 'heart' | 'head' | 'life' | 'fate';
 const TOUCH_IDS: TouchId[] = ['life', 'head', 'heart', 'fate'];
 /** Lines that open a world (any other line would just flare and be read aloud). */
 const WORLDS_ON = new Set<TouchId>(['heart', 'life', 'head', 'fate']);
+/** Graha names (Hindi, roman) for each mount's world title. */
+const GRAHA_NAME: Record<string, [string, string]> = {
+  jupiter: ['गुरु', 'Guru'], saturn: ['शनि', 'Shani'], sun_apollo: ['सूर्य', 'Surya'], mercury: ['बुध', 'Budh'],
+  mars_upper: ['मंगल', 'Mangal'], luna_moon: ['चंद्र', 'Chandra'], venus: ['शुक्र', 'Shukra'],
+};
 const FIST_REACH = 0.115; // m, longest fingertip-to-wrist distance below which a hand counts as a fist
 
 function log(event: string, kv: Record<string, unknown> = {}, layout?: unknown): void {
@@ -144,7 +149,10 @@ export class HastRekhaSystem extends createSystem({}) {
   private grahaIdx = -1;
   private readonly grahaBase = new Vector3();
   private readonly grahaN = new Vector3();
-  private worldLine: TouchId | null = null;
+  private worldLine: TouchId | 'graha' | null = null;
+  private worldMount = -1;
+  private mountCand = -1;
+  private mountT = 0;
   private worldT = 0;
   private worldSaid = false;
   private worldGpuLogged = false;
@@ -759,7 +767,8 @@ export class HastRekhaSystem extends createSystem({}) {
       this.touchLines.push({ id, strokes: r.smooth });
     }
     this.overlay.dimLine('join', 0.35);
-    this.overlay.sigils.glowTarget.fill(0.12);
+    this.overlay.sigils.glowTarget.fill(0.6);
+    this.mountCand = -1;
     this.sound.swell();
     this.say(PANDIT.explore);
     this.hint.show('Touch or pinch a glowing line  ✨', new Vector3(0, this.H - 0.32, -0.45), 0);
@@ -789,7 +798,34 @@ export class HastRekhaSystem extends createSystem({}) {
       this.updateWorld(dt, f);
       tip = pinch = null;
     }
+    // the mounts can be touched too: each opens its graha's sky. Whichever is nearer the
+    // fingertip wins, a mount's centre or a line (a line may run right past a mount).
+    let mc = -1;
+    if (f && other.tracked && !this.worldLine) {
+      const [a, b, h] = toPalm(f, other.joints[9]);
+      if (h > -0.02 && h < 0.015) {
+        let best = POKE_RADIUS * 0.8;
+        MOUNT_CENTROIDS.forEach((c, i) => {
+          const d = vdist(q(f, a, b), q(f, c[0], c[1]));
+          if (d < best) {
+            best = d;
+            mc = i;
+          }
+        });
+        if (mc >= 0 && tip && tip.dist <= best) mc = -1;
+        else if (mc >= 0) tip = null;
+      }
+    }
     this.toucher.step(dt, tip, pinch, this.touchEvents);
+    if (mc !== this.mountCand) {
+      this.mountCand = mc;
+      this.mountT = 0;
+      if (mc >= 0) this.sound.shimmer(0.6);
+    } else if (mc >= 0) {
+      this.mountT += dt;
+      if (this.mountT >= POKE_DWELL && this.mountT - dt < POKE_DWELL) this.openMount(mc);
+    }
+    if (!this.worldLine) for (let i = 0; i < 7; i++) this.overlay.sigils.glowTarget[i] = i === mc ? 1.4 : 0.6;
     // dev keys: 1..4 select life/head/heart/fate
     const k = ['1', '2', '3', '4'].findIndex((d) => this.keys.has(d));
     if (k >= 0 && this.touchLines.some((l) => l.id === TOUCH_IDS[k])) this.touchEvents.push({ kind: 'select', id: TOUCH_IDS[k], u: 0.5, by: 'touch' });
@@ -865,6 +901,34 @@ export class HastRekhaSystem extends createSystem({}) {
     log('world-open', { line: id });
   }
 
+  /** A mount was touched in explore: its graha's sky opens around you. */
+  private openMount(i: number): void {
+    if (this.worldLine || this.portal.isOpen) return;
+    const f = this.readable(this.readSide);
+    if (!f) return;
+    const m = MOUNT_TEXT[i];
+    const g = GRAHA[m.id];
+    const [hi, ro] = GRAHA_NAME[m.id] ?? ['ग्रह', 'Graha'];
+    this.subs.clear();
+    this.voice.stop();
+    this.talkUntil = this.time;
+    this.hint.hide();
+    this.overlay.sigils.pulse[i] = 1;
+    this.sound.bowl(220);
+    const c = q(f, MOUNT_CENTROIDS[i][0], MOUNT_CENTROIDS[i][1], 0.01);
+    this.palmPt.set(c[0], c[1], c[2]);
+    this.portal.open('graha', this.palmPt, this.headWorld, { color: g.color, title: [`${hi} ग्रह`, `${ro} · ${m.planet}`], ring: m.id === 'saturn', sun: m.id === 'sun_apollo' });
+    this.worldLine = 'graha';
+    this.worldMount = i;
+    this.worldT = 0;
+    this.worldSaid = false;
+    this.worldGpuLogged = false;
+    this.fistT = 0;
+    this.setting.appearTarget = 0;
+    this.mountHeard.add(i);
+    log('world-open', { line: 'graha', mount: m.id });
+  }
+
   private lineItem(id: TouchId) {
     return buildReading(RULES, READINGS, this.profile!, this.choices).find((r) => r.key === `${id}:${this.choices[id]}`);
   }
@@ -883,8 +947,8 @@ export class HastRekhaSystem extends createSystem({}) {
       this.worldSaid = true;
       const n = WORLD_NARRATION[id as WorldId];
       this.say(n.intro);
-      const item = this.lineItem(id);
-      if (item) this.say(item.text);
+      const text = id === 'graha' ? MOUNT_TEXT[this.worldMount].text : this.lineItem(id)?.text;
+      if (text) this.say(text);
       this.say(n.outro);
     }
     if (import.meta.env.DEV && !this.worldGpuLogged && this.worldT > 4) {
