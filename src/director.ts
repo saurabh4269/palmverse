@@ -96,6 +96,7 @@ export class HastRekhaSystem extends createSystem({}) {
   private phase: Phase = 'boot';
   private phaseT = 0;
   private time = 0;
+  private audioRetryT = -10;
   private stage = new Group();
   private overlay!: PalmOverlay;
   private setting!: Setting;
@@ -247,6 +248,10 @@ export class HastRekhaSystem extends createSystem({}) {
     this.time += dt;
     this.phaseT += dt;
     const presenting = !!this.renderer.xr.isPresenting;
+    if (presenting && this.sound.ctx?.state === 'suspended' && this.time - this.audioRetryT > 1) {
+      this.audioRetryT = this.time;
+      this.sound.unlock();
+    }
     if (presenting !== this.immersive) {
       this.immersive = presenting;
       log('xr', { presenting });
@@ -259,6 +264,10 @@ export class HastRekhaSystem extends createSystem({}) {
         this.logXRRender();
         // hands or controllers? (on device a held controller means no hand input sources at all)
         const xs = this.renderer.xr.getSession();
+        // Quest Browser's own Enter-XR button (offerSession) gives the page no user gesture, so
+        // the AudioContext stays suspended and every clip is silent. XR select/squeeze events
+        // count as user activation: unlock on those too (update() also retries every second).
+        if (xs) for (const ev of ['selectstart', 'select', 'squeezestart', 'inputsourceschange']) xs.addEventListener(ev, () => this.sound.unlock());
         const logInputs = () => log('inputs', { sources: xs ? Array.from(xs.inputSources).map((i) => (i.hand ? 'hand-' : 'ctrl-') + i.handedness).join(',') : 'none', features: (xs as { enabledFeatures?: string[] } | null)?.enabledFeatures?.join(',') ?? '?' });
         logInputs();
         xs?.addEventListener('inputsourceschange', logInputs);
