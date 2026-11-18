@@ -87,6 +87,8 @@ class HandRead {
   constructor(readonly side: Side) {}
 }
 
+const LINE_NAME: Record<TouchId, [string, string]> = { heart: ['Hridaya Rekha', 'हृदय रेखा'], head: ['Mastishk Rekha', 'मस्तिष्क रेखा'], life: ['Jeevan Rekha', 'जीवन रेखा'], fate: ['Bhagya Rekha', 'भाग्य रेखा'] };
+
 export class HastRekhaSystem extends createSystem({}) {
   private phase: Phase = 'boot';
   private phaseT = 0;
@@ -147,6 +149,12 @@ export class HastRekhaSystem extends createSystem({}) {
   private touchLines: TouchLine<TouchId>[] = [];
   private tipHit: LineHit<TouchId> = { id: 'heart', dist: 0, h: 0, u: 0 };
   private pinchHit: LineHit<TouchId> = { id: 'heart', dist: 0, h: 0, u: 0 };
+  private curHit: LineHit<TouchId> = { id: 'heart', dist: 0, h: 0, u: 0 };
+  /** each touch line alone, for the fingertip's distance to the hovered line */
+  private touchLineOne = new Map<TouchId, TouchLine<TouchId>[]>();
+  /** a line selected while the previous world was still folding away: opens when it has */
+  private pendingLine: TouchId | null = null;
+  private pendingT = 0;
   private linesHeard = new Set<TouchId>();
   private exploreMoreSaid = false;
   private shimmerT = 0;
@@ -810,8 +818,11 @@ export class HastRekhaSystem extends createSystem({}) {
       this.overlay.showLine(id, shapeFor(id, v), `${id}:${v}`, false);
       this.overlay.dimLine(id, 1);
       r.breathTarget = 1;
-      this.touchLines.push({ id, strokes: r.smooth });
+      const tl = { id, strokes: r.smooth };
+      this.touchLines.push(tl);
+      this.touchLineOne.set(id, [tl]);
     }
+    this.pendingLine = null;
     this.overlay.dimLine('join', 0.35);
     this.overlay.sigils.glowTarget.fill(0.6);
     this.mountCand = -1;
@@ -832,9 +843,11 @@ export class HastRekhaSystem extends createSystem({}) {
     const t = this.phaseT;
     const f = this.readable(this.readSide);
     const other = this.hands[this.readSide === 'left' ? 'right' : 'left'];
-    let tip: LineHit<TouchId> | null = null, pinch: LineHit<TouchId> | null = null;
+    let tip: LineHit<TouchId> | null = null, pinch: LineHit<TouchId> | null = null, cur: LineHit<TouchId> | null = null;
     if (f && other.tracked && this.touchLines.length) {
       tip = nearestLine(f, other.joints[9], this.touchLines, this.tipHit);
+      const hov = this.toucher.hover ? this.touchLineOne.get(this.toucher.hover) : undefined;
+      if (hov) cur = nearestLine(f, other.joints[9], hov, this.curHit);
       if (this.pinching(other)) {
         const a = other.joints[4], b = other.joints[9];
         pinch = nearestLine(f, [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2, (a[2] + b[2]) / 2], this.touchLines, this.pinchHit);
@@ -862,7 +875,16 @@ export class HastRekhaSystem extends createSystem({}) {
         else if (mc >= 0) tip = null;
       }
     }
-    this.toucher.step(dt, tip, pinch, this.touchEvents);
+    this.toucher.step(dt, tip, pinch, this.touchEvents, cur);
+    if (this.pendingLine) {
+      this.pendingT -= dt;
+      if (this.pendingT <= 0) this.pendingLine = null;
+      else if (!this.worldLine && !this.portal.isOpen) {
+        const id = this.pendingLine;
+        this.pendingLine = null;
+        this.openLine(id);
+      }
+    }
     if (mc !== this.mountCand) {
       this.mountCand = mc;
       this.mountT = 0;
@@ -882,10 +904,20 @@ export class HastRekhaSystem extends createSystem({}) {
           r.hoverTarget = 1;
           this.sound.shimmer(0.3);
           this.shimmerT = 0;
+          // the line that will open is lit; the others step back, and its name says what it is
+          if (!this.worldLine) {
+            for (const l of TOUCH_IDS) this.overlay.lines.get(l)!.breathTarget = l === e.id ? 1 : 0.25;
+            const [ro, hi] = LINE_NAME[e.id];
+            this.hint.show(`${hi} · ${ro}\nhold or pinch to open`, new Vector3(0, this.H - 0.32, -0.45), 0);
+          }
           log('line-hover', { line: e.id });
           break;
         case 'unhover':
           r.hoverTarget = 0;
+          if (!this.worldLine) {
+            for (const l of TOUCH_IDS) this.overlay.lines.get(l)!.breathTarget = 1;
+            this.hint.show('Touch or pinch a glowing line  ✨', new Vector3(0, this.H - 0.32, -0.45), 0);
+          }
           break;
         case 'touch':
           r.ripple(e.u);
@@ -920,7 +952,14 @@ export class HastRekhaSystem extends createSystem({}) {
 
   /** A line was selected: its world blooms out of the palm and Panditji tells it from inside. */
   private openLine(id: TouchId): void {
-    if (this.worldLine || this.portal.isOpen) return;
+    if (this.worldLine || this.portal.isOpen) {
+      // still folding the last world away: open this one as soon as it has gone
+      if (!this.worldLine) {
+        this.pendingLine = id;
+        this.pendingT = 1.5;
+      }
+      return;
+    }
     this.subs.clear();
     this.voice.stop();
     this.talkUntil = this.time;

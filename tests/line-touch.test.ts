@@ -64,4 +64,31 @@ tch.reset();
 all.length = 0;
 run(null, 5, at(0.01));
 check('pinch selects once', all.filter((e) => e === 'select:heart').length === 1, all.join());
+// device bug (18 Nov): hovering one line and pinching opened a neighbour (the pinch midpoint sits
+// toward the thumb). The hovered line wins the pinch, and another line takes the hover over only
+// when it is nearer by TOUCH.switchMargin.
+{
+  type L = 'heart' | 'head' | 'life' | 'fate';
+  const hit = (id: L, dist: number, h = 0.004, u = 0.5): LineHit<L> => ({ id, dist, h, u });
+  const t2 = new LineToucher<L>();
+  const ev2: TouchEvent<L>[] = [];
+  const got: string[] = [];
+  const go = (tip: LineHit<L> | null, cur: LineHit<L> | null, n = 1, pinch: LineHit<L> | null = null) => {
+    for (let i = 0; i < n; i++) {
+      t2.step(1 / 72, tip, pinch, ev2, cur);
+      for (const e of ev2) got.push(`${e.kind}:${e.id}`);
+    }
+  };
+  go(hit('fate', 0.006, 0.02), null, 3);
+  check('hover fate', t2.hover === 'fate', got.join());
+  // life is 2 mm nearer than fate: not enough to switch
+  go(hit('life', 0.005, 0.02), hit('fate', 0.007, 0.02), 10);
+  check('hysteresis keeps fate', t2.hover === 'fate', got.join());
+  // pinch whose midpoint is nearest life: the hovered fate opens
+  go(hit('life', 0.005, 0.02), hit('fate', 0.007, 0.02), 1, hit('life', 0.004, 0.01));
+  check('pinch opens the hovered line', got.includes('select:fate') && !got.includes('select:life'), got.join());
+  // life clearly nearer (by more than the margin): the hover moves
+  go(hit('life', 0.002, 0.02), hit('fate', 0.012, 0.02), 3);
+  check('clearly nearer line takes the hover', t2.hover === 'life', got.join());
+}
 done('line-touch');

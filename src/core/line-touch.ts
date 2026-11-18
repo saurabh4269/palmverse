@@ -78,7 +78,9 @@ export const TOUCH = {
   touchH: 0.012,
   touchBelow: -0.03,
   /** touch held this long selects (kills accidental brushes) */
-  dwell: 0.14,
+  dwell: 0.25,
+  /** another line must be this much nearer than the hovered one to take the hover over (lines run close near the wrist) */
+  switchMargin: 0.004,
   /** keep a hover alive this long after the finger leaves or tracking drops */
   grace: 0.2,
   /** a pinch this close to a line (pinch point to line, metres) selects it */
@@ -116,12 +118,19 @@ export class LineToucher<Id extends string = string> {
   /**
    * One frame. `tip` is the toucher's fingertip hit (null if not tracked / no lines);
    * `pinch` is the hit of the pinch point when that hand is pinching (null otherwise).
+   * `cur` is the fingertip's hit against the hovered line only (null if nothing is hovered):
+   * the hovered line keeps the hover unless another is clearly nearer, and a pinch opens the
+   * hovered line, the one lit up, never whatever is nearest the thumb–index midpoint.
    */
-  step(dt: number, tip: LineHit<Id> | null, pinch: LineHit<Id> | null, events: TouchEvent<Id>[]): void {
+  step(dt: number, tip: LineHit<Id> | null, pinch: LineHit<Id> | null, events: TouchEvent<Id>[], cur: LineHit<Id> | null = null): void {
     events.length = 0;
-    // pinch near a line: select on the pinch's rising edge
+    if (cur && cur.id !== this.hover) cur = null;
+    // pinch: select on the rising edge; the hovered line wins
     const pinching = !!pinch;
-    if (pinch && !this.wasPinching && pinch.dist < TOUCH.pinchNear && Math.abs(pinch.h) < 0.05) {
+    if (pinch && !this.wasPinching && this.hover && cur && cur.dist < TOUCH.pinchNear && Math.abs(cur.h) < 0.05) {
+      events.push({ kind: 'select', id: this.hover, u: cur.u, by: 'pinch' });
+      this.selected = true;
+    } else if (pinch && !this.wasPinching && pinch.dist < TOUCH.pinchNear && Math.abs(pinch.h) < 0.05) {
       if (this.hover !== pinch.id) {
         if (this.hover) events.push({ kind: 'unhover', id: this.hover });
         this.hover = pinch.id;
@@ -133,6 +142,8 @@ export class LineToucher<Id extends string = string> {
     this.wasPinching = pinching;
 
     const inBand = !!tip && tip.h < TOUCH.hoverH && tip.h > TOUCH.touchBelow;
+    // hysteresis between lines: stay on the hovered one unless another is nearer by switchMargin
+    if (inBand && cur && tip!.id !== this.hover && cur.dist < TOUCH.hoverOut && tip!.dist + TOUCH.switchMargin > cur.dist) tip = cur;
     const keep = inBand && tip!.id === this.hover && tip!.dist < TOUCH.hoverOut;
     const enter = inBand && tip!.dist < TOUCH.hoverIn;
     if (keep || (enter && tip!.id === this.hover)) {
