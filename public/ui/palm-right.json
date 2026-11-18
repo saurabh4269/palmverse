@@ -1,0 +1,50 @@
+{
+  "image": "palm-right.png",
+  "size": [
+    512,
+    640
+  ],
+  "space": "pixels, x right, y down",
+  "points": {
+    "wrist": [
+      222.3,
+      537.9
+    ],
+    "index_mcp": [
+      295.9,
+      257.1
+    ],
+    "middle_mcp": [
+      223.8,
+      257.8
+    ],
+    "ring_mcp": [
+      170.5,
+      273.4
+    ],
+    "pinky_mcp": [
+      119.9,
+      300.7
+    ],
+    "thumb_tip": [
+      425.9,
+      289.6
+    ],
+    "index_tip": [
+      307.0,
+      50.3
+    ],
+    "middle_tip": [
+      222.3,
+      20.8
+    ],
+    "ring_tip": [
+      154.3,
+      50.9
+    ],
+    "pinky_tip": [
+      97.3,
+      145.7
+    ]
+  }
+}

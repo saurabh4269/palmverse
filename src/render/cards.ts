@@ -208,6 +208,35 @@ const FINGERS: { base: [number, number]; len: number }[] = [
   { base: [0.97, 0.63], len: 0.48 },
 ];
 
+/**
+ * The card's palm: a palm-up right hand rendered from the MakeHuman/MPFB human (tools/palm/,
+ * public/ui/palm-right.{webp,json}). Its joint pixels map the palm frame (a, b) onto the image:
+ * a = 0 at the wrist and 1 at the middle knuckle, b from the index knuckle (−0.37) to the little
+ * finger's (+0.63), as in palm-regions.json. Until it loads, cards draw the old sketch.
+ */
+const PALM_IMG = { img: null as HTMLImageElement | null, w: 512, h: 640, W: [222.3, 537.9], A: [1.5, -280.1], B: [-176, 43.6] };
+const waitingCards = new Set<ShapeCard>();
+if (typeof Image !== 'undefined') {
+  const img = new Image();
+  img.onload = () => {
+    PALM_IMG.img = img;
+    for (const c of waitingCards) c.paint();
+    waitingCards.clear();
+  };
+  img.src = `${import.meta.env.BASE_URL}ui/palm-right.webp`;
+  void fetch(`${import.meta.env.BASE_URL}ui/palm-right.json`)
+    .then((r) => r.json())
+    .then((j: { size: [number, number]; points: Record<string, [number, number]> }) => {
+      const p = j.points;
+      PALM_IMG.w = j.size[0];
+      PALM_IMG.h = j.size[1];
+      PALM_IMG.W = p.wrist;
+      PALM_IMG.A = [p.middle_mcp[0] - p.wrist[0], p.middle_mcp[1] - p.wrist[1]];
+      PALM_IMG.B = [p.pinky_mcp[0] - p.index_mcp[0], p.pinky_mcp[1] - p.index_mcp[1]];
+    })
+    .catch(() => {});
+}
+
 /** A choice card: a small palm diagram with the candidate line and a plain label. */
 export class ShapeCard extends PokeCard {
   selected = false;
@@ -227,10 +256,19 @@ export class ShapeCard extends PokeCard {
     const g = this.ctx, W = this.canvas.width, H = this.canvas.height;
     // palm-frame (a, b) → canvas: fingers up, thumb side on the right as you see your own right palm
     const cx = W * 0.5, top = H * 0.08, sc = W * 0.36;
-    const P = (a: number, b: number): [number, number] => [cx - b * sc, top + (1.75 - a) * sc];
+    let P = (a: number, b: number): [number, number] => [cx - b * sc, top + (1.75 - a) * sc];
     g.save();
     g.lineJoin = 'round';
     g.lineCap = 'round';
+    const im = PALM_IMG.img;
+    if (!im) waitingCards.add(this);
+    if (im) {
+      // the rendered palm, fitted above the label
+      const ih = H * 0.74, k = ih / PALM_IMG.h, iw = PALM_IMG.w * k, ix = (W - iw) / 2, iy = H * 0.035;
+      g.drawImage(im, ix, iy, iw, ih);
+      const { W: O, A, B } = PALM_IMG;
+      P = (a, b) => [ix + k * (O[0] + a * A[0] + b * B[0]), iy + k * (O[1] + a * A[1] + b * B[1])];
+    } else {
     // fingers
     g.strokeStyle = 'rgba(236,206,160,0.42)';
     g.lineWidth = W * 0.07;
@@ -263,6 +301,7 @@ export class ShapeCard extends PokeCard {
     g.strokeStyle = 'rgba(236,206,160,0.5)';
     g.lineWidth = 2;
     g.stroke();
+    }
     // candidate line(s)
     const col = LINE_COLORS[this.line];
     if (this.strokes.length === 0) {
