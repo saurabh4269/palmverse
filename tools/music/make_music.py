@@ -165,7 +165,7 @@ def main():
     manifest = json.load(open(mpath)) if os.path.exists(mpath) else {}
     srcpath = os.path.join(RAW, 'sources.json')
     sources = json.load(open(srcpath)) if os.path.exists(srcpath) else {}
-    key = open(a.key_file).read().strip() if a.key_file else None
+    key = open(a.key_file).read().strip() if a.key_file else (os.environ.get('ELEVENLABS_API_KEY') or None)
     use_sfx = False
     for tid in ids:
         raw = os.path.join(RAW, f'{tid}.mp3')

@@ -15,7 +15,7 @@ import {
   Vector3,
 } from '@iwsdk/core';
 
-// Adapted from projects/chausar/src/game/human.ts (same kit): procedural seated human.
+// Adapted from projects/chausar/src/game/human.ts in github.com/saurabh4269/meta-vr-start-2026-kit (same authors): procedural seated human.
 // Hast Rekha changes: grey brows (not near-black), kurta/shawl material tuning, a calm
 // head tilt instead of Shakuni's sly one, [hast] dev logs.
 /**

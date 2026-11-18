@@ -1,4 +1,4 @@
-// Adapted from projects/chausar/src/game/ui.ts (same kit, same authors): Subtitles + Hint.
+// Adapted from projects/chausar/src/game/ui.ts in github.com/saurabh4269/meta-vr-start-2026-kit (same authors): Subtitles + Hint.
 import { Group, Object3D, Quaternion, Vector3 } from '@iwsdk/core';
 import { FONT_BODY, FONT_DISPLAY, Label } from './text.js';
 

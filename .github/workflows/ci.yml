@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Typecheck, unit tests, build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      # Install scripts are skipped: none are needed to typecheck, test or build, and some
+      # (headset and ML tooling pulled in by the IWSDK CLI) want network or native setup.
+      - name: Install
+        run: npm ci --ignore-scripts
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Unit tests
+        run: npm test
+
+      - name: Build
+        run: npm run build
+        env:
+          NODE_ENV: production
+
+      # The emulator end-to-end test (npm run test:xr) needs a managed browser and the
+      # IWSDK dev server, so it runs locally; see README.md#testing.

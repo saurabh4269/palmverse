@@ -5,7 +5,7 @@ Every line Panditji speaks is rendered once to an mp3 and shipped in `public/voi
 Pipeline: **ElevenLabs Voice Design** (a new voice from a text description; nothing is cloned) → text-to-speech per line → **`divine.sh`** (temple reverb, octave-down weight, octave-up whisper, fifth pad, chorus, tanpura bed, −16 LUFS) → `public/voice/<lang>/<hash>.mp3` plus `manifest.json`.
 
 ```bash
-cd projects/hast-rekha
+cd palmverse
 (cd tools/voice/assets && python3 ../gen_assets.py)          # once: synthetic temple IR + tanpura (numpy, scipy)
 node tools/voice/dump-lines.mjs > .tmp/lines.json            # every spoken line (src/content/spoken.ts)
 python3 tools/voice/render_voice.py --key-file <file> --design   # once: designs the voice → tools/voice/voice.json

@@ -1,0 +1,37 @@
+name: Bug report
+description: Something does not work as described
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what you expected, and what you saw instead.
+    validations:
+      required: true
+  - type: dropdown
+    id: where
+    attributes:
+      label: Where
+      options:
+        - Meta Quest 3
+        - Meta Quest 3S
+        - IWSDK emulator (desktop)
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: browser
+    attributes:
+      label: Browser and version
+      placeholder: Quest Browser 156
+  - type: input
+    id: phase
+    attributes:
+      label: Step of the reading
+      placeholder: e.g. scan, mounts, explore (heart world)
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs or screenshots
+      description: Console output, or a capture from the headset. Please make sure no other people are visible in passthrough captures.

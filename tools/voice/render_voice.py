@@ -153,7 +153,7 @@ def main() -> None:
     ap.add_argument('--length-scale', default='1.12', help='Piper: >1 speaks slower')
     ap.add_argument('--set', default='pandit', choices=['pandit', 'divine'], help="divine: the opening lines, in the Aakashvani voice (voice-divine.json)")
     a = ap.parse_args()
-    key = open(a.key_file).read().strip() if a.key_file else ''
+    key = open(a.key_file).read().strip() if a.key_file else os.environ.get('ELEVENLABS_API_KEY', '').strip()
     engine = f'piper:{os.path.basename(a.piper)[:-5]}' if a.piper else None
     divine = a.set == 'divine'
     raw_dir = os.path.join(HERE, 'raw', a.lang + ('-piper' if a.piper else '') + ('-divine' if divine else ''))

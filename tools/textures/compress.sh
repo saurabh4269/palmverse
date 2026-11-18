@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# KTX2 (Basis Universal) for the GLBs, with mipmaps. Run from projects/hast-rekha/ after a model build:
+# KTX2 (Basis Universal) for the GLBs, with mipmaps. Run from the repository root after a model build:
 #   assets-src/models/*.glb (Blender) → public/models/*.glb (KTX2, loaded by the app)
 #   UASTC: the skin atlas (it carries the face), the eyes, and alpha-tested strand cards
 #          (hair, beard, brows, lashes): ETC1S would smear the cut-out edges.

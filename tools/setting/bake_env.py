@@ -12,7 +12,7 @@ show the lamps where they are.
 Equirect convention: the image centre faces three.js +X and +Z is on the right,
 which is what three's equirect sampling expects (no runtime rotation offset).
 
-Run from projects/hast-rekha/:
+Run from the repository root:
   /Applications/Blender.app/Contents/MacOS/Blender -b -P tools/setting/bake_env.py -- --out public/env/pavilion.hdr
 """
 import argparse

@@ -1,4 +1,4 @@
-// Copied from projects/chausar/src/game/text.ts (same kit): Canvas2D text that shapes Devanagari.
+// Copied from projects/chausar/src/game/text.ts in github.com/saurabh4269/meta-vr-start-2026-kit (same authors): Canvas2D text that shapes Devanagari.
 import {
   CanvasTexture,
   LinearFilter,

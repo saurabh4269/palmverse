@@ -27,7 +27,7 @@ It is adapted from `projects/chausar/tools/shakuni/`, so the GLB keeps the same 
    The destination is MPFB's `LocationService.get_user_data()`. On Linux it is `~/.config/blender/<ver>/extensions/.user/user_default/mpfb/data`.
 
 ## Build and preview
-From `projects/hast-rekha/`:
+From the repository root:
 ```sh
 B=/Applications/Blender.app/Contents/MacOS/Blender
 $B -b -P tools/pandit/build_pandit.py -- --out assets-src/models/pandit.glb   # [--skin-size 1024] [--no-costume] [--no-ao]

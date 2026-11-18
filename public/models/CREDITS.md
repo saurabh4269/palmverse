@@ -11,7 +11,7 @@ The palmist character. It is an original design and does not depict any real per
 | Skin recolour and stubble shading, grey hair recolour, deep-brown iris recolour | Done in code by our build script | Ours (CC0 inputs) |
 | Beard and moustache (alpha shells and cards, procedural strand texture), kurta and pyjama, front placket, maroon shawl (procedural cotton and wool textures) | Generated in code by `tools/pandit/costume.py` | Ours |
 
-The pipeline is adapted from `projects/chausar/tools/shakuni/` in this repository. No third-party textures beyond the MakeHuman CC0 assets are used.
+The pipeline is adapted from the team's earlier character pipeline in the [research kit](https://github.com/saurabh4269/meta-vr-start-2026-kit). No third-party textures beyond the MakeHuman CC0 assets are used.
 
 ## banyan.glb
 

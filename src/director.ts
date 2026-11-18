@@ -1,6 +1,6 @@
 /**
  * Hast Rekha director: one system, one explicit phase machine
- * (architecture.md). Every frame it reads both hands' 25 joints, builds the
+ * (docs/ARCHITECTURE.md). Every frame it reads both hands' 25 joints, builds the
  * palm frame of the reading hand, and feeds four uniforms to the overlay so
  * the lines and mounts stay on the real skin.
  *

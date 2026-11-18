@@ -733,7 +733,7 @@ export class WorldPortal {
   private readonly skyMat: ShaderMaterial;
   private readonly heroes = new Map<WorldId, Mesh>();
   /**
-   * The life world's banyan: a real model (public/models/banyan.glb, CC-BY, see models/CREDITS.md)
+   * The life world's banyan: a real model (public/models/banyan.glb, CC-BY, see public/models/CREDITS.md)
    * in place of the procedural tubes. Loaded the first time the life world opens; grows by scale.
    */
   private banyan: Object3D | null = null;

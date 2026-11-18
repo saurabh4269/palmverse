@@ -8,10 +8,11 @@ import { BANNED, buildReading, isSafeText, resolveRule, type RulesJson, todaysMo
 import { check, done } from './harness.js';
 
 const rules = JSON.parse(readFileSync(process.cwd() + '/src/data/palmistry-rules.json', 'utf8')) as RulesJson;
-const rootRules = readFileSync(process.cwd() + '/../../data/palmistry-rules.json', 'utf8');
-check('project copy of palmistry-rules.json matches data/', rootRules === readFileSync(process.cwd() + '/src/data/palmistry-rules.json', 'utf8'));
-const rootRegions = readFileSync(process.cwd() + '/../../data/palm-regions.json', 'utf8');
-check('project copy of palm-regions.json matches data/', rootRegions === readFileSync(process.cwd() + '/src/data/palm-regions.json', 'utf8'));
+// In the original monorepo these files were copies of the research kit's data/ folder; here they are the
+// canonical copies (source: github.com/saurabh4269/meta-vr-start-2026-kit/tree/main/data). Check they parse.
+check('palmistry-rules.json has features and rules', rules.features.length > 0);
+const regions = JSON.parse(readFileSync(process.cwd() + '/src/data/palm-regions.json', 'utf8'));
+check('palm-regions.json parses', !!regions && typeof regions === 'object');
 
 // the banned pattern itself catches what it must
 for (const bad of ['a short life', 'You will marry twice', 'signs of illness', 'risk of divorce', 'Cheiro: insanity', 'fertility', 'early death', 'this predicts wealth', 'bad luck ahead', 'jealous nature'])

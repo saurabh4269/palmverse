@@ -15,7 +15,7 @@ Two outputs inside the GLB:
     alpha = baked occlusion of the floor by the takht and stand feet, i.e. a soft
     contact shadow cut from the props' real footprints (not a blob).
 
-Run from projects/hast-rekha/:
+Run from the repository root:
   /Applications/Blender.app/Contents/MacOS/Blender -b -P tools/setting/build_setting.py -- --out assets-src/models/setting.glb && tools/textures/compress.sh
 Takes about a minute on CPU (Cycles AO bakes).
 """

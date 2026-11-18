@@ -1,7 +1,33 @@
 {
-  "name": "hast-rekha",
+  "name": "palmverse",
   "version": "0.1.0",
+  "description": "Hast Rekha, the Indian tradition of reading the hand, drawn in light on your real palm in mixed reality. Hands-only WebXR for Meta Quest 3.",
   "private": true,
+  "license": "MIT",
+  "author": "Saurabh Gupta",
+  "homepage": "https://github.com/saurabh4269/palmverse#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/saurabh4269/palmverse.git"
+  },
+  "bugs": {
+    "url": "https://github.com/saurabh4269/palmverse/issues"
+  },
+  "keywords": [
+    "webxr",
+    "meta-quest",
+    "quest-3",
+    "mixed-reality",
+    "passthrough",
+    "hand-tracking",
+    "iwsdk",
+    "threejs",
+    "palmistry",
+    "hast-rekha",
+    "samudrika-shastra",
+    "india",
+    "culture"
+  ],
   "type": "module",
   "scripts": {
     "dev": "iwsdk dev restart --open --foreground",

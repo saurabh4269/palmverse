@@ -50,3 +50,12 @@ opencode.json
 .claude/settings.local.json
 tools/voice/assets/
 tools/voice/raw/
+
+# Release hygiene: never commit these
+.claude/
+.agents/
+.cursor/
+tools/music/raw/
+*.key
+.env.*
+!.env.example

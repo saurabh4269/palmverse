@@ -1,0 +1,16 @@
+name: Feature or content suggestion
+description: An idea for the experience, or a correction to a reading or translation
+labels: [enhancement]
+body:
+  - type: textarea
+    id: idea
+    attributes:
+      label: The idea
+      description: What should change, and why.
+    validations:
+      required: true
+  - type: textarea
+    id: source
+    attributes:
+      label: Sources (for content changes)
+      description: For readings, cite the text or tradition. For Hindi, the line and your suggested wording.
