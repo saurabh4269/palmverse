@@ -122,6 +122,10 @@ export class HastRekhaSystem extends createSystem({}) {
 
   init(): void {
     void loadFonts();
+    // Fixed foveation: three defaults to 1.0 (maximum), which visibly softens the periphery where
+    // the captions and line cards sit (~20° off centre). 0.5 keeps them crisp; the scene is light
+    // (≈75 draw calls), so the GPU can afford it. Verify on device (docs/TESTING.md).
+    this.renderer.xr.setFoveation(0.5);
     this.stage.name = 'hast-stage';
     this.world.createTransformEntity(this.stage, { persistent: true });
 
@@ -176,6 +180,7 @@ export class HastRekhaSystem extends createSystem({}) {
       if (presenting) {
         this.sound.unlock();
         this.anchored = false;
+        this.logXRRender();
         this.go('welcome');
       } else {
         this.voice.stop();
@@ -210,6 +215,27 @@ export class HastRekhaSystem extends createSystem({}) {
       this.lastLayoutLog = this.time;
       this.logLayout();
     }
+  }
+
+  /**
+   * What the XR compositor actually got: layer type (projection layer = WebXR Layers + MSAA render
+   * target; XRWebGLLayer = the browser's own antialias), multiview, foveation and resolution.
+   * Logged (dev) once per session so the emulator and the headset can be compared (docs/TESTING.md).
+   */
+  private logXRRender(): void {
+    const xr = this.renderer.xr as typeof this.renderer.xr & { isMultiview?: boolean };
+    const layer = xr.getBaseLayer() as (XRWebGLLayer & XRProjectionLayer) | null;
+    const gl = this.renderer.getContext();
+    log('xr-render', {
+      layer: !layer ? 'none' : 'textureWidth' in layer ? 'XRProjectionLayer' : 'XRWebGLLayer',
+      antialias: (layer as XRWebGLLayer | null)?.antialias ?? 'n/a',
+      ctxAntialias: gl.getContextAttributes()?.antialias,
+      samplesMax: (gl as WebGL2RenderingContext).getParameter?.((gl as WebGL2RenderingContext).MAX_SAMPLES),
+      multiview: !!xr.isMultiview,
+      foveation: xr.getFoveation(),
+      fixedFoveation: (layer as XRProjectionLayer | null)?.fixedFoveation ?? 'n/a',
+      size: layer ? `${layer.textureWidth ?? layer.framebufferWidth}x${layer.textureHeight ?? layer.framebufferHeight}` : 'n/a',
+    });
   }
 
   // ───────────────────────── stage ─────────────────────────
@@ -394,6 +420,8 @@ export class HastRekhaSystem extends createSystem({}) {
       case 'mounts':
         this.mountSeq = 0;
         this.say(PANDIT.mountsIntro);
+        // the busiest moment (overlay + sigils + plate + Panditji talking): a headset has no 'g' key
+        if (import.meta.env.DEV) setTimeout(() => log('gpu', { ...gpuStats(this.scene, this.renderer) }), 1500);
         break;
       case 'lines':
         this.lineIdx = 0;

@@ -16,7 +16,7 @@ How the build meets the Meta VR Start Developer Competition 2026 rules and its f
 | Requirement | Status | Evidence |
 |---|---|---|
 | Hands-first, completes without a controller | ✅ emulator | E2E plays the whole reading with emulated hands only (`set-input-mode hand`): Continue poke, palm up, scan, mounts poked by the other hand's fingertip, five line choices by poke, skip to card, Finish. `iwsdk.config.json` turns on `handTracking`. There is no controller code path. |
-| Quest 3 / 3S at 60 fps or more | ✅ design / ⚠ device | Overlay: one ribbon mesh per visible line, one mesh for all seven mount sigils, one sheen quad. All placement happens in the vertex shader from four uniforms (`src/render/palm-overlay.ts`). The dome is one draw. No shadows, no post-processing, no physics. The pandit GLB is 3.6 MB with a 2048² skin. Measured in the emulator (`npx @iwsdk/cli scene render-stats`, mounts phase): **70 draw calls, about 105k triangles, 28 programs**. The 21 static setting props are merged into one mesh per material at load (`mergeStatic` in `src/render/dome.ts`), which took 98 calls down to 70. **Frame rate not yet measured on a device.** |
+| Quest 3 / 3S at 60 fps or more | ✅ design / ⚠ device | Overlay: one ribbon mesh per visible line, one mesh for all seven mount sigils, one sheen quad. All placement happens in the vertex shader from four uniforms (`src/render/palm-overlay.ts`). The dome is one draw. No shadows, no post-processing, no physics. Textures are KTX2 (Basis Universal: UASTC for the face, eyes and strand cut-outs, ETC1S for AO and cloth), transcoded by a locally served Basis transcoder. Estimated texture memory went from 40 MB to 21 MB. Measured in the emulator at the mounts phase (dev `gpu` log): **76 draw calls, about 110k triangles**. The props are one Blender-baked mesh with one material each (5 draws), and AO and contact shadows are baked, never computed per frame. Fixed foveation is 0.5, with 4× MSAA on Quest's projection layer (docs/TESTING.md §4). **Frame rate not yet measured on a device.** |
 | English | ✅ | All speech and captions are in English. Devanagari appears as titles and names (हस्त रेखा, गुरु पर्वत) next to their romanised and English forms. |
 | No logos, brands or identifiable people | ✅ | Panditji is an original character generated from MakeHuman parameters, not a likeness. The pavilion, cards and sigils are procedural. |
 | Original, not a wrapper | ✅ | No external service. The palm frame, measurement, rule engine, shaders and sound all run locally. |
@@ -86,6 +86,12 @@ How the build meets the Meta VR Start Developer Competition 2026 rules and its f
   - **No gaze interactions.** Gaze input is a Unity/Unreal Interaction SDK feature.
 
 ## Criterion 4: Polish & Presentation
+- **Lighting and materials (visual pass, 18 Nov):**
+  - the takht, chowki, diyas and brass lamp stands are rebuilt in Blender at their exact runtime sizes, bevelled, with **baked ambient occlusion** and a **floor contact shadow cut from their real footprints** (`tools/setting/build_setting.py`). The platform stands on your real floor instead of floating over passthrough;
+  - Panditji has **rest-pose baked AO** (costume folds, ears, fingers, under the beard), plus a **runtime contact shadow from his actual seated pose**: an orthographic depth render looking up from under the seat, blurred once into a decal (`src/render/contact-shadow.ts`);
+  - **image-based light baked from the pavilion itself** (`tools/setting/bake_env.py` → `public/env/pavilion.hdr`): the dusk dome, the warm bounce off the takht, and the five diya flames, so brass and silk reflect the lamps that are actually there;
+  - physical materials: skin with a low warm sheen (a cheap stand-in for subsurface warmth), cotton with a light sheen, the shawl as silk, real metal brass, satin lacquered wood;
+  - KTX2 textures (sharper at a quarter of the GPU memory) with a local transcoder.
 - **Art direction:**
   - a lamp-lit pavilion: a procedural dome with a dusk sky between carved pillars;
   - a low chowki with diyas and a flickering warm light;

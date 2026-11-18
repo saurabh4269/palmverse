@@ -95,9 +95,9 @@ function upgradeMaterial(mat: Material, mesh: Mesh): Material {
     p.specularIntensity = 0.3;
   } else {
     p.roughness = 0.5;
-    p.sheen = 1.0;
-    p.sheenRoughness = 0.32;
-    p.sheenColor = new Color(0.95, 0.45, 0.3);
+    p.sheen = 0.8;
+    p.sheenRoughness = 0.35;
+    p.sheenColor = new Color(0.8, 0.4, 0.3);
     p.specularIntensity = 0.5;
   }
   p.name = (mat as MeshStandardMaterial).name;

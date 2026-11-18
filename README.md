@@ -82,13 +82,19 @@ src/
                        Devanagari canvas text, choice cards and buttons, subtitles, share card, audio
   page.ts              the 2D page: framing, Enter button, saved-card gallery
 public/
-  models/pandit.glb    the character (see models/CREDITS.md)
+  models/pandit.glb    the character, KTX2 textures (see models/CREDITS.md)
+  models/setting.glb   the pavilion props with baked AO and a floor contact shadow (KTX2)
+  env/pavilion.hdr     image-based light baked from the pavilion itself
+assets-src/models/     uncompressed Blender outputs (not deployed); tools/textures/compress.sh → public/models
   probe.html           camera-access feasibility probe for Layer 3 (not part of the app)
 tests/                 palm-frame, rules, share-layout unit tests
 tools/
   e2e.py, xr_e2e_lib.py   emulator end-to-end test
   shots.py                close-up stills for visual review
-  pandit/                 headless Blender + MPFB character build
+  pandit/                 headless Blender + MPFB character build (with rest-pose AO bake)
+  setting/                build_setting.py (props + AO + floor shadow), bake_env.py (pavilion HDR)
+  textures/compress.sh    KTX2 compression (UASTC face/strands, ETC1S AO/cloth)
+  perf-quest.sh           guided frame-rate capture on a connected Quest (docs/TESTING.md §4)
 docs/
   JUDGING.md           criteria → features → evidence, decisions, known risks
   TESTING.md           tests, the lesson from invisible ribbons, the device checklist
