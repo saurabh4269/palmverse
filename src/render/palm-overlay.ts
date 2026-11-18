@@ -20,6 +20,7 @@ import {
   CanvasTexture,
   Color,
   CustomBlending,
+  DoubleSide,
   Group,
   LinearFilter,
   LinearMipmapLinearFilter,
@@ -55,6 +56,8 @@ function glowBlend(m: ShaderMaterial): ShaderMaterial {
   m.transparent = true;
   m.depthWrite = false;
   m.depthTest = false;
+  // winding flips with stroke direction and left/right hand: never cull
+  m.side = DoubleSide;
   m.blending = CustomBlending;
   m.blendSrc = OneFactor;
   m.blendDst = OneMinusSrcAlphaFactor;
@@ -88,7 +91,7 @@ class Ribbon {
           uColor: { value: new Color(color) },
           uProgress: { value: 1 },
           uOpacity: { value: 0 },
-          uWidth: { value: 0.0021 },
+          uWidth: { value: 0.0028 },
           uTime: { value: 0 },
         },
         vertexShader: /* glsl */ `
@@ -111,13 +114,15 @@ class Ribbon {
           varying float vSide; varying float vU;
           void main(){
             float d = abs(vSide) * 3.0;           // 0 centre .. 3 halo edge, in core half-widths
-            float core = smoothstep(1.15, 0.55, d);
+            float core = (1.0 - smoothstep(0.55, 1.15, d));
             float halo = exp(-d * d * 0.55) * 0.55;
-            float shown = smoothstep(uProgress + 0.002, uProgress - 0.02, vU);
+            float shown = (1.0 - smoothstep(uProgress - 0.02, uProgress + 0.002, vU));
             float tip = exp(-pow((vU - uProgress) * 28.0, 2.0)) * step(uProgress, 0.999);
             float shimmer = 0.85 + 0.15 * sin(vU * 40.0 - uTime * 3.0);
             vec3 c = uColor * (halo * shimmer) + vec3(1.0, 0.97, 0.88) * core * 0.9 + vec3(1.0, 0.9, 0.6) * tip * 1.2 * (1.0 - d / 3.0);
-            float a = clamp(max(max(c.r, c.g), c.b), 0.0, 1.0) * shown * uOpacity;
+            // a soft dark 'ink' bed under the glow keeps the line legible on bright skin in passthrough
+            float ink = exp(-d * d * 0.35) * 0.38;
+            float a = clamp(max(max(max(c.r, c.g), c.b), ink), 0.0, 1.0) * shown * uOpacity;
             gl_FragColor = vec4(c * shown * uOpacity, a);
           }`,
       }),
@@ -190,7 +195,7 @@ class MountSigils {
           uGlow: { value: this.glow },
           uPulse: { value: this.pulse },
           uOpacity: { value: 1 },
-          uSize: { value: 0.0115 },
+          uSize: { value: 0.014 },
         },
         vertexShader: /* glsl */ `
           ${PALM_UNIFORMS_GLSL}
@@ -320,7 +325,7 @@ class PalmSheen {
           void main(){
             // soft palm-shaped mask: an ellipse over the palm in (a,b)
             vec2 p = (vAb - vec2(0.5, 0.1)) / vec2(0.55, 0.72);
-            float m = smoothstep(1.0, 0.6, length(p));
+            float m = (1.0 - smoothstep(0.6, 1.0, length(p)));
             float band = exp(-pow((vAb.x - uSweep) * 14.0, 2.0));
             vec3 c = vec3(1.0, 0.72, 0.32) * (0.06 * m + band * m * 0.55);
             float a = max(max(c.r, c.g), c.b) * uOpacity;

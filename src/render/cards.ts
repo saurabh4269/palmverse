@@ -322,7 +322,7 @@ export class ShapeCard extends PokeCard {
 export class MountPlate {
   readonly card: PokeCard;
   constructor() {
-    this.card = new PokeCard('mount-plate', 0.15, 0.06, 512);
+    this.card = new PokeCard('mount-plate', 0.17, 0.062, 640);
   }
   set(nameHi: string, roman: string, planet: string, short: string): void {
     const g = this.card.ctx, W = this.card.canvas.width, H = this.card.canvas.height;
@@ -336,16 +336,24 @@ export class MountPlate {
     g.stroke();
     g.textBaseline = 'middle';
     g.textAlign = 'left';
+    // every run is measured and shrunk to fit: names and glosses vary a lot in length
+    const fit = (text: string, maxW: number, px: number, font: (n: number) => string): void => {
+      let n = px;
+      g.font = font(n);
+      while (n > 10 && g.measureText(text).width > maxW) g.font = font(--n);
+    };
+    const x0 = W * 0.05, maxW = W * 0.9;
     g.fillStyle = '#ffd57a';
-    g.font = `${Math.round(H * 0.4)}px ${FONT_DISPLAY}`;
-    g.fillText(nameHi, W * 0.05, H * 0.33);
+    fit(nameHi, maxW * 0.5, Math.round(H * 0.4), (n) => `${n}px ${FONT_DISPLAY}`);
+    g.fillText(nameHi, x0, H * 0.33);
     const hiW = g.measureText(nameHi).width;
     g.fillStyle = '#fff1d0';
-    g.font = `600 ${Math.round(H * 0.2)}px ${FONT_BODY}`;
-    g.fillText(`${roman} · ${planet}`, W * 0.05 + hiW + 16, H * 0.36);
+    const sub = `${roman} · ${planet}`;
+    fit(sub, maxW - hiW - 16, Math.round(H * 0.2), (n) => `600 ${n}px ${FONT_BODY}`);
+    g.fillText(sub, x0 + hiW + 16, H * 0.36);
     g.fillStyle = '#f4e3c2';
-    g.font = `500 ${Math.round(H * 0.21)}px ${FONT_BODY}`;
-    g.fillText(short, W * 0.05, H * 0.74);
+    fit(short, maxW, Math.round(H * 0.21), (n) => `500 ${n}px ${FONT_BODY}`);
+    g.fillText(short, x0, H * 0.74);
     this.card.tex.needsUpdate = true;
   }
 }

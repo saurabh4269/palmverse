@@ -64,25 +64,25 @@ export class Dome {
           vec2 cell = floor(g);
           float s = hash(cell);
           float tw = 0.6 + 0.4 * sin(uTime * (1.0 + s * 3.0) + s * 40.0);
-          float star = step(0.985, s) * smoothstep(0.5, 0.0, length(fract(g) - 0.5)) * tw * smoothstep(0.08, 0.35, el);
+          float star = step(0.985, s) * (1.0 - smoothstep(0.0, 0.5, length(fract(g) - 0.5))) * tw * smoothstep(0.08, 0.35, el);
           sky += vec3(1.0, 0.95, 0.85) * star * 0.9;
           // pavilion: 12 pillars with cusped arches, dark carved stone against the sky
           float seg = 3.14159265 * 2.0 / 12.0;
           float f = fract(az / seg + 0.5) - 0.5;           // -0.5..0.5 across one bay
-          float pillar = smoothstep(0.455, 0.44, abs(f));   // 0 on the pillar
+          float pillar = (1.0 - smoothstep(0.44, 0.455, abs(f)));   // 0 on the pillar
           float archTop = 0.62 - 0.18 * (1.0 - pow(abs(f) / 0.42, 2.0)) ;
           float cusp = 0.025 * cos(abs(f) * 30.0);
-          float opening = pillar * smoothstep(archTop + cusp + 0.01, archTop + cusp - 0.01, el);
-          vec3 stone = vec3(0.18, 0.09, 0.06) + vec3(0.25, 0.12, 0.05) * smoothstep(0.6, 0.0, el) * 0.6;
+          float opening = pillar * (1.0 - smoothstep(archTop + cusp - 0.01, archTop + cusp + 0.01, el));
+          vec3 stone = vec3(0.18, 0.09, 0.06) + vec3(0.25, 0.12, 0.05) * (1.0 - smoothstep(0.0, 0.6, el)) * 0.6;
           // carved band and a jaali screen in the lower part of every bay
-          float band = smoothstep(0.012, 0.0, abs(el - (archTop + 0.06)));
+          float band = (1.0 - smoothstep(0.0, 0.012, abs(el - (archTop + 0.06))));
           stone += vec3(0.5, 0.3, 0.1) * band * 0.5;
           vec2 jg = vec2(f * 26.0, el * 26.0);
-          float jaali = smoothstep(0.32, 0.28, length(fract(jg) - 0.5)) * step(el, 0.06) * pillar;
+          float jaali = (1.0 - smoothstep(0.28, 0.32, length(fract(jg) - 0.5))) * step(el, 0.06) * pillar;
           vec3 col = mix(stone, sky, opening);
           col = mix(col, sky * 0.8 + vec3(0.15, 0.06, 0.02), jaali * 0.7);
           // lamp warmth ahead, where Panditji sits
-          col += vec3(0.35, 0.16, 0.04) * exp(-pow(az * 1.4, 2.0)) * smoothstep(0.5, -0.1, el) * 0.6;
+          col += vec3(0.35, 0.16, 0.04) * exp(-pow(az * 1.4, 2.0)) * (1.0 - smoothstep(-0.1, 0.5, el)) * 0.6;
           // fade out below the horizon: the real table and hands stay visible
           float a = smoothstep(-0.30, -0.10, el) * uOpacity;
           gl_FragColor = vec4(col, a);
@@ -157,8 +157,8 @@ export class Setting {
           float sway = sin(uTime * 7.0 + vUv.y * 4.0) * 0.04 * vUv.y;
           p.x += sway;
           float r = length(vec2(p.x * 2.6, p.y * (p.y > 0.0 ? 1.0 : 2.6)));
-          float f = smoothstep(0.5, 0.05, r);
-          vec3 c = mix(vec3(1.0, 0.45, 0.08), vec3(1.0, 0.95, 0.75), smoothstep(0.25, 0.0, r));
+          float f = (1.0 - smoothstep(0.05, 0.5, r));
+          vec3 c = mix(vec3(1.0, 0.45, 0.08), vec3(1.0, 0.95, 0.75), (1.0 - smoothstep(0.0, 0.25, r)));
           float a = f * uOpacity;
           gl_FragColor = vec4(c * a, a);
         }`,
