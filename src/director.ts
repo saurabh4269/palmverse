@@ -16,7 +16,7 @@ import { PANDIT } from './content/script.js';
 import type { HandProfile, LineChoices, LineId, MountId, Side } from './content/types.js';
 import { LINE_ORDER, LINE_VALUES, shapeFor, TEMPLATE } from './core/line-shapes.js';
 import { aggregate, measureOnce, profileFrom, type RawMeasure } from './core/measure.js';
-import { dist as vdist, isReadablePalm, type Joints, palmFrame, type PalmFrame, q, toPalm, type V3, facing } from './core/palm-frame.js';
+import { dist as vdist, isHeldPalm, isReadablePalm, type Joints, palmFrame, type PalmFrame, q, toPalm, type V3, facing } from './core/palm-frame.js';
 import { OneEuroFilter3 } from './core/one-euro.js';
 import { LineToucher, nearestLine, type LineHit, type TouchEvent, type TouchLine } from './core/line-touch.js';
 import { buildReading, type ReadingItem, type RulesJson, todaysMountIndex } from './core/rules.js';
@@ -79,6 +79,8 @@ class HandRead {
   readonly buf = new Float32Array(25 * 16);
   lostT = 0;
   primed = false;
+  /** acquired as readable; kept by the looser isHeldPalm until it fails or tracking is lost */
+  held = false;
   /** One Euro per joint: steady at rest (registration on skin), little lag when the hand moves */
   readonly filters = Array.from({ length: 25 }, () => new OneEuroFilter3());
   readonly fOut = { x: 0, y: 0, z: 0 };
@@ -233,6 +235,11 @@ export class HastRekhaSystem extends createSystem({}) {
         this.voice.prefetch(PANDIT.greeting);
         this.anchored = false;
         this.logXRRender();
+        // hands or controllers? (on device a held controller means no hand input sources at all)
+        const xs = this.renderer.xr.getSession();
+        const logInputs = () => log('inputs', { sources: xs ? Array.from(xs.inputSources).map((i) => (i.hand ? 'hand-' : 'ctrl-') + i.handedness).join(',') : 'none', features: (xs as { enabledFeatures?: string[] } | null)?.enabledFeatures?.join(',') ?? '?' });
+        logInputs();
+        xs?.addEventListener('inputsourceschange', logInputs);
         log('voice', { clips: this.voice.clips.count });
         this.go('welcome');
       } else {
@@ -367,7 +374,7 @@ export class HastRekhaSystem extends createSystem({}) {
         if (!src.hand || (src.handedness !== 'left' && src.handedness !== 'right')) continue;
         const h = this.hands[src.handedness];
         const spaces = Array.from(src.hand.values());
-        if (!frame.fillPoses(spaces, ref, h.buf)) continue;
+        if (!frame.fillPoses(spaces, ref, h.buf) && !this.jointPoses(frame, spaces, ref, h.buf)) continue;
         if (!h.primed) for (const f of h.filters) f.reset();
         for (let i = 0; i < 25; i++) {
           this.tmpV.set(h.buf[i * 16 + 12], h.buf[i * 16 + 13], h.buf[i * 16 + 14]).applyMatrix4(pm);
@@ -393,11 +400,23 @@ export class HastRekhaSystem extends createSystem({}) {
         if (h.lostT > 0.15) {
           h.tracked = false;
           h.primed = false;
+          h.held = false;
         }
       }
     }
     this.tipsArr[0] = this.hands.left.tracked ? this.hands.left.tip : null;
     this.tipsArr[1] = this.hands.right.tracked ? this.hands.right.tip : null;
+  }
+
+  /** Fallback when fillPoses fails (it fails the whole hand if any joint has no pose): joint by joint. */
+  private jointPoses(frame: XRFrame, spaces: XRJointSpace[], ref: XRReferenceSpace, out: Float32Array): boolean {
+    if (!frame.getJointPose || spaces.length < 25) return false;
+    for (let i = 0; i < 25; i++) {
+      const p = frame.getJointPose(spaces[i], ref);
+      if (!p) return false;
+      out.set(p.transform.matrix, i * 16);
+    }
+    return true;
   }
 
   private eye(): V3 {
@@ -409,7 +428,8 @@ export class HastRekhaSystem extends createSystem({}) {
     if (!side) return null;
     const h = this.hands[side];
     if (!h.tracked || !h.frame) return null;
-    return isReadablePalm(h.frame, this.eye()) ? h.frame : null;
+    h.held = (h.held ? isHeldPalm : isReadablePalm)(h.frame, this.eye());
+    return h.held ? h.frame : null;
   }
 
   // ───────────────────────── speech ─────────────────────────
@@ -1159,7 +1179,7 @@ export class HastRekhaSystem extends createSystem({}) {
     // tracking lost mid-reading: a gentle line, once per loss
     if (this.readSide && ['mounts', 'lines'].includes(this.phase)) {
       const h = this.hands[this.readSide];
-      if (!f && h.lostT > 2.5 && this.time - this.lostSaid > 15 && this.phase === 'mounts') {
+      if (!f && !h.tracked && h.lostT > 2.5 && this.time - this.lostSaid > 15 && this.phase === 'mounts') {
         this.lostSaid = this.time;
         this.say(PANDIT.trackingLost);
       }

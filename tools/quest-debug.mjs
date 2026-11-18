@@ -12,6 +12,9 @@ import { join } from 'node:path';
 
 const CLIENT = String.raw`(() => {
   if (window.__questDebug) return;
+  // Headset only (or ?questdebug): its console, rAF and WebGL wrappers break the emulator e2e
+  // (the language-button poke never registers), so desktop and the IWER emulator run untouched.
+  if (!/OculusBrowser|Quest/.test(navigator.userAgent) && !/[?&]questdebug/.test(location.search)) return;
   window.__questDebug = true;
   const page = Math.random().toString(36).slice(2, 8);
   const top = window.top === window;

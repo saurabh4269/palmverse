@@ -1,7 +1,7 @@
 /** Palm frame maths: a synthetic hand with known joints → expected frame, mount centroids, round trips. */
 import regions from '../src/data/palm-regions.json';
 import { classifyElement, measureOnce, profileFrom, aggregate } from '../src/core/measure.js';
-import { facing, isReadablePalm, J, type Joints, palmFrame, q, toPalm, type V3 } from '../src/core/palm-frame.js';
+import { facing, isHeldPalm, isReadablePalm, J, type Joints, palmFrame, q, toPalm, type V3 } from '../src/core/palm-frame.js';
 import { check, done } from './harness.js';
 
 const near = (a: number, b: number, e = 1e-6) => Math.abs(a - b) < e;
@@ -89,3 +89,15 @@ const s = measureOnce(syntheticHand('right'), 'right');
 const agg = aggregate([s, s, s, { ...s, palmSquareness: 9 }, s]);
 check('median ignores an outlier', near(agg.palmSquareness, s.palmSquareness));
 done('palm-frame');
+
+// hysteresis: a palm tilted to ~60° from the eye is not acquired but is kept once held; edge-on is dropped
+{
+  const j = syntheticHand('right');
+  const f = palmFrame(j, 'right');
+  const c: V3 = [(j[0][0] + j[9][0]) / 2, (j[0][1] + j[9][1]) / 2, (j[0][2] + j[9][2]) / 2];
+  const tilt = (deg: number): V3 => { const r = (deg * Math.PI) / 180, d = 0.35; return [c[0] + d * Math.sin(r), c[1], c[2] + d * Math.cos(r)]; };
+  check('tilt 60°: not acquired', !isReadablePalm(f, tilt(60)), String(facing(f, tilt(60))));
+  check('tilt 60°: kept when held', isHeldPalm(f, tilt(60)));
+  check('tilt 85°: dropped even when held', !isHeldPalm(f, tilt(85)));
+  check('back of hand: dropped when held', !isHeldPalm(palmFrame(j, 'left'), tilt(0)));
+}

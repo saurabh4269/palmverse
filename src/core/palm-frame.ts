@@ -100,3 +100,13 @@ export function isReadablePalm(f: PalmFrame, eye: V3): boolean {
   const d = dist(eye, palmCentre(f));
   return facing(f, eye) > 0.57 && d > 0.18 && d < 0.65 && f.length > 0.05 && f.length < 0.14;
 }
+
+/**
+ * Keeping a palm already acquired: much looser than acquiring it. On a real Quest 3 people tilt the
+ * reading hand while poking it with the other (facing 0.2–0.57 in over half the mounts-phase samples),
+ * and the overlay must not blink off and back on.
+ */
+export function isHeldPalm(f: PalmFrame, eye: V3): boolean {
+  const d = dist(eye, palmCentre(f));
+  return facing(f, eye) > 0.2 && d > 0.12 && d < 0.8 && f.length > 0.05 && f.length < 0.14;
+}

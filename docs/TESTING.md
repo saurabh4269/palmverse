@@ -167,6 +167,12 @@ Record in the table below: the median and worst frame time, missed frames, CPU- 
 |---|---|---|---|---|---|
 | | | | | | |
 
+## First headset session (18 Nov 2026, Quest 3, Quest Browser 156, dev server over Wi-Fi)
+
+- **"Hands never detected" was the controllers being awake, not a code fault.** In `raise`, `palm` stayed null for 6.8 minutes. Then, on the same page with no reload, `palm-up hand=right` arrived and the whole reading ran (scan → mounts → lines → explore with line worlds → card). The second round reached `palm-up` 2 s after `raise`. **Put both controllers down (or switch them off) before Enter XR.** Quest only switches to hand input once the controllers go idle. The app now logs `inputs sources=hand-left,hand-right,…` when the session starts and whenever the input sources change, so this is visible in the log next time.
+- **The palm overlay flickered in the mounts phase.** In 72 of 128 samples, the palm was tilted between 0.2 and 0.57 (cosine to the eye) while the other hand poked it. It dropped out of "readable", and Panditji kept saying "I cannot see your hand". Fixed with hysteresis: `isReadablePalm` (0.57) acquires the palm, and the looser `isHeldPalm` (0.2, 12–80 cm) keeps it. The line only plays when the hand really isn't tracked. `fillPoses` now also falls back to per-joint `getJointPose`.
+- The dev relay (`tools/quest-debug.mjs`, which writes `artifacts/quest-log.jsonl`) only runs on Quest Browser, or with `?questdebug`. Its console, rAF and WebGL wrappers made the emulator e2e miss the language-button poke.
+
 ## Device checklist
 To be done by a person with a Quest 3 or 3S, in Quest Browser, at the hosted HTTPS URL or the dev server's network URL. ⚠ **None of these has been done yet.** Record the results here.
 
