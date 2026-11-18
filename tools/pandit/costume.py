@@ -414,6 +414,7 @@ def add_placket(kurta, rig):
     bpy.ops.object.join()
     for poly in kurta.data.polygons[-len(F):]:
         poly.material_index = 1
+    kurta["placket_faces"] = len(F)  # build_pandit's AO bake keeps these unoccluded
 
 
 def decimate(obj, ratio):

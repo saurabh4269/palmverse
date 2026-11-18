@@ -7,7 +7,8 @@
  * hands resting on the chowki otherwise. If the model fails to load the
  * experience still works (captions + voice).
  */
-import { AssetManager, Group, Vector3 } from '@iwsdk/core';
+import { AssetManager, Group, Object3D, Vector3, type WebGLRenderer } from '@iwsdk/core';
+import { FootprintShadow } from './contact-shadow.js';
 import { type HumanDrive, PanditHuman } from './human.js';
 
 /** pelvis bone height in model space (tools/pandit build output) */
@@ -28,6 +29,10 @@ export class Pandit {
   /** world-space point the right hand indicates for 'point' */
   readonly pointAt = new Vector3();
   private human: PanditHuman | null = null;
+  private model: Object3D | null = null;
+  /** his real seated footprint on the durrie, baked once he is posed (render/contact-shadow.ts) */
+  readonly shadow = new FootprintShadow(1.1, 1.0);
+  private settledT = 0;
   private fade = 0;
   fadeTarget = 0;
   private t = 0;
@@ -49,6 +54,15 @@ export class Pandit {
 
   constructor() {
     this.group.name = 'pandit';
+    this.shadow.mesh.position.set(0, 0.408, 0.05); // durrie top (takht 0.40 + 6 mm)
+    this.group.add(this.shadow.mesh);
+  }
+
+  /** Bake the contact shadow once, after he has faded in and the seated IK has settled. */
+  bakeShadowIfReady(renderer: WebGLRenderer): void {
+    if (this.shadow.baked || !this.model || this.settledT < 0.8) return;
+    this.shadow.bake(renderer, this.model);
+    if (import.meta.env.DEV) console.info('[hast] contact-shadow baked');
   }
 
   async load(): Promise<void> {
@@ -63,6 +77,7 @@ export class Pandit {
       }
       scene.position.set(0, SEAT_Y + PELVIS_ABOVE_SEAT - MODEL_PELVIS_Y, 0);
       this.group.add(scene);
+      this.model = scene;
       human.setFade(0);
       this.human = human;
       this.loaded = true;
@@ -83,6 +98,8 @@ export class Pandit {
     const h = this.human;
     if (!h) return;
     h.setFade(this.fade < 0.995 ? this.fade : 1);
+    this.settledT = this.fade > 0.98 ? this.settledT + dt : 0;
+    this.shadow.mat.opacity = this.fade * 0.9;
     if (this.fade < 0.01) return;
     this.group.updateMatrixWorld(true);
     const t = this.t;

@@ -195,6 +195,7 @@ export class HastRekhaSystem extends createSystem({}) {
     this.pandit.gesture =
       this.phase === 'welcome' && this.phaseT < 4 ? 'namaste' : this.phase === 'end' && this.phaseT < 5 ? 'namaste' : this.pandit.talking && this.phase !== 'raise' && this.phase !== 'lines' ? 'explain' : 'rest';
     this.pandit.update(dt);
+    this.pandit.bakeShadowIfReady(this.renderer);
     this.subs.update(dt, this.immersive ? this.player.head : this.camera);
     this.hint.update(dt, this.headLocal);
     this.faceHead(this.intro.mesh);
