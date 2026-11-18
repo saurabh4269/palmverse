@@ -8,6 +8,7 @@
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { iwsdkDev } from '@iwsdk/vite-plugin-dev';
+import { questDebug } from './tools/quest-debug.mjs';
 import { defineConfig, type Plugin } from 'vite';
 
 /**
@@ -35,7 +36,7 @@ function basisTranscoder(): Plugin {
 }
 
 export default defineConfig({
-  plugins: [iwsdkDev(), basisTranscoder()],
+  plugins: [iwsdkDev(), questDebug(), basisTranscoder()],
   server: { host: '0.0.0.0', port: 8087, open: false },
   build: {
     outDir: 'dist',
