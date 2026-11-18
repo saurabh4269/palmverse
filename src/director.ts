@@ -30,6 +30,8 @@ import { LINE_COLORS, MOUNT_ORDER, PalmOverlay } from './render/palm-overlay.js'
 import { Pandit } from './render/pandit.js';
 import { renderShareCard } from './render/share-card.js';
 import { gpuStats } from './render/gpu-stats.js';
+import { WorldPortal, type WorldId } from './render/worlds.js';
+import { WORLD_NARRATION } from './content/worlds.js';
 import { FONT_BODY, Label, loadFonts } from './render/text.js';
 import { Hint, Subtitles } from './render/ui.js';
 
@@ -48,6 +50,9 @@ const POKE_DWELL = 0.25; // s
 const PINCH_ON = 0.018; // m, thumb tip to index tip
 type TouchId = 'heart' | 'head' | 'life' | 'fate';
 const TOUCH_IDS: TouchId[] = ['life', 'head', 'heart', 'fate'];
+/** Lines that open a world (any other line would just flare and be read aloud). */
+const WORLDS_ON = new Set<TouchId>(['heart', 'life', 'head', 'fate']);
+const FIST_REACH = 0.115; // m, longest fingertip-to-wrist distance below which a hand counts as a fist
 
 function log(event: string, kv: Record<string, unknown> = {}, layout?: unknown): void {
   if (!import.meta.env.DEV) return;
@@ -133,6 +138,14 @@ export class HastRekhaSystem extends createSystem({}) {
   private linesHeard = new Set<TouchId>();
   private exploreMoreSaid = false;
   private shimmerT = 0;
+  private portal = new WorldPortal();
+  private worldLine: TouchId | null = null;
+  private worldT = 0;
+  private worldSaid = false;
+  private worldGpuLogged = false;
+  private fistT = 0;
+  private readonly palmPt = new Vector3();
+  private maskHands: (Joints | null)[] = [null, null];
 
   init(): void {
     void loadFonts();
@@ -157,6 +170,8 @@ export class HastRekhaSystem extends createSystem({}) {
     this.overlay = new PalmOverlay(MOUNT_CENTROIDS, MOUNT_TEXT.map((m) => m.sigil));
     // overlay vertices are computed in world space by its shader: keep it at the scene root
     this.world.createTransformEntity(this.overlay.group, { persistent: true });
+    // the portal world is centred on the head in world space, like the overlay
+    this.world.createTransformEntity(this.portal.group, { persistent: true });
 
     this.subs = new Subtitles(this.stage, new Vector3(0, 0.96, -0.92));
     this.hint = new Hint(this.stage);
@@ -385,6 +400,7 @@ export class HastRekhaSystem extends createSystem({}) {
     const today = MOUNT_TEXT[todaysMountIndex(new Date())];
     switch (p) {
       case 'boot':
+        this.closeWorld('exit');
         this.setting.appearTarget = 0;
         this.setting.dome.opacityTarget = 0;
         this.overlay.presenceTarget = 0;
@@ -450,6 +466,7 @@ export class HastRekhaSystem extends createSystem({}) {
       case 'reading':
         this.hideCards();
         this.hint.hide();
+        this.closeWorld('continue');
         for (const id of TOUCH_IDS) this.overlay.lines.get(id)!.breathTarget = 0;
         this.startReading();
         break;
@@ -754,6 +771,10 @@ export class HastRekhaSystem extends createSystem({}) {
         pinch = nearestLine(f, [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2, (a[2] + b[2]) / 2], this.touchLines, this.pinchHit);
       }
     }
+    if (this.worldLine) {
+      this.updateWorld(dt, f);
+      tip = pinch = null;
+    }
     this.toucher.step(dt, tip, pinch, this.touchEvents);
     // dev keys: 1..4 select life/head/heart/fate
     const k = ['1', '2', '3', '4'].findIndex((d) => this.keys.has(d));
@@ -793,24 +814,100 @@ export class HastRekhaSystem extends createSystem({}) {
         this.sound.shimmer(this.toucher.proximity);
       }
     }
-    if (this.linesHeard.size > 0 && !this.exploreMoreSaid && this.talkLeft() <= 0) {
+    if (this.linesHeard.size > 0 && !this.exploreMoreSaid && !this.worldLine && !this.portal.isOpen && this.talkLeft() <= 0) {
       this.exploreMoreSaid = true;
       this.say(PANDIT.exploreMore);
     }
-    this.btnNext.show(this.linesHeard.size > 0 || t > 20 || this.touchLines.length === 0);
+    this.btnNext.show(!this.worldLine && (this.linesHeard.size > 0 || t > 20 || this.touchLines.length === 0));
     if (this.pressed === 'next' || next) this.go('reading');
   }
 
-  /** A line was selected: Panditji tells what the tradition reads in it. */
+  /** A line was selected: its world blooms out of the palm and Panditji tells it from inside. */
   private openLine(id: TouchId): void {
-    const item = buildReading(RULES, READINGS, this.profile!, this.choices).find((r) => r.key === `${id}:${this.choices[id]}`);
+    if (this.worldLine || this.portal.isOpen) return;
     this.subs.clear();
     this.voice.stop();
     this.talkUntil = this.time;
-    if (item) this.say(item.text);
     this.linesHeard.add(id);
     this.exploreMoreSaid = false;
     this.hint.hide();
+    const f = this.readable(this.readSide);
+    if (!WORLDS_ON.has(id) || !f) {
+      const item = this.lineItem(id);
+      if (item) this.say(item.text);
+      return;
+    }
+    const c = q(f, 0.55, 0.1, 0.01);
+    this.palmPt.set(c[0], c[1], c[2]);
+    this.portal.open(id as WorldId, this.palmPt, this.headWorld);
+    this.worldLine = id;
+    this.worldT = 0;
+    this.worldSaid = false;
+    this.worldGpuLogged = false;
+    this.fistT = 0;
+    // the lamps go out while you are inside; Panditji's voice comes from within the world
+    this.setting.appearTarget = 0;
+    for (const l of TOUCH_IDS) this.overlay.lines.get(l)!.breathTarget = l === id ? 1 : 0.2;
+    log('world-open', { line: id });
+  }
+
+  private lineItem(id: TouchId) {
+    return buildReading(RULES, READINGS, this.profile!, this.choices).find((r) => r.key === `${id}:${this.choices[id]}`);
+  }
+
+  /** Longest fingertip-to-wrist reach of a hand: small only when every finger is curled (a fist, not a point). */
+  private reach(h: HandRead): number {
+    const w = h.joints[0];
+    return Math.max(vdist(h.joints[9], w), vdist(h.joints[14], w), vdist(h.joints[19], w), vdist(h.joints[24], w));
+  }
+
+  private updateWorld(dt: number, f: PalmFrame | null): void {
+    const id = this.worldLine!;
+    this.worldT += dt;
+    if (!this.worldSaid && this.worldT > 1.4) {
+      // the voice begins once the world has started to surround you (design pack §2.4)
+      this.worldSaid = true;
+      const n = WORLD_NARRATION[id as WorldId];
+      this.say(n.intro);
+      const item = this.lineItem(id);
+      if (item) this.say(item.text);
+      this.say(n.outro);
+    }
+    if (import.meta.env.DEV && !this.worldGpuLogged && this.worldT > 4) {
+      this.worldGpuLogged = true;
+      log('gpu', { world: id, ...gpuStats(this.scene, this.renderer) });
+    }
+    // close: either hand made into a fist (held briefly), the dev key x, or the telling is over
+    const fist = (['left', 'right'] as Side[]).some((s) => this.hands[s].tracked && this.reach(this.hands[s]) < FIST_REACH);
+    this.fistT = fist && this.worldT > 1.0 ? this.fistT + dt : 0;
+    if (this.fistT > 0.25) this.closeWorld('fist');
+    else if (this.keys.has('x')) this.closeWorld('key');
+    else if (this.worldSaid && this.talkLeft() <= 0 && this.worldT > 6) this.closeWorld('told');
+    if (f) {
+      const c = q(f, 0.55, 0.1, 0.01);
+      this.palmPt.set(c[0], c[1], c[2]);
+    }
+  }
+
+  private closeWorld(reason: string): void {
+    const id = this.worldLine;
+    if (!id) return;
+    this.worldLine = null;
+    this.portal.close();
+    this.sound.fold();
+    this.setting.appearTarget = 1;
+    if (reason !== 'told') {
+      this.subs.clear();
+      this.voice.stop();
+      this.talkUntil = this.time;
+    }
+    // the lines relight in order as the world folds back in
+    TOUCH_IDS.forEach((l, i) => {
+      const r = this.overlay.lines.get(l)!;
+      r.breathTarget = 1;
+      setTimeout(() => (r.flash = 0.6), 700 + i * 150);
+    });
+    log('world-close', { line: id, reason });
   }
 
   // ───────────────────────── reading ─────────────────────────
@@ -935,6 +1032,9 @@ export class HastRekhaSystem extends createSystem({}) {
     if (f) this.overlay.setFrame(f);
     this.overlay.presenceTarget = show ? 1 : 0;
     this.overlay.update(dt, this.time);
+    this.maskHands[0] = this.hands.left.tracked ? this.hands.left.joints : null;
+    this.maskHands[1] = this.hands.right.tracked ? this.hands.right.joints : null;
+    this.portal.update(dt, this.worldLine && f ? this.palmPt : null, this.maskHands);
     // the mount name plate floats just above the fingertips of the reading hand
     if (f && this.phase === 'mounts') {
       const p = q(f, 1.85, 0.1, 0.03);
@@ -989,6 +1089,21 @@ export class HastRekhaSystem extends createSystem({}) {
     for (const c of this.cards) c.pressedNow = c.update(dt, this.tipsArr);
   }
 
+  /** The sample of a line farthest from every other line (where a test fingertip can't be mistaken). */
+  private lonepoint(l: TouchLine<TouchId>): [number, number] {
+    let best: [number, number] = l.strokes[0].pts[0], bestD = -1;
+    for (const s of l.strokes)
+      for (const p of s.pts.slice(2, -2)) {
+        let d = Infinity;
+        for (const o of this.touchLines) if (o !== l) for (const os of o.strokes) for (const r of os.pts) d = Math.min(d, Math.hypot((p[0] - r[0]) * 0.09, (p[1] - r[1]) * 0.07));
+        if (d > bestD) {
+          bestD = d;
+          best = p;
+        }
+      }
+    return best;
+  }
+
   private logLayout(): void {
     const w = (o: Mesh) => r3(o.getWorldPosition(this.tmpV));
     const f = this.readSide ? this.hands[this.readSide].frame : null;
@@ -1001,7 +1116,7 @@ export class HastRekhaSystem extends createSystem({}) {
         cards: this.cards.map((c) => ({ id: c.id, p: w(c.mesh) })),
         mounts: f ? MOUNT_ORDER.map((id, i) => ({ id, p: r3(q(f, MOUNT_CENTROIDS[i][0], MOUNT_CENTROIDS[i][1], 0.004)), n: r3(f.N) })) : [],
         palm: f ? { O: r3(f.O), len: +f.length.toFixed(3), wid: +f.width.toFixed(3) } : null,
-        lines: f && this.phase === 'explore' ? this.touchLines.map((l) => { const s = l.strokes[0]; const m = s.pts[Math.floor(s.pts.length / 2)]; return { id: l.id, p: r3(q(f, m[0], m[1], 0.004)), n: r3(f.N) }; }) : [],
+        lines: f && this.phase === 'explore' ? this.touchLines.map((l) => { const m = this.lonepoint(l); return { id: l.id, p: r3(q(f, m[0], m[1], 0.004)), n: r3(f.N) }; }) : [],
       },
     );
   }

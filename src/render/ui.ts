@@ -99,10 +99,11 @@ export class Subtitles {
     this.tag.opacity = 0;
   }
 
-  /** Queue a line. A new Panditji line replaces whatever he was saying. */
+  /**
+   * Queue a line after whatever is already queued, so a telling of several lines is captioned in
+   * full and stays in step with the voice queue (callers interrupt with clear() first).
+   */
   say(text: string, voice: Voice = 'pandit'): number {
-    if (voice !== 'whisper') this.queue = this.queue.filter((p) => p.voice === 'whisper');
-    if (voice === 'pandit' && this.current?.voice === 'pandit') this.current = null;
     let total = 0;
     for (const page of paginate(text)) {
       const dur = Math.max(1.9, 0.75 + page.length * 0.06);
