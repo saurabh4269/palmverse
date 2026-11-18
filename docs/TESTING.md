@@ -7,11 +7,15 @@ There are three automated layers: unit tests in node, an emulator end-to-end tes
 
 Latest run (18 Nov 2026):
 ```
+ok   one-euro: 3/3
 ok   palm-frame: 41/41
 ok   rules (4000 fuzz combos, 29982 items): 2581/2581
 ok   share-layout: 283/283
 ```
 `npx tsc --noEmit` also passes.
+
+### `tests/one-euro.test.ts` (3 checks)
+The joint filter: ±2 mm noise on a still hand is cut by at least 3×; a hand sweeping at 0.4 m/s lags by under 15 mm; after a reset (hand lost, then found elsewhere) the first sample passes straight through.
 
 ### `tests/palm-frame.test.ts` (41 checks)
 These run on a synthetic hand with known joints (palm 9 cm long, knuckle row 7 cm), for both the right and left hand:

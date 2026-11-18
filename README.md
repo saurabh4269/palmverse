@@ -75,7 +75,7 @@ src/
     rules.ts             reading builder; drops unresolved, "omit" and banned-claim readings
     save.ts              versioned localStorage of past readings
     share-layout.ts      share-card layout maths
-    one-euro.ts          One Euro filter (currently unused)
+    one-euro.ts          One Euro filter on every palm joint (steady at rest, low lag in motion)
   content/             Panditji's script, reading library, mount and line-option text
   data/                copies of ../../data/palmistry-rules.json and palm-regions.json (a test checks they match)
   render/              palm-overlay shaders, Panditji (pandit.ts + procedural human.ts), dome pavilion,

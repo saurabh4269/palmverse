@@ -16,6 +16,7 @@ import type { HandProfile, LineChoices, LineId, MountId, Side } from './content/
 import { LINE_ORDER, LINE_VALUES, shapeFor, TEMPLATE } from './core/line-shapes.js';
 import { aggregate, measureOnce, profileFrom, type RawMeasure } from './core/measure.js';
 import { dist as vdist, isReadablePalm, type Joints, palmFrame, type PalmFrame, q, toPalm, type V3, facing } from './core/palm-frame.js';
+import { OneEuroFilter3 } from './core/one-euro.js';
 import { buildReading, type ReadingItem, type RulesJson, todaysMountIndex } from './core/rules.js';
 import { load as loadSave, otherHand, save as storeSave, type SaveData } from './core/save.js';
 import regionsJson from './data/palm-regions.json';
@@ -59,6 +60,9 @@ class HandRead {
   readonly buf = new Float32Array(25 * 16);
   lostT = 0;
   primed = false;
+  /** One Euro per joint: steady at rest (registration on skin), little lag when the hand moves */
+  readonly filters = Array.from({ length: 25 }, () => new OneEuroFilter3());
+  readonly fOut = { x: 0, y: 0, z: 0 };
   constructor(readonly side: Side) {}
 }
 
@@ -257,12 +261,13 @@ export class HastRekhaSystem extends createSystem({}) {
         const h = this.hands[src.handedness];
         const spaces = Array.from(src.hand.values());
         if (!frame.fillPoses(spaces, ref, h.buf)) continue;
-        const k = h.primed ? 1 - Math.exp(-dt * 28) : 1;
+        if (!h.primed) for (const f of h.filters) f.reset();
         for (let i = 0; i < 25; i++) {
           this.tmpV.set(h.buf[i * 16 + 12], h.buf[i * 16 + 13], h.buf[i * 16 + 14]).applyMatrix4(pm);
           const j = h.joints[i], s = h.smooth[i];
           j[0] = this.tmpV.x; j[1] = this.tmpV.y; j[2] = this.tmpV.z;
-          s[0] += (j[0] - s[0]) * k; s[1] += (j[1] - s[1]) * k; s[2] += (j[2] - s[2]) * k;
+          h.filters[i].filter(j[0], j[1], j[2], dt, h.fOut);
+          s[0] = h.fOut.x; s[1] = h.fOut.y; s[2] = h.fOut.z;
         }
         h.primed = true;
         const tip = h.joints[9];

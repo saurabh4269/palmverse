@@ -53,7 +53,7 @@ How the build meets the Meta VR Start Developer Competition 2026 rules and its f
 
 ## Criterion 3: Technical Implementation
 - **Hand tracking:**
-  - Reads 25 joints per hand each frame with `XRFrame.fillPoses`, then applies exponential smoothing (time constant about 36 ms).
+  - Reads 25 joints per hand each frame with `XRFrame.fillPoses`, then runs each joint through a One Euro filter (Casiez et al., CHI 2012): strong smoothing while the palm is still, so the overlay sits steady on the skin, and little lag when it moves (`tests/one-euro.test.ts`: jitter cut by at least 3×, lag under 15 mm at 0.4 m/s). The poking fingertip stays unfiltered for responsiveness.
   - The palm frame comes from 4 joints, with handedness-corrected normals. A palm counts as readable based on facing, distance and plausible size.
   - Tracking-loss grace period is 150 ms (`src/director.ts`, `readHands`).
 - **Layer 1, measured from joints only** (`src/core/measure.ts`):
@@ -117,7 +117,7 @@ How the build meets the Meta VR Start Developer Competition 2026 rules and its f
       - There is no human ground truth, and end classes are unreliable.
     - **The open question** is whether a web page on Quest can get passthrough camera frames at all. Unity has the Passthrough Camera API; WebXR raw camera access was reported as unsupported in Quest Browser in early 2026 ([ideas-7-8.md §8.4](../../../research/ideas-7-8.md)).
     - `public/probe.html` is a small, standalone page that tests two routes on the headset: WebXR `camera-access` (`XRView.camera` and `getCameraImage`) and `getUserMedia`. It reports the resolution and shows a preview so creases can be judged by eye. ⚠ **It has not been run on a Quest, so the answer is unknown.**
-- **Fingertip tracing is not implemented.** The research plan had a "trace your line with a fingertip" mode. The shipped Layer 2 uses pick-the-closest-shape cards instead: a poke is more robust than tracing a few millimetres above your own skin with jittery tracking, and the result maps directly onto rulebook values. `src/core/one-euro.ts` (a One Euro filter for fingertips) exists but is not wired in.
+- **Fingertip tracing is not implemented.** The research plan had a "trace your line with a fingertip" mode. The shipped Layer 2 uses pick-the-closest-shape cards instead: a poke is more robust than tracing a few millimetres above your own skin with jittery tracking, and the result maps directly onto rulebook values. 
 - **No LLM.** The reading comes from a fixed, cited, safety-filtered library. There is no network dependency, no prompt that could drift into prediction, and nothing leaves the device.
 
 ## Known limitations and risks
