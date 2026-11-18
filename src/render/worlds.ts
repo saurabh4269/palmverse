@@ -905,3 +905,127 @@ export class WorldPortal {
   }
 }
 
+
+// ─────────────────────────── grahas over the mounts ───────────────────────────
+
+/** Navagraha colour per mount (gems from the design pack §3.2), and the planet's look. */
+export const GRAHA: Record<string, { color: string; look: number }> = {
+  jupiter: { color: '#F5B700', look: 0 }, // Guru, yellow sapphire: banded gold
+  saturn: { color: '#5B7BD5', look: 1 }, // Shani, blue sapphire: ringed
+  sun_apollo: { color: '#E8481C', look: 2 }, // Surya, ruby: corona
+  mercury: { color: '#2BB673', look: 0 }, // Budh, emerald
+  mars_upper: { color: '#E5533D', look: 0 }, // Mangal, red coral
+  luna_moon: { color: '#EAF2FF', look: 3 }, // Chandra, pearl: crescent
+  venus: { color: '#FFE3EF', look: 4 }, // Shukra, diamond: sparkling
+};
+
+/**
+ * The graha of a poked mount rises out of the palm as a small glowing planet
+ * (one billboard, the planet shaded in the fragment shader), hovers over the
+ * mount while Panditji tells it, then sinks back.
+ */
+export class GrahaOrb {
+  readonly mesh: Mesh;
+  private readonly mat: ShaderMaterial;
+  private t = 99;
+  private time = 0;
+  private life = 9;
+  readonly base = new Vector3();
+  private readonly toEye = new Vector3();
+
+  constructor() {
+    this.mat = premul(
+      new ShaderMaterial({
+        uniforms: { uTime: { value: 0 }, uOpacity: { value: 0 }, uColor: { value: new Color() }, uLook: { value: 0 } },
+        vertexShader: /* glsl */ `
+          varying vec2 vUv;
+          void main(){
+            vUv = uv * 2.0 - 1.0;
+            vec3 c = (modelMatrix * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
+            float s = length(modelMatrix[0].xyz);
+            vec3 toCam = normalize(cameraPosition - c);
+            vec3 r = normalize(cross(vec3(0.0, 1.0, 0.0), toCam)), u = cross(toCam, r);
+            gl_Position = projectionMatrix * viewMatrix * vec4(c + (r * position.x + u * position.y) * s, 1.0);
+          }`,
+        fragmentShader: /* glsl */ `
+          precision highp float;
+          uniform float uTime; uniform float uOpacity; uniform vec3 uColor; uniform int uLook;
+          varying vec2 vUv;
+          ${NOISE_GLSL}
+          void main(){
+            vec2 p = vUv * 1.6;           // planet radius 1 inside a quad of half-size 1.6
+            float r = length(p);
+            vec3 c = vec3(0.0); float a = 0.0;
+            // glow around everything
+            float glow = exp(-max(r - 1.0, 0.0) * 4.5) * 0.55;
+            c += uColor * glow; a += glow * 0.8;
+            if (r < 1.0) {
+              vec3 n = vec3(p, sqrt(1.0 - r * r));
+              float spin = uTime * 0.4;
+              vec3 L = normalize(vec3(-0.5, 0.6, 0.65));
+              float lit = 0.3 + 0.7 * max(dot(n, L), 0.0);
+              float lat = n.y;
+              float lon = atan(n.x, n.z) + spin;
+              vec3 base = uColor;
+              if (uLook == 0 || uLook == 1) base *= 0.75 + 0.25 * sin(lat * 14.0 + sin(lon * 2.0) * 0.6);
+              if (uLook == 3) lit = smoothstep(-0.15, 0.25, dot(n, normalize(vec3(-0.9, 0.2, 0.4))));   // a crescent
+              if (uLook == 4) base += vec3(1.0) * pow(noise(vec3(n * 9.0 + uTime)), 8.0) * 3.0;      // diamond sparkle
+              float rim = pow(1.0 - n.z, 3.0);
+              vec3 s = base * lit + vec3(1.0, 0.95, 0.85) * rim * 0.6;
+              if (uLook == 2) s = mix(vec3(1.0, 0.9, 0.55), uColor, r * r) * (1.0 + 0.2 * fbm(vec3(p * 4.0, uTime)));
+              c = s; a = 1.0;
+            }
+            if (uLook == 2) {             // Surya's corona: rays
+              float ang = atan(p.y, p.x);
+              float rays = pow(0.5 + 0.5 * sin(ang * 12.0 + uTime), 6.0) * exp(-max(r - 1.0, 0.0) * 2.5) * step(1.0, r);
+              c += uColor * rays; a += rays * 0.7;
+            }
+            if (uLook == 1) {             // Shani's ring, tilted, in front of and behind the planet
+              vec2 q = vec2(p.x, (p.y + p.x * 0.18) / 0.28);
+              float rr = length(q);
+              float ring = smoothstep(1.25, 1.3, rr) * smoothstep(1.58, 1.52, rr) * (0.65 + 0.35 * sin(rr * 60.0));
+              bool front = q.y < 0.0;
+              if (front || r > 1.0) { c = mix(c, vec3(1.0, 0.85, 0.6), ring * 0.85); a = max(a, ring * 0.9); }
+            }
+            a = clamp(a, 0.0, 1.0) * uOpacity;
+            gl_FragColor = vec4(c * uOpacity, a);
+          }`,
+      }),
+    );
+    this.mesh = new Mesh(new PlaneGeometry(1, 1), this.mat);
+    this.mesh.name = 'graha-orb';
+    this.mesh.renderOrder = 24;
+    this.mesh.frustumCulled = false;
+    this.mesh.visible = false;
+  }
+
+  /** Raise the graha of mount `id` (seconds to stay up: `life`). */
+  rise(id: string, life = 9): void {
+    const g = GRAHA[id] ?? GRAHA.jupiter;
+    (this.mat.uniforms.uColor.value as Color).set(g.color);
+    this.mat.uniforms.uLook.value = g.look;
+    this.t = 0;
+    this.life = life;
+  }
+
+  sink(): void {
+    if (this.t < this.life) this.t = this.life;
+  }
+
+  /** @param base the mount on the skin; @param normal the palm normal; @param eye the head */
+  update(dt: number, base: Vector3, normal: Vector3, eye: Vector3, visible: boolean): void {
+    this.time += dt;
+    this.t += dt;
+    const ease = (x: number) => (x <= 0 ? 0 : x >= 1 ? 1 : x * x * (3 - 2 * x));
+    const up = ease(this.t / 0.9), down = ease((this.t - this.life) / 0.7);
+    const k = up * (1 - down);
+    this.mesh.visible = visible && k > 0.005;
+    if (!this.mesh.visible) return;
+    this.toEye.copy(eye).sub(base).normalize();
+    this.mesh.position.copy(base).addScaledVector(normal, 0.012 + 0.05 * k).addScaledVector(this.toEye, 0.01);
+    this.mesh.position.y += Math.sin(this.time * 1.6) * 0.003 * k;
+    this.mesh.scale.setScalar(0.026 * (0.3 + 0.7 * k) * 1.6 * 2);
+    this.mat.uniforms.uTime.value = this.time;
+    this.mat.uniforms.uOpacity.value = k;
+  }
+}

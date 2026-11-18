@@ -30,7 +30,7 @@ import { LINE_COLORS, MOUNT_ORDER, PalmOverlay } from './render/palm-overlay.js'
 import { Pandit } from './render/pandit.js';
 import { renderShareCard } from './render/share-card.js';
 import { gpuStats } from './render/gpu-stats.js';
-import { WorldPortal, type WorldId } from './render/worlds.js';
+import { GrahaOrb, WorldPortal, type WorldId } from './render/worlds.js';
 import { WORLD_NARRATION } from './content/worlds.js';
 import { CARD_LINE, elementIntroLine, otherHandRaiseLine, pickedLine, todaysMountLine } from './content/spoken.js';
 import { FONT_BODY, Label, loadFonts } from './render/text.js';
@@ -140,6 +140,10 @@ export class HastRekhaSystem extends createSystem({}) {
   private exploreMoreSaid = false;
   private shimmerT = 0;
   private portal = new WorldPortal();
+  private graha = new GrahaOrb();
+  private grahaIdx = -1;
+  private readonly grahaBase = new Vector3();
+  private readonly grahaN = new Vector3();
   private worldLine: TouchId | null = null;
   private worldT = 0;
   private worldSaid = false;
@@ -174,6 +178,7 @@ export class HastRekhaSystem extends createSystem({}) {
     this.world.createTransformEntity(this.overlay.group, { persistent: true });
     // the portal world is centred on the head in world space, like the overlay
     this.world.createTransformEntity(this.portal.group, { persistent: true });
+    this.world.createTransformEntity(this.graha.mesh, { persistent: true });
 
     this.subs = new Subtitles(this.stage, new Vector3(0, 0.96, -0.92));
     this.hint = new Hint(this.stage);
@@ -649,7 +654,10 @@ export class HastRekhaSystem extends createSystem({}) {
       this.subs.clear();
       this.voice.stop();
       this.talkUntil = this.time;
-      this.say(m.text);
+      const d = this.say(m.text);
+      // its graha rises out of the palm while he tells it
+      this.grahaIdx = cand;
+      this.graha.rise(m.id, Math.max(4, d));
       this.mountHeard.add(cand);
       this.saveData.mountsHeard = Array.from(new Set([...this.saveData.mountsHeard, m.id]));
       log('mount-poke', { id: m.id, heard: this.mountHeard.size });
@@ -1041,6 +1049,13 @@ export class HastRekhaSystem extends createSystem({}) {
     this.maskHands[0] = this.hands.left.tracked ? this.hands.left.joints : null;
     this.maskHands[1] = this.hands.right.tracked ? this.hands.right.joints : null;
     this.portal.update(dt, this.worldLine && f ? this.palmPt : null, this.maskHands);
+    if (f && this.grahaIdx >= 0) {
+      const c = MOUNT_CENTROIDS[this.grahaIdx];
+      const p = q(f, c[0], c[1]);
+      this.grahaBase.set(p[0], p[1], p[2]);
+      this.grahaN.set(f.N[0], f.N[1], f.N[2]);
+    }
+    this.graha.update(dt, this.grahaBase, this.grahaN, this.headWorld, !!f && this.phase === 'mounts');
     // the mount name plate floats just above the fingertips of the reading hand
     if (f && this.phase === 'mounts') {
       const p = q(f, 1.85, 0.1, 0.03);
