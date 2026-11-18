@@ -60,10 +60,23 @@ def fnv1a(s: str) -> str:
     return f'{h:08x}'
 
 
+# Hindi words inside English lines are sent to TTS in Devanagari, so the multilingual model says them
+# the Hindi way ("Rekha" as रेखा, not "Reeka"). The caption keeps the roman form. Longest first.
+PRON = {
+    'Samudrika Shastra': 'सामुद्रिक शास्त्र', 'Hast Rekha': 'हस्त रेखा', 'Hridaya': 'हृदय', 'Mastishk': 'मस्तिष्क', 'Jeevan': 'जीवन',
+    'Bhagya': 'भाग्य', 'Rekhas': 'रेखाएँ', 'rekhas': 'रेखाएँ', 'Rekha': 'रेखा', 'Panditji': 'पंडितजी', 'Parvat': 'पर्वत', 'parvat': 'पर्वत',
+    'Guru': 'गुरु', 'Shani': 'शनि', 'Surya': 'सूर्य', 'Budh': 'बुध', 'Mangal': 'मंगल', 'Chandra': 'चंद्र', 'Shukra': 'शुक्र',
+    'Prithvi': 'पृथ्वी', 'Vayu': 'वायु', 'Agni': 'अग्नि', 'Jal': 'जल', 'Hast': 'हस्त', 'grahas': 'ग्रह', 'graha': 'ग्रह',
+    'Aakashvani': 'आकाशवाणी', 'Namaste': 'नमस्ते',
+}
+PRON_RE = re.compile(r'\b(' + '|'.join(sorted(map(re.escape, PRON), key=len, reverse=True)) + r')\b')
+
+
 def spoken(text: str, lang: str) -> str:
-    """What is sent to TTS. English: Devanagari words are dropped (each has its roman form beside it), as at runtime."""
+    """What is sent to TTS. English: the Devanagari glosses are dropped, then the Hindi words go in Devanagari (PRON)."""
     if lang == 'en':
         text = re.sub(r'[ऀ-ॿ]+[,\s]*', '', text)
+        text = PRON_RE.sub(lambda m: PRON[m.group(1)], text)
     return re.sub(r'\s+', ' ', text).strip()
 
 
@@ -133,6 +146,7 @@ def main() -> None:
     ap.add_argument('--rechain', action='store_true')
     ap.add_argument('--limit', type=int, default=0)
     ap.add_argument('--only', default='', help='regex: render only lines whose text matches')
+    ap.add_argument('--force', action='store_true', help='re-render the matched lines even if a raw take exists')
     ap.add_argument('--model', default='eleven_multilingual_v2')
     ap.add_argument('--piper', help='offline: a Piper .onnx voice (e.g. en_GB-alba-medium.onnx) instead of ElevenLabs')
     ap.add_argument('--piper-python', default='python3', help='a python with piper-tts installed')
@@ -169,6 +183,9 @@ def main() -> None:
         if a.only and not re.search(a.only, text):
             continue
         stale = h in man['lines'] and man['lines'][h].get('src') not in (None, engine) and not a.rechain
+        if a.force and a.only and os.path.exists(raw):
+            os.remove(raw)
+            stale = True
         if not os.path.exists(raw):
             if a.rechain or not (key or a.piper):
                 continue
