@@ -27,6 +27,7 @@ import { Setting } from './render/dome.js';
 import { LINE_COLORS, MOUNT_ORDER, PalmOverlay } from './render/palm-overlay.js';
 import { Pandit } from './render/pandit.js';
 import { renderShareCard } from './render/share-card.js';
+import { gpuStats } from './render/gpu-stats.js';
 import { FONT_BODY, Label, loadFonts } from './render/text.js';
 import { Hint, Subtitles } from './render/ui.js';
 
@@ -129,6 +130,7 @@ export class HastRekhaSystem extends createSystem({}) {
     this.stage.add(this.pandit.group);
     this.pandit.group.position.set(0, 0, -1.45);
     void this.pandit.load();
+    void this.setting.loadBaked();
 
     this.overlay = new PalmOverlay(MOUNT_CENTROIDS, MOUNT_TEXT.map((m) => m.sigil));
     // overlay vertices are computed in world space by its shader: keep it at the scene root
@@ -407,6 +409,7 @@ export class HastRekhaSystem extends createSystem({}) {
   private updatePhase(dt: number): void {
     const t = this.phaseT;
     const nextPressed = this.keys.has('n');
+    if (import.meta.env.DEV && this.keys.has('g')) log('gpu', { ...gpuStats(this.scene, this.renderer) });
     switch (this.phase) {
       case 'welcome':
         this.intro.opacity = Math.min(1, t / 1.2);

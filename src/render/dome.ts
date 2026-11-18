@@ -7,6 +7,7 @@
  * flickering lamp light (created once, in the constructor).
  */
 import {
+  AssetManager,
   BackSide,
   BoxGeometry,
   BufferGeometry,
@@ -181,6 +182,7 @@ export class Setting {
   private t = 0;
   appear = 0;
   appearTarget = 0;
+  baked: Group | null = null;
 
   /** chowki: the low table in front of Panditji, at his side of the room (stage-local). */
   constructor(chowkiPos: Vector3) {
@@ -278,6 +280,40 @@ export class Setting {
     this.group.add(key);
     mergeStatic(this.group); // before the dome (a ShaderMaterial) so it is untouched
     this.group.add(this.dome.mesh);
+  }
+
+  /**
+   * Swap the procedural props for the Blender-baked set (tools/setting/build_setting.py):
+   * same geometry, bevelled, with baked AO on UV1 and a floor contact shadow cut from the
+   * real footprints. Until it arrives (or if it fails) the procedural props stay.
+   */
+  async loadBaked(): Promise<void> {
+    try {
+      const gltf = await AssetManager.loadGLTF(`${import.meta.env.BASE_URL}models/setting.glb`, 'setting-baked');
+      const scene = gltf.scene;
+      scene.name = 'setting-baked';
+      scene.traverse((o) => {
+        const m = o as Mesh;
+        if (!m.isMesh) return;
+        const mats = Array.isArray(m.material) ? m.material : [m.material];
+        if (m.name.startsWith('Setting_FloorShadow') || mats.some((x) => x.name === 'floor_shadow')) {
+          const src = mats[0] as MeshStandardMaterial;
+          // unlit black with the baked occlusion as alpha: grounds the takht on the real floor
+          m.material = new MeshBasicMaterial({ color: 0x000000, map: src.map, transparent: true, depthWrite: false, opacity: 0.9 });
+          m.renderOrder = 1;
+        } else {
+          for (const x of mats as MeshStandardMaterial[]) {
+            x.aoMapIntensity = 1;
+          }
+        }
+      });
+      for (const o of [...this.group.children]) if (o.name.startsWith('setting-merged-')) o.removeFromParent();
+      this.group.add(scene);
+      this.baked = scene;
+      if (import.meta.env.DEV) console.info('[hast] baked setting loaded');
+    } catch (e) {
+      console.warn('[hast] baked setting failed; keeping procedural props', e);
+    }
   }
 
   update(dt: number, head: Vector3): void {
