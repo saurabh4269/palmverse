@@ -512,9 +512,8 @@ export class HastRekhaSystem extends createSystem({}) {
         this.sound.swell();
         this.say(PANDIT.linesAppear);
         const el = ELEMENTS.find((e) => e.id === this.profile!.element)!;
+        // the element's full reading comes once, in the reading; here only its name
         this.say(elementIntroLine(el));
-        const r = READINGS.find((x) => x.key === `element:${el.id}`);
-        if (r) this.say(r.text);
         break;
       }
       case 'mounts':

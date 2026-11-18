@@ -35,13 +35,13 @@ export const HINDI: Record<string, string> = {
     "शनि पर्वत, शनि का पर्वत, मध्यमा के नीचे। परंपरा इसे एकाग्रता, धैर्य और गंभीर अध्ययन से जोड़ती है: हाथ का शांत विद्वान वाला कोना।",
   "Surya Parvat, the mount of the Sun, below the ring finger. Old books tie it to creativity, charm and a love of beauty. Cheiro called it a good mount in every hand.":
     "सूर्य पर्वत, सूर्य का पर्वत, अनामिका के नीचे। पुरानी किताबें इसे रचनात्मकता, आकर्षण और सुंदरता के प्रेम से जोड़ती हैं। कीरो इसे हर हाथ में एक अच्छा पर्वत मानते थे।",
-  "Budh Parvat, the mount of Mercury, below the little finger. The tradition links it to quick wit, good conversation and a nose for business. Budh is the messenger, after all.":
+  "Budh Parvat, the mount of Mercury, below the little finger. Its gifts are quick wit, good conversation and a nose for business. Budh is the messenger, after all.":
     "बुध पर्वत, बुध का पर्वत, कनिष्ठा के नीचे। परंपरा इसे तेज़ बुद्धि, अच्छी बातचीत और व्यापार की समझ से जोड़ती है। आख़िर बुध संदेशवाहक जो है।",
   "Mangal Parvat, the mount of Mars, on the outer edge below Budh. Many teachers split Mangal into an upper and a lower mount. This upper one is read as composure: standing calm and steady under pressure.":
     "मंगल पर्वत, मंगल का पर्वत, बुध के नीचे बाहरी किनारे पर। कई गुरु मंगल को ऊपरी और निचले पर्वत में बाँटते हैं। यह ऊपरी पर्वत संयम का माना जाता है: दबाव में भी शांत और स्थिर रहना।",
-  "Chandra Parvat, the mount of the Moon, at the lower outer edge of the palm. The tradition gives it imagination, poetry and inventiveness: the dreamer's country.":
+  "Chandra Parvat, the mount of the Moon, at the lower outer edge of the palm. Here live imagination, poetry and inventiveness: the dreamer's country.":
     "चंद्र पर्वत, चंद्रमा का पर्वत, हथेली के निचले बाहरी किनारे पर। परंपरा इसे कल्पना, कविता और नई सूझ से जोड़ती है: सपने देखने वालों का देश।",
-  "Shukra Parvat, the mount of Venus, the soft pad at the base of the thumb. The tradition reads it as warmth, friendship and a love of music, art and beautiful things.":
+  "Shukra Parvat, the mount of Venus, the soft pad at the base of the thumb. Old books fill it with warmth, friendship and a love of music, art and beautiful things.":
     "शुक्र पर्वत, शुक्र का पर्वत, अँगूठे की जड़ का कोमल उभार। परंपरा इसे स्नेह, मित्रता, और संगीत, कला और सुंदर चीज़ों के प्रेम की तरह पढ़ती है।",
   "Very good. You have met all seven. Some teachers count more, some fewer. Teachers differ here, as they love to.":
     "बहुत अच्छा। आप सातों से मिल लिए। कुछ गुरु इससे ज़्यादा गिनते हैं, कुछ कम। इस बात पर गुरुओं में मतभेद है, और उन्हें यह अच्छा भी लगता है।",
@@ -95,26 +95,26 @@ export const HINDI: Record<string, string> = {
     "अब आपकी रेखाएँ प्रकाश में लिखी हैं। दूसरे हाथ की उँगली से किसी एक को छुइए, या उसके पास चुटकी बनाइए, और वह खुल जाएगी।",
   "Touch another line if you like. When you are ready, press Continue and I will put it all together.":
     "चाहें तो कोई और रेखा छुइए। जब तैयार हों, आगे बढ़ें दबाइए, और मैं सब कुछ एक साथ जोड़ूँगा।",
-  "This is the world of your Hridaya Rekha, the heart line. In the old books it is a line of feeling, and of how a person gives warmth.":
-    "यह आपकी हृदय रेखा का संसार है। पुरानी किताबों में यह भावनाओं की रेखा है, और इस बात की कि कोई अपनापन कैसे देता है।",
-  "The lotus grows from still water and opens toward the light. The tradition likes that picture for the heart. Close your hand when you are ready, and the world returns to your palm.":
-    "कमल शांत पानी से उगता है और प्रकाश की ओर खिलता है। परंपरा को हृदय के लिए यह चित्र प्रिय है। जब तैयार हों, मुट्ठी बंद कीजिए, और यह संसार आपकी हथेली में लौट आएगा।",
-  "This is the world of your Jeevan Rekha. The tradition reads it as a line of energy and of roots, the way you hold yourself in the world, not as any measure of time.":
-    "यह आपकी जीवन रेखा का संसार है। परंपरा इसे ऊर्जा और जड़ों की रेखा मानती है, यानी आप दुनिया में कैसे टिके रहते हैं, समय का कोई माप नहीं।",
-  "The banyan sends down new roots from its branches and keeps growing wider. The old readers liked that picture for this line. Close your hand, and the world returns to your palm.":
-    "बरगद अपनी शाखाओं से नई जड़ें नीचे भेजता है और फैलता ही जाता है। पुराने पंडितों को इस रेखा के लिए यह चित्र प्रिय था। मुट्ठी बंद कीजिए, और यह संसार आपकी हथेली में लौट आएगा।",
-  "This is the world of your Mastishk Rekha, the head line. The tradition reads it as the way a mind likes to travel, the way stars are joined into a picture.":
-    "यह आपकी मस्तिष्क रेखा का संसार है। परंपरा इसे मन के चलने का ढंग मानती है, जैसे तारों को जोड़कर कोई चित्र बनता है।",
-  "Every constellation is a story someone chose to draw between the stars. Close your hand, and the sky returns to your palm.":
-    "हर तारामंडल एक कहानी है, जिसे किसी ने तारों के बीच खींचना चुना। मुट्ठी बंद कीजिए, और आकाश आपकी हथेली में लौट आएगा।",
+  "Here your Hridaya Rekha, the heart line, opens into a lotus pond. In the old books it is a line of feeling, and of how a person gives warmth.":
+    "यहाँ आपकी हृदय रेखा एक कमल-ताल में खुलती है। पुरानी किताबों में यह भावना की रेखा है, और इस बात की कि कोई कैसे स्नेह देता है।",
+  "The lotus grows from still water and opens toward the light; the tradition keeps that picture for the heart. Whenever you are ready, close your hand and we step back out.":
+    "कमल शांत पानी से उगता है और रोशनी की ओर खिलता है; परंपरा हृदय के लिए यही चित्र रखती है। जब आप तैयार हों, हाथ बंद कीजिए और हम लौट चलेंगे।",
+  "Your Jeevan Rekha has become a banyan by a river. It speaks of energy and of roots, the way you hold yourself in the world, not of any measure of time.":
+    "आपकी जीवन रेखा नदी किनारे एक बरगद बन गई है। यह ऊर्जा और जड़ों की बात करती है, आप दुनिया में कैसे टिके रहते हैं, इसकी; समय के किसी माप की नहीं।",
+  "A banyan sends new roots down from its branches and keeps growing wider. Old readers loved that picture for this line. Close your fingers when you want to come home.":
+    "बरगद अपनी डालियों से नई जड़ें नीचे भेजता है और फैलता ही जाता है। पुराने पंडितों को इस रेखा के लिए यह चित्र बहुत प्रिय था। जब लौटना चाहें, उँगलियाँ बंद कर लीजिए।",
+  "Look up: your Mastishk Rekha, the head line, is a sky of stars. The tradition reads it as the way a mind likes to travel, joining points of light into a picture.":
+    "ऊपर देखिए: आपकी मस्तिष्क रेखा तारों भरा आकाश है। परंपरा इसे मन के चलने के ढंग की तरह पढ़ती है, जो रोशनी के बिंदुओं को जोड़कर एक चित्र बनाता है।",
+  "Every constellation is a story someone chose to draw between the stars. Make a fist, and the sky folds back into your palm.":
+    "हर नक्षत्र एक कहानी है जो किसी ने तारों के बीच खींचना चुना। मुट्ठी बाँधिए, और आकाश आपकी हथेली में लौट आएगा।",
   "Each mount carries the name of a graha, a planet of the old Indian sky. Here is the one that gives this mount its name.":
     "हर पर्वत पर किसी ग्रह का नाम है, पुराने भारतीय आकाश का कोई ग्रह। यह वही है जिससे इस पर्वत को नाम मिला।",
-  "The tradition counts nine grahas and gives each a gem and a colour, as you see here. Close your hand, and the sky returns to your palm.":
-    "परंपरा नौ ग्रह गिनती है और हर एक को एक रत्न और एक रंग देती है, जैसा आप यहाँ देख रहे हैं। मुट्ठी बंद कीजिए, और आकाश आपकी हथेली में लौट आएगा।",
-  "This is the world of your Bhagya Rekha. Its planet is Shani, the slow and patient one, whom the tradition sees as a teacher of steady effort.":
-    "यह आपकी भाग्य रेखा का संसार है। इसका ग्रह शनि है, धीमा और धैर्यवान, जिसे परंपरा निरंतर परिश्रम का गुरु मानती है।",
-  "A path of light is something you walk, step by step. That is how the old books speak of this line. Close your hand, and the world returns to your palm.":
-    "प्रकाश का रास्ता वह है जिस पर आप क़दम-दर-क़दम चलते हैं। पुरानी किताबें इस रेखा के बारे में ऐसे ही बात करती हैं। मुट्ठी बंद कीजिए, और यह संसार आपकी हथेली में लौट आएगा।",
+  "The tradition counts nine grahas and gives each a gem and a colour, as you see here. Close your hand to return.":
+    "परंपरा नौ ग्रह गिनती है और हर एक को एक रत्न और एक रंग देती है, जैसा आप यहाँ देख रहे हैं। लौटने के लिए हाथ बंद कीजिए।",
+  "A road of light: your Bhagya Rekha. Its planet is Shani, the slow and patient one, whom the tradition sees as a teacher of steady effort.":
+    "रोशनी की एक राह: आपकी भाग्य रेखा। इसका ग्रह शनि है, धीमा और धैर्यवान, जिसे परंपरा लगातार मेहनत का गुरु मानती है।",
+  "A path is something you walk, step by step, and that is how the old books speak of this line. Close your hand, and the road rolls back into your palm.":
+    "राह वह है जिस पर आप कदम-दर-कदम चलते हैं, और पुरानी किताबें इस रेखा के बारे में ऐसे ही बात करती हैं। हाथ बंद कीजिए, और राह आपकी हथेली में लौट आएगी।",
   "Let me put it all together, the way my teachers did, as tendencies the tradition sees in a hand like yours.":
     "अब सब कुछ एक साथ जोड़ता हूँ, जैसे मेरे गुरु करते थे: वे प्रवृत्तियाँ जो परंपरा आपके जैसे हाथ में देखती है।",
   "A square palm with shorter fingers: the tradition calls this a Prithvi hand, the hand of the earth. It is read as practical, steady and dependable, someone who likes to build things that last.":
@@ -139,13 +139,13 @@ export const HINDI: Record<string, string> = {
     "आपका अँगूठा तर्जनी से चौड़ा खुलता है। कीरो ने यहाँ के चौड़े फ़ासले को स्वतंत्र मन और साहस माना, ऐसा व्यक्ति जो अपना रास्ता ख़ुद चुनना पसंद करता है।",
   "Your Hridaya Rekha curves up under the index finger, toward Guru Parvat. Cheiro counted this among the finest endings: loyal and warm in affection, with high ideals for the people you care for.":
     "आपकी हृदय रेखा तर्जनी के नीचे, गुरु पर्वत की ओर ऊपर मुड़ती है। कीरो इसे सबसे अच्छे सिरों में गिनते थे: स्नेह में वफ़ादार और गर्मजोशी भरा, अपने प्रियजनों के लिए ऊँचे आदर्शों के साथ।",
-  "Your Hridaya Rekha ends between the index and middle fingers. The tradition reads this as calm and giving in affection, with a balanced, generous way of caring.":
+  "Your Hridaya Rekha ends between the index and middle fingers. Palmists take this as calm and giving in affection, with a balanced, generous way of caring.":
     "आपकी हृदय रेखा तर्जनी और मध्यमा के बीच ख़त्म होती है। परंपरा इसे स्नेह में शांत और उदार मानती है, परवाह करने का एक संतुलित, खुले दिल वाला ढंग।",
-  "Your Hridaya Rekha ends under the middle finger, near Shani Parvat. The tradition reads this as practical and self-contained in affection: you show care through deeds more than words.":
+  "Your Hridaya Rekha ends under the middle finger, near Shani Parvat. Old books read it as practical and self-contained in affection: you show care through deeds more than words.":
     "आपकी हृदय रेखा मध्यमा के नीचे, शनि पर्वत के पास ख़त्म होती है। परंपरा इसे स्नेह में व्यावहारिक और आत्मनिर्भर मानती है: आप अपनी परवाह शब्दों से ज़्यादा कामों से दिखाते हैं।",
   "Your Mastishk Rekha runs straight across the palm. Cheiro read this as a clear, practical mind that likes facts, order and a sensible plan.":
     "आपकी मस्तिष्क रेखा हथेली के आर-पार सीधी चलती है। कीरो इसे साफ़, व्यावहारिक मन मानते थे, जिसे तथ्य, व्यवस्था और समझदार योजना अच्छी लगती है।",
-  "Your Mastishk Rekha slopes gently down toward Chandra Parvat, the mount of the moon. The tradition reads this as an imaginative mind, at home with stories, art and intuition.":
+  "Your Mastishk Rekha slopes gently down toward Chandra Parvat, the mount of the moon. That is the mark of an imaginative mind, at home with stories, art and intuition.":
     "आपकी मस्तिष्क रेखा धीरे-धीरे चंद्र पर्वत, चंद्रमा के पर्वत, की ओर ढलती है। परंपरा इसे कल्पनाशील मन मानती है, जो कहानियों, कला और अंतर्ज्ञान में रमता है।",
   "Your Mastishk Rekha is short and to the point. Modern Indian teachers read this as a mind that decides quickly and directly, without too much circling around.":
     "आपकी मस्तिष्क रेखा छोटी और सीधी बात करने वाली है। आधुनिक भारतीय गुरु इसे ऐसा मन मानते हैं जो जल्दी और सीधे फ़ैसला करता है, ज़्यादा घुमा-फिराकर नहीं।",
@@ -157,7 +157,7 @@ export const HINDI: Record<string, string> = {
     "आपकी मस्तिष्क और जीवन रेखाओं के बीच शुरू में थोड़ी दूरी है। कीरो इसे स्वतंत्रता और फुर्ती मानते थे, ऐसा व्यक्ति जो शुरू से ही अपने निर्णय पर भरोसा करता है।",
   "Your Jeevan Rekha sweeps in a wide curve around Shukra Parvat. The tradition reads this as warmth and plenty of energy, someone who enjoys people and throws themselves into things.":
     "आपकी जीवन रेखा शुक्र पर्वत के चारों ओर चौड़ा घुमाव लेती है। परंपरा इसे गर्मजोशी और भरपूर ऊर्जा मानती है, ऐसा व्यक्ति जिसे लोगों का साथ अच्छा लगता है और जो हर काम में पूरे मन से जुटता है।",
-  "Your Jeevan Rekha curves close to the thumb. The tradition reads this as a reserved, gentle energy: someone who recharges in quiet and chooses where to spend their spark.":
+  "Your Jeevan Rekha curves close to the thumb. Teachers take this as a reserved, gentle energy: someone who recharges in quiet and chooses where to spend their spark.":
     "आपकी जीवन रेखा अँगूठे के पास से घूमती है। परंपरा इसे संयत, कोमल ऊर्जा मानती है: ऐसा व्यक्ति जो शांति में फिर से ऊर्जा पाता है और सोच-समझकर अपनी चमक ख़र्च करता है।",
   "Your Jeevan Rekha splits near the wrist, one branch reaching toward Chandra Parvat. Old books link this to a love of travel, new places and change of scene.":
     "आपकी जीवन रेखा कलाई के पास बँटती है, एक शाखा चंद्र पर्वत की ओर जाती है। पुरानी किताबें इसे यात्रा, नई जगहों और बदलाव के प्रेम से जोड़ती हैं।",
@@ -169,7 +169,7 @@ export const HINDI: Record<string, string> = {
     "आपकी भाग्य रेखा कलाई से सीधी उठती है। परंपरा इसे दिशा की पक्की समझ से जोड़ती है, ऐसा मन जो जानता है कि उसे क्या खींचता है।",
   "Your Bhagya Rekha begins on Chandra Parvat, the moon side of the palm. Cheiro linked this to a sociable, varied temperament that draws on the people around it.":
     "आपकी भाग्य रेखा चंद्र पर्वत से, हथेली की चंद्र वाली ओर से शुरू होती है। कीरो ने इसे मिलनसार, विविध स्वभाव से जोड़ा, जो अपने आसपास के लोगों से शक्ति लेता है।",
-  "Your Bhagya Rekha begins in the middle of the palm. The tradition reads this as a direction that grows clearer with experience: a late bloomer, as gardeners say, often the sweetest.":
+  "Your Bhagya Rekha begins in the middle of the palm. Here the tradition sees a direction that grows clearer with experience: a late bloomer, as gardeners say, often the sweetest.":
     "आपकी भाग्य रेखा हथेली के बीच से शुरू होती है। परंपरा इसे ऐसी दिशा मानती है जो अनुभव के साथ साफ़ होती जाती है: देर से खिलने वाला फूल, जैसा माली कहते हैं, अक्सर सबसे मीठा।",
   "A confession: every reading fits almost everyone a little. Scholars call it the Barnum effect. So enjoy it as story and culture.":
     "एक बात मान लूँ: हर पढ़त थोड़ी-बहुत लगभग सब पर बैठ जाती है। विद्वान इसे बार्नम प्रभाव कहते हैं। इसलिए इसका आनंद कहानी और संस्कृति की तरह लीजिए।",
