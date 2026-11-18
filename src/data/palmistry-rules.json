@@ -1,0 +1,4525 @@
+{
+ "schema_version": 1,
+ "title": "Hast Rekha rulebook (Samudrika / Western palmistry synthesis)",
+ "purpose": "Machine-readable palmistry rules for the Hast Rekha Quest app: what each line, mount, hand shape, finger and mark means, which measurable attribute changes the reading, and where the rule comes from.",
+ "disclaimer": "Palmistry is a cultural and entertainment tradition, widely regarded as pseudoscience, with many conflicting interpretations (S9). The app must present readings as 'the tradition says...', never as prediction, diagnosis or advice. Many source rules (death, illness, insanity, infidelity, fertility) are recorded for completeness but flagged 'sensitivity' and must not be shown.",
+ "citation_levels": {
+  "read": "I read the passage; the rule is a paraphrase of it",
+  "toc": "section confirmed from the table of contents; the rule is standard teaching consistent with that section but not line-verified",
+  "web": "modern web page, facts only"
+ },
+ "conventions": {
+  "page_numbers": "S1 page numbers are the printed page where the section starts (from the book's contents list). S2 is cited by Part and chapter because the OCR page numbers are unreliable.",
+  "text_policy": "All wording is paraphrased. No source text is reproduced.",
+  "naming": "Hindi/Sanskrit names are given where known. Where sources disagree (e.g. pitru/matru/ayu), the primary label is the one most sources agree on and the others are listed under aliases.",
+  "region_ref": "Each feature that lives on the palm points to data/palm-regions.json for its joint-space region.",
+  "app_policy_fields": "app_safe_reading = what the app may say; avoid_claims = what it must not say; sensitivity = category tags to filter on.",
+  "hands": "Cheiro: left hand = inherited tendencies, right = developed. Modern Indian guides: dominant hand = present, other = innate (S7). Do not use the old 'men right, women left' rule (S7 calls it 'bunkum')."
+ },
+ "sources": [
+  {
+   "id": "S1",
+   "title": "Palmistry for All",
+   "author": "Cheiro (Count Louis Hamon)",
+   "year": 1916,
+   "kind": "classic-text",
+   "url": "https://www.gutenberg.org/ebooks/20480",
+   "mirror": "https://archive.org/details/palmistryforall20480gut",
+   "licence": "Public domain in the USA (Project Gutenberg #20480; Gutenberg licence applies only to the Gutenberg trademark/boilerplate)",
+   "used_for": "Main source: lines, marks, mounts, hand shape, fingers. Cited by chapter and printed page (pages from the book's table of contents).",
+   "verified": "downloaded the full text (270 KB) and read the chapters cited as 'read'"
+  },
+  {
+   "id": "S2",
+   "title": "The Laws of Scientific Hand Reading",
+   "author": "William G. Benham",
+   "year": 1900,
+   "kind": "classic-text",
+   "url": "https://archive.org/details/lawsscientifich00benhgoog",
+   "mirror": "https://archive.org/details/in.ernet.dli.2015.219091",
+   "licence": "Public domain in the USA (1900; Internet Archive flags the Google scan NOT_IN_COPYRIGHT/US). The 1988 'Benham Book of Palmistry' reprint is a different, lending-only item and was not used.",
+   "used_for": "Second Western opinion; mount types; upper vs lower Mars; Line of Mars; minor lines. Cited by Part and chapter.",
+   "verified": "downloaded the OCR text (1.2 MB); the Mars/minor-line passages cited as 'read'"
+  },
+  {
+   "id": "S3",
+   "title": "Brihat Samhita, ch. 68 (Purusha-lakshana, 'features of men'), verses 42-50 on the hand",
+   "author": "Varahamihira (6th c. CE)",
+   "year": 550,
+   "kind": "classical-Indian-text",
+   "url": "https://www.siva.sh/brihat-samhita/68/41-45",
+   "mirror": "https://www.siva.sh/brihat-samhita/68/46-50",
+   "licence": "Sanskrit original: public domain. The English/Hindi renderings on siva.sh have no licence stated: I paraphrased only and copied nothing.",
+   "used_for": "Oldest Indian hand-sign rules found: glossy deep lines, fish/conch/wheel/lotus/flag/swastika marks, three wrist lines, finger-joint rules.",
+   "verified": "fetched verses 68.42-68.50 and checked the Sanskrit against the English"
+  },
+  {
+   "id": "S4",
+   "title": "The Indian System of Human Marks (Samudrika corpus: Garga-jyotisha, Brihat Samhita 68/70, Agni Purana 243-244, Garuda Purana 1.63-65, Bhavishya Purana 1.24-28, Vishnudharmottara 2.8-9)",
+   "author": "Kenneth G. Zysk",
+   "year": 2016,
+   "kind": "scholarly-edition",
+   "url": "https://catalogue.leidenuniv.nl/nde/fulldisplay/alma9939832242602711/31UKB_LEU:UBL_NDE",
+   "mirror": null,
+   "licence": "Scholarly book (Brill). Not copied; used as a map to where the classical Indian verses are. Check the publisher for access.",
+   "used_for": "Pointer to the Sanskrit chapters (Agni Purana 243-244, Garuda Purana 1.63-65 etc.) for later deep dives.",
+   "verified": "read the table of contents in the Leiden catalogue record only"
+  },
+  {
+   "id": "S5",
+   "title": "Hasta Samudrika (interactive reader of classical hand verses + MediaPipe/Hessian-ridge line finder)",
+   "author": "Tamal (RKMVU)",
+   "year": 2026,
+   "kind": "prior-art-web",
+   "url": "https://cs.rkmvu.ac.in/~tamal/jyotisha/hasta/",
+   "mirror": null,
+   "licence": "No licence stated. Verses come from GRETIL and Sanskrit Wikisource; translations are the site's own. Used as a reference only; nothing copied.",
+   "used_for": "Confirms two things: (1) classical Indian texts do not contain heart/head lines or planetary mounts, only a few lines described by start/end + auspicious marks; (2) the same MediaPipe + ridge-filter + 'search for the line between named places' idea already works in a browser.",
+   "verified": "fetched the page and the palmread.js header"
+  },
+  {
+   "id": "S6",
+   "title": "Palmistry Made Easy (An Indian Palmist)",
+   "author": "anonymous",
+   "year": 1950,
+   "kind": "indian-20th-c-manual",
+   "url": "https://archive.org/details/crsw-palmistry-made-easy-an-indian-palmist",
+   "mirror": null,
+   "licence": "Uploader tagged it CC0 but this is a 1950 Indian publication, so its copyright status is uncertain. Not copied; cross-check only.",
+   "used_for": "Cross-check that Indian manuals of the period follow the Western Cheiro system (square/spatulate hands etc.).",
+   "verified": "downloaded OCR text and read the contents list only"
+  },
+  {
+   "id": "S7",
+   "title": "Modern Indian hast-rekha guides (names, locations, broad meanings)",
+   "author": "various: AstroWord, Vivahika, Palmyst, Trikaal Vaani, PalmTalks, Times of India, Live Hindustan",
+   "year": 2025,
+   "kind": "web",
+   "url": "https://www.astroword.in/blog/hastarekha-shastra-complete-guide-vedic-palmistry",
+   "mirror": "https://www.vivahika.co.in/blog/palmistry-guide-how-to-read-palm-lines",
+   "licence": "Copyrighted web articles. Facts only (Hindi names, positions, broad readings). No text copied.",
+   "used_for": "Hindi/Sanskrit names; the four-element hand typing; Rahu/Ketu mount positions; modern 'not a lifespan' reframing.",
+   "verified": "fetched AstroWord and Vivahika in full; others from search excerpts"
+  },
+  {
+   "id": "S8",
+   "title": "Cheiro's Language of the Hand",
+   "author": "Cheiro",
+   "year": 1894,
+   "kind": "classic-text",
+   "url": "https://archive.org/details/cheiroslanguageo00chei_1",
+   "mirror": null,
+   "licence": "Internet Archive/Library of Congress: 'unaware of any copyright restrictions'. Public domain in the USA.",
+   "used_for": "Found and downloaded as a cross-check; not cited line-by-line because S1 is the later, cleaner statement.",
+   "verified": "downloaded OCR text (400 KB)"
+  },
+  {
+   "id": "S9",
+   "title": "Palmistry (Wikipedia)",
+   "author": "Wikipedia contributors",
+   "year": 2026,
+   "kind": "reference",
+   "url": "https://en.wikipedia.org/wiki/Palmistry",
+   "mirror": null,
+   "licence": "CC BY-SA 4.0",
+   "used_for": "Context: many conflicting interpretations; widely viewed as pseudoscience.",
+   "verified": "fetched"
+  }
+ ],
+ "feature_counts": {
+  "line": 18,
+  "line-attribute": 2,
+  "mount": 11,
+  "mount-attribute": 1,
+  "hand-shape": 8,
+  "finger": 7,
+  "mark": 16
+ },
+ "total_features": 63,
+ "features": [
+  {
+   "id": "life",
+   "kind": "line",
+   "name_en": "Life line (vitality line)",
+   "name_hi": "जीवन रेखा",
+   "name_roman": "Jeevan Rekha",
+   "tier": "major",
+   "aliases": [
+    {
+     "hi": "पितृ रेखा",
+     "roman": "Pitru Rekha",
+     "note": "some Hindi books; Vivahika lists Pitri/Ayur for the life line"
+    },
+    {
+     "hi": "आयु रेखा",
+     "roman": "Ayu Rekha",
+     "note": "alias in some sources; in others a separate classical 'age' line, see classical_ayu_line"
+    }
+   ],
+   "summary": "Curves round the thumb-base (Venus mount). Reads vitality, energy and robustness of constitution, plus major life changes. Cheiro also claims it shows natural length of life, which modern Indian sources reject: use the 'vitality' reading only.",
+   "attributes": [
+    {
+     "attribute": "length",
+     "values": [
+      {
+       "value": "long, clear, unbroken",
+       "effect": "strong vitality and constitution",
+       "cite": {
+        "src": "S1",
+        "loc": "Part I ch.III 'The Line of Life', p.36",
+        "level": "read"
+       }
+      },
+      {
+       "value": "short or faint",
+       "effect": "lower reserves or energy that fluctuates: NOT a short life",
+       "cite": {
+        "src": "S7",
+        "loc": "AstroWord/Vivahika/Palmyst",
+        "level": "web"
+       }
+      }
+     ]
+    },
+    {
+     "attribute": "depth_width",
+     "values": [
+      {
+       "value": "thin, clean, deep",
+       "effect": "will-force and resilience under strain",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.III p.36-40",
+        "level": "read"
+       }
+      },
+      {
+       "value": "broad, shallow",
+       "effect": "robust physical strength but less resistance to strain",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.III p.36-40",
+        "level": "read"
+       }
+      }
+     ]
+    },
+    {
+     "attribute": "continuity",
+     "values": [
+      {
+       "value": "chain of links",
+       "effect": "weaker vitality, esp. on a soft hand",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.III p.36-40",
+        "level": "read"
+       }
+      },
+      {
+       "value": "break or island",
+       "effect": "a turning point or low-energy spell at that stretch of life (do not say illness)",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.III p.36-40",
+        "level": "read"
+       }
+      }
+     ]
+    },
+    {
+     "attribute": "curvature",
+     "values": [
+      {
+       "value": "wide semicircle into the palm (broad Venus mount)",
+       "effect": "warm, energetic, strong constitution",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.III p.36-40, Plate IX",
+        "level": "read"
+       }
+      },
+      {
+       "value": "hugging the thumb (narrow Venus mount)",
+       "effect": "a more delicate constitution, less 'animal magnetism'",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.III p.36-40, Plate IX",
+        "level": "read"
+       }
+      }
+     ]
+    },
+    {
+     "attribute": "start",
+     "values": [
+      {
+       "value": "high, toward Jupiter",
+       "effect": "ambitious, more self-control",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.III p.36-40, Plate IX",
+        "level": "read"
+       }
+      },
+      {
+       "value": "low, from the Mars area",
+       "effect": "quicker temper, less ambition when young",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.III p.36-40, Plate IX",
+        "level": "read"
+       }
+      },
+      {
+       "value": "joined to the head line",
+       "effect": "cautious, sensitive early on",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.II 'joined' p.16",
+        "level": "toc"
+       }
+      }
+     ]
+    },
+    {
+     "attribute": "branches",
+     "values": [
+      {
+       "value": "rising branches",
+       "effect": "periods of strong effort; toward Jupiter = ambition for authority",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.III p.36-40, Plate X",
+        "level": "read"
+       }
+      },
+      {
+       "value": "branch stopped by head line",
+       "effect": "an effort derailed by a misjudgement",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.III p.36-40, Plate X",
+        "level": "read"
+       }
+      },
+      {
+       "value": "branch stopped by heart line",
+       "effect": "affections interfere with a goal",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.III p.36-40, Plate X",
+        "level": "read"
+       }
+      }
+     ]
+    },
+    {
+     "attribute": "end",
+     "values": [
+      {
+       "value": "fork toward the Moon mount",
+       "effect": "restless, love of travel or change of place",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.III p.36-44",
+        "level": "toc"
+       }
+      }
+     ]
+    }
+   ],
+   "citations": [
+    {
+     "src": "S1",
+     "loc": "Part I ch.III p.36-43",
+     "level": "read"
+    },
+    {
+     "src": "S2",
+     "loc": "Part II ch.VII 'The Line of Life'",
+     "level": "toc"
+    },
+    {
+     "src": "S7",
+     "loc": "Palm-line names: Vivahika (Pitri/Ayur Rekha), AstroWord (Jeevan Rekha)",
+     "level": "web"
+    }
+   ],
+   "app_safe_reading": "vitality, stamina, how you recharge, big life changes as 'chapters'",
+   "avoid_claims": [
+    "lifespan or date of death",
+    "illness predictions"
+   ],
+   "sensitivity": [
+    "health",
+    "death"
+   ],
+   "region_ref": "palm-regions.json#lines/life",
+   "auto_detect": "auto: corridor + ridge path",
+   "confidence": "high",
+   "note": "The user's naming (life=pitru, head=matru, heart=ayu) is one tradition's labelling. Sources conflict, so the app should show Jeevan / Mastishk / Hridaya / Bhagya as primary labels and treat the others as per-source aliases."
+  },
+  {
+   "id": "head",
+   "kind": "line",
+   "name_en": "Head line (mind line)",
+   "name_hi": "मस्तिष्क रेखा",
+   "name_roman": "Mastishk Rekha",
+   "tier": "major",
+   "aliases": [
+    {
+     "hi": "मातृ रेखा",
+     "roman": "Matru Rekha",
+     "note": "alias in some sources"
+    }
+   ],
+   "summary": "Runs across the palm between life and heart lines. Reads thinking style and mental direction. Cheiro calls it the most important line.",
+   "attributes": [
+    {
+     "attribute": "slope",
+     "values": [
+      {
+       "value": "straight across",
+       "effect": "practical, analytical, business-like",
+       "cite": {
+        "src": "S1",
+        "loc": "Part I ch.II 'The Line of Head' p.8-15",
+        "level": "read"
+       }
+      },
+      {
+       "value": "sloping toward the Moon mount",
+       "effect": "imaginative, artistic, intuitive",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.II p.8-15",
+        "level": "read"
+       }
+      },
+      {
+       "value": "very steep, curling under the Moon",
+       "effect": "very imaginative and inward (Cheiro says morbid; do not use)",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.II p.8-15",
+        "level": "read"
+       }
+      },
+      {
+       "value": "fork: one branch straight, one sloping",
+       "effect": "holds both an imaginative and a practical side",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.II p.8-15",
+        "level": "read"
+       }
+      }
+     ]
+    },
+    {
+     "attribute": "start",
+     "values": [
+      {
+       "value": "inside/under the life line (from Mars)",
+       "effect": "sensitive, quick-tempered; may mature into control if the line straightens",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.II 'three principal positions' Plate I, p.10-16",
+        "level": "read"
+       }
+      },
+      {
+       "value": "joined to the life line",
+       "effect": "careful and sensitive; independence comes later",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.II p.16",
+        "level": "toc"
+       }
+      },
+      {
+       "value": "separate from the life line (open)",
+       "effect": "independent, impulsive, quick to act; very wide gap = impetuous",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.II p.19-21",
+        "level": "read"
+       }
+      },
+      {
+       "value": "from the Jupiter mount",
+       "effect": "ambition-led mind; Cheiro rates this start highly",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.II p.19-21",
+        "level": "read"
+       }
+      }
+     ]
+    },
+    {
+     "attribute": "depth_width",
+     "values": [
+      {
+       "value": "fine, clean, deep",
+       "effect": "concentration; typical of heavy brain-workers",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.II p.8-15",
+        "level": "read"
+       }
+      },
+      {
+       "value": "broad, shallow",
+       "effect": "less focus, more changeable; more physical than mental",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.II p.8-15",
+        "level": "read"
+       }
+      }
+     ]
+    },
+    {
+     "attribute": "length",
+     "values": [
+      {
+       "value": "long",
+       "effect": "depth of engagement with ideas",
+       "cite": {
+        "src": "S7",
+        "loc": "Trikaal Vaani",
+        "level": "web"
+       }
+      },
+      {
+       "value": "short",
+       "effect": "direct, quick decisions",
+       "cite": {
+        "src": "S7",
+        "loc": "Trikaal Vaani",
+        "level": "web"
+       }
+      }
+     ]
+    },
+    {
+     "attribute": "continuity",
+     "values": [
+      {
+       "value": "island or chain of islands",
+       "effect": "a stretch of mental strain or indecision (Cheiro links it to illness: do not use)",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.II p.22-25",
+        "level": "read"
+       }
+      },
+      {
+       "value": "break",
+       "effect": "a change of mental direction at that age",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.II 'Changes in the Line of Head' p.26-29",
+        "level": "toc"
+       }
+      }
+     ]
+    },
+    {
+     "attribute": "left_vs_right",
+     "values": [
+      {
+       "value": "left hand (inherited) vs right (developed)",
+       "effect": "compare the two: a line straighter on the right means practicality was cultivated",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.II p.8-15",
+        "level": "read"
+       }
+      }
+     ]
+    }
+   ],
+   "citations": [
+    {
+     "src": "S1",
+     "loc": "Part I ch.II p.8-35",
+     "level": "read"
+    },
+    {
+     "src": "S2",
+     "loc": "Part II ch.VI 'The Line of Head'",
+     "level": "toc"
+    },
+    {
+     "src": "S7",
+     "loc": "Palm-line names: AstroWord (Mastishka), Vivahika (Matru/Mastaka)",
+     "level": "web"
+    }
+   ],
+   "app_safe_reading": "how you think: practical vs imaginative, focused vs wide-ranging",
+   "avoid_claims": [
+    "insanity, brain illness, drink or drug claims (Cheiro makes several)",
+    "ability or IQ"
+   ],
+   "sensitivity": [
+    "mental-illness"
+   ],
+   "region_ref": "palm-regions.json#lines/head",
+   "auto_detect": "auto: corridor + ridge path",
+   "confidence": "high"
+  },
+  {
+   "id": "heart",
+   "kind": "line",
+   "name_en": "Heart line (emotion line)",
+   "name_hi": "हृदय रेखा",
+   "name_roman": "Hridaya Rekha",
+   "tier": "major",
+   "aliases": [
+    {
+     "hi": "कामा रेखा",
+     "roman": "Kama Rekha",
+     "note": "Vivahika only; low confidence"
+    }
+   ],
+   "summary": "Runs across the palm under the fingers. Reads emotional style and how one bonds. Where it ENDS (under Jupiter, Saturn or between) is the main rule.",
+   "attributes": [
+    {
+     "attribute": "end",
+     "values": [
+      {
+       "value": "ends high, on or around the outside of Jupiter",
+       "effect": "idealistic, devoted, can idolise a partner",
+       "cite": {
+        "src": "S1",
+        "loc": "Part I ch.VII 'The Line of Heart' p.67-72",
+        "level": "read"
+       }
+      },
+      {
+       "value": "ends at the centre of Jupiter",
+       "effect": "loyal, high standards, constant; one of the best endings",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.VII p.67-72",
+        "level": "read"
+       }
+      },
+      {
+       "value": "ends between Jupiter and Saturn",
+       "effect": "calm, deep, giving, balanced expectations",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.VII p.67-72",
+        "level": "read"
+       }
+      },
+      {
+       "value": "ends on/under Saturn",
+       "effect": "reserved, pragmatic, self-contained in love; Cheiro says selfish, reframe as independent",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.VII p.67-72",
+        "level": "read"
+       }
+      },
+      {
+       "value": "curls down at the Jupiter base",
+       "effect": "tends to give love without return (Cheiro: fatal disappointment; omit)",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.VII p.67-72",
+        "level": "read"
+       }
+      }
+     ]
+    },
+    {
+     "attribute": "length",
+     "values": [
+      {
+       "value": "short",
+       "effect": "less outwardly demonstrative",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.VII p.67-72",
+        "level": "read"
+       }
+      },
+      {
+       "value": "very long",
+       "effect": "intense attachment; Cheiro: jealous (reframe)",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.VII p.67-72",
+        "level": "read"
+       }
+      }
+     ]
+    },
+    {
+     "attribute": "depth_colour",
+     "values": [
+      {
+       "value": "deep, clear, well-coloured",
+       "effect": "healthy, steady affection",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.VII p.67-72",
+        "level": "read"
+       }
+      }
+     ]
+    },
+    {
+     "attribute": "continuity",
+     "values": [
+      {
+       "value": "chained or broken",
+       "effect": "emotional turbulence, not doom",
+       "cite": {
+        "src": "S7",
+        "loc": "Trikaal Vaani",
+        "level": "web"
+       }
+      }
+     ]
+    },
+    {
+     "attribute": "with_head_line",
+     "values": [
+      {
+       "value": "very long heart line + steeply sloping head line",
+       "effect": "imagination amplifies feelings (Cheiro: jealousy)",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.VII p.67-72",
+        "level": "read"
+       }
+      }
+     ]
+    }
+   ],
+   "citations": [
+    {
+     "src": "S1",
+     "loc": "Part I ch.VII p.67-72",
+     "level": "read"
+    },
+    {
+     "src": "S2",
+     "loc": "Part II ch.V 'The Line of Heart'",
+     "level": "toc"
+    },
+    {
+     "src": "S7",
+     "loc": "Palm-line names: AstroWord (Hridaya), Vivahika (Kama/Hridaya)",
+     "level": "web"
+    }
+   ],
+   "app_safe_reading": "how you show affection; idealist vs practical vs balanced",
+   "avoid_claims": [
+    "jealousy, infidelity, divorce",
+    "heart disease"
+   ],
+   "sensitivity": [
+    "relationships",
+    "health"
+   ],
+   "region_ref": "palm-regions.json#lines/heart",
+   "auto_detect": "auto: corridor + ridge path; end class from the three end anchors",
+   "confidence": "high"
+  },
+  {
+   "id": "fate",
+   "kind": "line",
+   "name_en": "Fate / destiny line (career line)",
+   "name_hi": "भाग्य रेखा",
+   "name_roman": "Bhagya Rekha",
+   "tier": "major",
+   "aliases": [
+    {
+     "hi": "शनि रेखा",
+     "roman": "Shani Rekha",
+     "note": ""
+    },
+    {
+     "hi": "कर्म रेखा",
+     "roman": "Karma Rekha",
+     "note": ""
+    },
+    {
+     "hi": "धन रेखा",
+     "roman": "Dhana Rekha",
+     "note": "AstroWord: some classical sources"
+    }
+   ],
+   "summary": "Rises roughly vertically toward Saturn. Reads career direction and how much of life feels 'steered'. Often absent: absence is read as a self-directed path, not bad luck.",
+   "attributes": [
+    {
+     "attribute": "start",
+     "values": [
+      {
+       "value": "straight from the wrist",
+       "effect": "direction set early",
+       "cite": {
+        "src": "S1",
+        "loc": "Part I ch.V 'The Line of Destiny' p.47-60, 'From the wrist'",
+        "level": "read"
+       }
+      },
+      {
+       "value": "from inside the life line",
+       "effect": "early life shaped by family; independence later (web)",
+       "cite": {
+        "src": "S7",
+        "loc": "Palmyst, PalmTalks",
+        "level": "web"
+       }
+      },
+      {
+       "value": "from the Moon mount",
+       "effect": "eventful, changeable career helped by other people or the public",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.V p.51-54",
+        "level": "read"
+       }
+      },
+      {
+       "value": "from mid-palm",
+       "effect": "direction becomes clear in the 20s-30s",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.V p.55",
+        "level": "toc"
+       }
+      }
+     ]
+    },
+    {
+     "attribute": "presence",
+     "values": [
+      {
+       "value": "absent",
+       "effect": "self-directed, no fixed track",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.V p.47",
+        "level": "read"
+       }
+      },
+      {
+       "value": "faint/shadowy",
+       "effect": "path not yet defined",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.V p.47",
+        "level": "read"
+       }
+      }
+     ]
+    },
+    {
+     "attribute": "influence_lines",
+     "values": [
+      {
+       "value": "line from the Moon mount joining it",
+       "effect": "another person's help or influence",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.V 'Influence lines' p.57",
+        "level": "read"
+       }
+      },
+      {
+       "value": "line running alongside without joining",
+       "effect": "another person's life stays separate",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.V p.57",
+        "level": "read"
+       }
+      }
+     ]
+    },
+    {
+     "attribute": "end",
+     "values": [
+      {
+       "value": "reaches Saturn mount",
+       "effect": "steady, defined career",
+       "cite": {
+        "src": "S7",
+        "loc": "Palmyst",
+        "level": "web"
+       }
+      },
+      {
+       "value": "stops at head line",
+       "effect": "a mental misjudgement ends a path",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.V",
+        "level": "toc"
+       }
+      },
+      {
+       "value": "stops at heart line",
+       "effect": "affections interfere with the career",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.V",
+        "level": "toc"
+       }
+      }
+     ]
+    },
+    {
+     "attribute": "count",
+     "values": [
+      {
+       "value": "double fate line",
+       "effect": "two careers or income streams",
+       "cite": {
+        "src": "S7",
+        "loc": "Palmyst",
+        "level": "web"
+       }
+      },
+      {
+       "value": "fate without a sun line",
+       "effect": "effort without the 'luck' of recognition (Cheiro warns against reading fate line alone)",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.VI p.61",
+        "level": "read"
+       }
+      }
+     ]
+    }
+   ],
+   "citations": [
+    {
+     "src": "S1",
+     "loc": "Part I ch.V p.47-60",
+     "level": "read"
+    },
+    {
+     "src": "S2",
+     "loc": "Part II ch.X 'The Line of Saturn'",
+     "level": "toc"
+    },
+    {
+     "src": "S7",
+     "loc": "Names Bhagya/Shani/Karma/Dhana: AstroWord, PalmTalks",
+     "level": "web"
+    }
+   ],
+   "app_safe_reading": "direction and drive, 'self-made' vs 'steered' path",
+   "avoid_claims": [
+    "job loss, failure, fixed fate claims"
+   ],
+   "sensitivity": [
+    "career"
+   ],
+   "region_ref": "palm-regions.json#lines/fate",
+   "auto_detect": "auto but often absent; stricter presence gate",
+   "confidence": "medium"
+  },
+  {
+   "id": "sun",
+   "kind": "line",
+   "name_en": "Sun / Apollo line (success line)",
+   "name_hi": "सूर्य रेखा",
+   "name_roman": "Surya Rekha",
+   "tier": "minor",
+   "aliases": [
+    {
+     "hi": "अपोलो रेखा",
+     "roman": "Apollo Rekha",
+     "note": ""
+    }
+   ],
+   "summary": "Vertical line toward the ring finger. Reads recognition, brightness of fortune, popularity. Cheiro says it lifts everything else on the hand.",
+   "attributes": [
+    {
+     "attribute": "presence",
+     "values": [
+      {
+       "value": "clear and unbroken",
+       "effect": "recognition, charm, 'luck'",
+       "cite": {
+        "src": "S1",
+        "loc": "Part I ch.VI 'The Line of the Sun' p.61-66",
+        "level": "read"
+       }
+      },
+      {
+       "value": "absent",
+       "effect": "nothing is wrong; simply no extra spotlight line",
+       "cite": {
+        "src": "S7",
+        "loc": "modern consensus",
+        "level": "web"
+       }
+      }
+     ]
+    },
+    {
+     "attribute": "start",
+     "values": [
+      {
+       "value": "from the life line",
+       "effect": "success through own effort",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.VI p.63",
+        "level": "toc"
+       }
+      },
+      {
+       "value": "from fate line",
+       "effect": "success tied to career",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.VI p.63",
+        "level": "toc"
+       }
+      },
+      {
+       "value": "from Plain of Mars / Moon / head / heart",
+       "effect": "success arrives with the mental, imaginative or emotional gift of that place",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.VI p.63",
+        "level": "toc"
+       }
+      }
+     ]
+    },
+    {
+     "attribute": "support",
+     "values": [
+      {
+       "value": "strong sun line",
+       "effect": "a mediocre head or fate line is lifted",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.VI p.61",
+        "level": "read"
+       }
+      }
+     ]
+    }
+   ],
+   "citations": [
+    {
+     "src": "S1",
+     "loc": "Part I ch.VI p.61-66",
+     "level": "read"
+    },
+    {
+     "src": "S2",
+     "loc": "Part II ch.XI 'The Line of Apollo'",
+     "level": "toc"
+    }
+   ],
+   "app_safe_reading": "recognition, creative spark",
+   "avoid_claims": [
+    "wealth or fame guarantees"
+   ],
+   "sensitivity": [],
+   "region_ref": "palm-regions.json#lines/sun",
+   "auto_detect": "auto, stricter presence gate; usually faint on RGB",
+   "confidence": "medium"
+  },
+  {
+   "id": "mercury_health",
+   "kind": "line",
+   "name_en": "Mercury / health line",
+   "name_hi": "बुध रेखा",
+   "name_roman": "Budh Rekha (also Swasthya Rekha)",
+   "tier": "minor",
+   "aliases": [],
+   "summary": "Diagonal from the Mercury mount toward the life line. In Cheiro it is the 'hepatica' (health). Modern Indian sources read it as communication and business sense.",
+   "attributes": [
+    {
+     "attribute": "presence",
+     "values": [
+      {
+       "value": "absent",
+       "effect": "a good sign in Cheiro: steady constitution and nerves",
+       "cite": {
+        "src": "S1",
+        "loc": "Part I ch.X 'The Line of Health' p.83-87",
+        "level": "read"
+       }
+      },
+      {
+       "value": "present, straight, not touching the life line",
+       "effect": "best form",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.X p.83-87",
+        "level": "read"
+       }
+      }
+     ]
+    },
+    {
+     "attribute": "stability",
+     "values": [
+      {
+       "value": "changes over the years",
+       "effect": "Cheiro: 'thermometer' of life, fading or deepening",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.X p.83-87",
+        "level": "read"
+       }
+      }
+     ]
+    },
+    {
+     "attribute": "meaning_in_hast_rekha",
+     "values": [
+      {
+       "value": "clear",
+       "effect": "communication, commerce, quick wit",
+       "cite": {
+        "src": "S7",
+        "loc": "Trikaal Vaani 'Budh Rekha'",
+        "level": "web"
+       }
+      }
+     ]
+    }
+   ],
+   "citations": [
+    {
+     "src": "S1",
+     "loc": "Part I ch.X p.83-87",
+     "level": "read"
+    },
+    {
+     "src": "S2",
+     "loc": "Part II ch.XII 'The Line of Mercury'",
+     "level": "toc"
+    },
+    {
+     "src": "S7",
+     "loc": "Trikaal Vaani",
+     "level": "web"
+    }
+   ],
+   "app_safe_reading": "communication and business instinct only",
+   "avoid_claims": [
+    "any health or disease claim"
+   ],
+   "sensitivity": [
+    "health"
+   ],
+   "region_ref": "palm-regions.json#lines/mercury_health",
+   "auto_detect": "auto, strict gate; rarely detected on RGB",
+   "confidence": "medium"
+  },
+  {
+   "id": "marriage",
+   "kind": "line",
+   "name_en": "Marriage / affection lines",
+   "name_hi": "विवाह रेखा",
+   "name_roman": "Vivah Rekha",
+   "tier": "minor",
+   "aliases": [],
+   "summary": "Short horizontal lines on the little-finger edge between heart line and finger base. Read significant bonds. Number of lines does NOT equal number of marriages.",
+   "attributes": [
+    {
+     "attribute": "form",
+     "values": [
+      {
+       "value": "deep, clear",
+       "effect": "a significant, lasting bond",
+       "cite": {
+        "src": "S1",
+        "loc": "Part I ch.VIII 'Signs relating to Marriage' p.73-76",
+        "level": "read"
+       }
+      },
+      {
+       "value": "short/faint",
+       "effect": "deep affection or a bond that never formalised",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.VIII p.73-76",
+        "level": "read"
+       }
+      }
+     ]
+    },
+    {
+     "attribute": "height",
+     "values": [
+      {
+       "value": "close to the heart line",
+       "effect": "earlier bond; Cheiro: early marriage",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.VIII p.73-76",
+        "level": "read"
+       }
+      }
+     ]
+    },
+    {
+     "attribute": "fork_or_island",
+     "values": [
+      {
+       "value": "island at start",
+       "effect": "slow start to the bond (Cheiro: delay/separation)",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.VIII p.73-76",
+        "level": "read"
+       }
+      },
+      {
+       "value": "fork at the end",
+       "effect": "drifting apart (Cheiro: separation; reframe)",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.VIII p.73-76",
+        "level": "read"
+       }
+      }
+     ]
+    },
+    {
+     "attribute": "count",
+     "values": [
+      {
+       "value": "several lines",
+       "effect": "several significant relationships, not a marriage count",
+       "cite": {
+        "src": "S7",
+        "loc": "AstroWord: three sources reject the counting rule",
+        "level": "web"
+       }
+      }
+     ]
+    }
+   ],
+   "citations": [
+    {
+     "src": "S1",
+     "loc": "Part I ch.VIII p.73-80",
+     "level": "read"
+    },
+    {
+     "src": "S2",
+     "loc": "Part II ch.IX 'The Lines of Affection'",
+     "level": "toc"
+    },
+    {
+     "src": "S7",
+     "loc": "AstroWord, Trikaal Vaani",
+     "level": "web"
+    }
+   ],
+   "app_safe_reading": "relationship depth and style",
+   "avoid_claims": [
+    "number or timing of marriages",
+    "divorce or separation"
+   ],
+   "sensitivity": [
+    "relationships"
+   ],
+   "region_ref": "palm-regions.json#lines/marriage",
+   "auto_detect": "NOT auto-detected (too small for RGB passthrough); optional Layer-2 finger trace only",
+   "confidence": "low"
+  },
+  {
+   "id": "bracelets",
+   "kind": "line",
+   "name_en": "Wrist bracelets (rascette)",
+   "name_hi": "मणिबंध",
+   "name_roman": "Manibandh",
+   "tier": "minor",
+   "aliases": [],
+   "summary": "One to four creases across the wrist. Read as a constitutional base.",
+   "attributes": [
+    {
+     "attribute": "first_bracelet",
+     "values": [
+      {
+       "value": "clear and unbroken",
+       "effect": "a steady base",
+       "cite": {
+        "src": "S7",
+        "loc": "Trikaal Vaani 'Manibandh'",
+        "level": "web"
+       }
+      },
+      {
+       "value": "chained or frayed",
+       "effect": "the body has been asked for more than is comfortable",
+       "cite": {
+        "src": "S7",
+        "loc": "Trikaal Vaani",
+        "level": "web"
+       }
+      }
+     ]
+    },
+    {
+     "attribute": "count",
+     "values": [
+      {
+       "value": "three",
+       "effect": "the classic 'three bracelets' (each traditionally linked to a period of life)",
+       "cite": {
+        "src": "S2",
+        "loc": "Part II ch.II 'three in number'",
+        "level": "toc"
+       }
+      }
+     ]
+    }
+   ],
+   "citations": [
+    {
+     "src": "S1",
+     "loc": "Part I ch.XI 'The Bracelets' p.91",
+     "level": "toc"
+    },
+    {
+     "src": "S2",
+     "loc": "Part II ch.II",
+     "level": "toc"
+    },
+    {
+     "src": "S7",
+     "loc": "Trikaal Vaani",
+     "level": "web"
+    }
+   ],
+   "app_safe_reading": "steadiness; a fun 'base' reading",
+   "avoid_claims": [
+    "longevity or wealth timelines"
+   ],
+   "sensitivity": [],
+   "region_ref": "palm-regions.json#lines/bracelets",
+   "auto_detect": "NOT auto-detected in the prototype (wrist is often cropped)",
+   "confidence": "low"
+  },
+  {
+   "id": "girdle_of_venus",
+   "kind": "line",
+   "name_en": "Girdle of Venus",
+   "name_hi": "शुक्र मुद्रिका / मेखला",
+   "name_roman": "Shukra Mudrika (Hindi name uncertain)",
+   "tier": "minor",
+   "aliases": [],
+   "summary": "A semicircle from between index/middle to between ring/little finger, above the heart line. Reads emotional sensitivity.",
+   "attributes": [
+    {
+     "attribute": "form",
+     "values": [
+      {
+       "value": "clear, continuous",
+       "effect": "sensitive, intense feelings, artistic taste (reframed)",
+       "cite": {
+        "src": "S1",
+        "loc": "Part I ch.XI 'The Girdle of Venus' p.88-90",
+        "level": "toc"
+       }
+      },
+      {
+       "value": "broken or fragmented",
+       "effect": "changeable moods (Cheiro: hysterical; do not use)",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.XI p.88-90",
+        "level": "read"
+       }
+      }
+     ]
+    }
+   ],
+   "citations": [
+    {
+     "src": "S1",
+     "loc": "Part I ch.XI p.88-90",
+     "level": "read"
+    },
+    {
+     "src": "S2",
+     "loc": "Part II ch.XIII 'The Girdle of Venus'",
+     "level": "toc"
+    }
+   ],
+   "app_safe_reading": "emotional sensitivity",
+   "avoid_claims": [
+    "hysteria, sexuality"
+   ],
+   "sensitivity": [
+    "sexuality",
+    "mental-illness"
+   ],
+   "region_ref": "palm-regions.json#lines/girdle_of_venus",
+   "auto_detect": "NOT auto-detected (thin, close to heart line)",
+   "confidence": "low"
+  },
+  {
+   "id": "mars_line",
+   "kind": "line",
+   "name_en": "Line of Mars (inner life line)",
+   "name_hi": "मंगल रेखा",
+   "name_roman": "Mangal Rekha",
+   "tier": "minor",
+   "aliases": [],
+   "summary": "A sister line running just inside the life line from the lower Mars area. Reinforces the life line.",
+   "attributes": [
+    {
+     "attribute": "presence",
+     "values": [
+      {
+       "value": "close, parallel to life line",
+       "effect": "extra stamina and resistance",
+       "cite": {
+        "src": "S2",
+        "loc": "Part II ch.XIV 'Line of Mars'",
+        "level": "read"
+       }
+      },
+      {
+       "value": "drifting away into the Venus mount",
+       "effect": "then it is an influence line, not a Mars line",
+       "cite": {
+        "src": "S2",
+        "loc": "Part II ch.XIV",
+        "level": "read"
+       }
+      }
+     ]
+    }
+   ],
+   "citations": [
+    {
+     "src": "S1",
+     "loc": "Part I ch.IV 'The Line of Mars' p.44-46",
+     "level": "toc"
+    },
+    {
+     "src": "S2",
+     "loc": "Part II ch.XIV 'Line of Mars'",
+     "level": "read"
+    }
+   ],
+   "app_safe_reading": "extra stamina",
+   "avoid_claims": [],
+   "sensitivity": [],
+   "region_ref": "palm-regions.json#lines/mars_line",
+   "auto_detect": "auto, strict gate; rare",
+   "confidence": "medium"
+  },
+  {
+   "id": "intuition",
+   "kind": "line",
+   "name_en": "Line of intuition",
+   "name_hi": "अंतर्ज्ञान रेखा",
+   "name_roman": "Antargyan Rekha (uncertain)",
+   "tier": "minor",
+   "aliases": [],
+   "summary": "A faint crescent along the little-finger edge toward the Moon mount. Read as sensitivity to hunches.",
+   "attributes": [
+    {
+     "attribute": "presence",
+     "values": [
+      {
+       "value": "clear crescent",
+       "effect": "strong intuition",
+       "cite": {
+        "src": "S1",
+        "loc": "Part I ch.XII p.92",
+        "level": "toc"
+       }
+      }
+     ]
+    }
+   ],
+   "citations": [
+    {
+     "src": "S1",
+     "loc": "Part I ch.XII 'The Line of Intuition' p.92",
+     "level": "toc"
+    }
+   ],
+   "app_safe_reading": "trusts hunches",
+   "avoid_claims": [],
+   "sensitivity": [],
+   "region_ref": "palm-regions.json#lines/intuition",
+   "auto_detect": "NOT auto-detected",
+   "confidence": "low"
+  },
+  {
+   "id": "ring_of_saturn",
+   "kind": "line",
+   "name_en": "Ring of Saturn",
+   "name_hi": "शनि मुद्रिका",
+   "name_roman": "Shani Mudrika (uncertain)",
+   "tier": "minor",
+   "aliases": [],
+   "summary": "A rare semicircle across the Saturn mount. Cheiro: not a good sign.",
+   "attributes": [
+    {
+     "attribute": "presence",
+     "values": [
+      {
+       "value": "present",
+       "effect": "withdrawn, solitary streak (Cheiro: unfortunate; reframe as reflective)",
+       "cite": {
+        "src": "S1",
+        "loc": "Part I ch.XI p.90",
+        "level": "read"
+       }
+      }
+     ]
+    }
+   ],
+   "citations": [
+    {
+     "src": "S1",
+     "loc": "Part I ch.XI p.90",
+     "level": "read"
+    }
+   ],
+   "app_safe_reading": "reflective, solitary streak",
+   "avoid_claims": [
+    "misfortune"
+   ],
+   "sensitivity": [],
+   "region_ref": "palm-regions.json#mounts/saturn",
+   "auto_detect": "NOT auto-detected",
+   "confidence": "low"
+  },
+  {
+   "id": "ring_of_solomon",
+   "kind": "line",
+   "name_en": "Ring of Solomon & mystic cross",
+   "name_hi": "गुरु मुद्रिका / रहस्य क्रॉस",
+   "name_roman": "Guru Mudrika (uncertain)",
+   "tier": "minor",
+   "aliases": [],
+   "summary": "A semicircle around the Jupiter base (Ring of Solomon) and a cross between head and heart lines (mystic cross). Both read as interest in the hidden or spiritual.",
+   "attributes": [
+    {
+     "attribute": "presence",
+     "values": [
+      {
+       "value": "ring around Jupiter",
+       "effect": "wisdom, a teacher's temperament",
+       "cite": {
+        "src": "S1",
+        "loc": "Part I ch.XIII p.96",
+        "level": "toc"
+       }
+      },
+      {
+       "value": "mystic cross in the palm hollow",
+       "effect": "pull toward mysticism and the occult",
+       "cite": {
+        "src": "S1",
+        "loc": "Part I ch.XIII p.95",
+        "level": "toc"
+       }
+      }
+     ]
+    }
+   ],
+   "citations": [
+    {
+     "src": "S1",
+     "loc": "Part I ch.XIII p.95-96",
+     "level": "toc"
+    }
+   ],
+   "app_safe_reading": "spiritual curiosity",
+   "avoid_claims": [],
+   "sensitivity": [],
+   "region_ref": "palm-regions.json#mounts/jupiter",
+   "auto_detect": "mystic cross: see marks",
+   "confidence": "low"
+  },
+  {
+   "id": "travel_lines",
+   "kind": "line",
+   "name_en": "Travel lines",
+   "name_hi": "यात्रा रेखा",
+   "name_roman": "Yatra Rekha",
+   "tier": "minor",
+   "aliases": [],
+   "summary": "Short horizontal lines from the little-finger edge across the Moon mount. Read as journeys.",
+   "attributes": [
+    {
+     "attribute": "presence",
+     "values": [
+      {
+       "value": "clear lines",
+       "effect": "love of travel and change of scene",
+       "cite": {
+        "src": "S1",
+        "loc": "Part I ch.XIV p.97-100",
+        "level": "toc"
+       }
+      }
+     ]
+    }
+   ],
+   "citations": [
+    {
+     "src": "S1",
+     "loc": "Part I ch.XIV p.97-100",
+     "level": "toc"
+    }
+   ],
+   "app_safe_reading": "wanderlust",
+   "avoid_claims": [
+    "accident or danger claims"
+   ],
+   "sensitivity": [],
+   "region_ref": "palm-regions.json#mounts/luna_moon",
+   "auto_detect": "NOT auto-detected",
+   "confidence": "low"
+  },
+  {
+   "id": "children_lines",
+   "kind": "line",
+   "name_en": "Children lines",
+   "name_hi": "संतान रेखा",
+   "name_roman": "Santan Rekha",
+   "tier": "minor",
+   "aliases": [],
+   "summary": "Tiny vertical lines rising from marriage lines; the classics also use barley/line marks at the thumb root.",
+   "attributes": [
+    {
+     "attribute": "count",
+     "values": [
+      {
+       "value": "lines at the thumb root",
+       "effect": "BS 68.49: big lines = sons, small = daughters",
+       "cite": {
+        "src": "S3",
+        "loc": "Brihat Samhita 68.49",
+        "level": "read"
+       }
+      },
+      {
+       "value": "marks above marriage lines",
+       "effect": "number/sex of children in Cheiro",
+       "cite": {
+        "src": "S1",
+        "loc": "Part I ch.IX p.81-82",
+        "level": "toc"
+       }
+      }
+     ]
+    }
+   ],
+   "citations": [
+    {
+     "src": "S1",
+     "loc": "Part I ch.IX p.81-82",
+     "level": "toc"
+    },
+    {
+     "src": "S3",
+     "loc": "Brihat Samhita 68.49",
+     "level": "read"
+    },
+    {
+     "src": "S3",
+     "loc": "Brihat Samhita 68.42",
+     "level": "read"
+    }
+   ],
+   "app_safe_reading": "OMIT",
+   "avoid_claims": [
+    "any statement about having, not having, or the sex of children"
+   ],
+   "sensitivity": [
+    "fertility"
+   ],
+   "region_ref": null,
+   "auto_detect": "never",
+   "confidence": "low",
+   "note": "Record only. The app policy is to leave this feature out: it is sensitive and not detectable."
+  },
+  {
+   "id": "via_lasciva",
+   "kind": "line",
+   "name_en": "Via Lasciva",
+   "name_hi": "-",
+   "name_roman": "-",
+   "tier": "minor",
+   "aliases": [],
+   "summary": "A crescent parallel to the Mercury edge. Cheiro links it to excess. Recorded for completeness; omit from the app.",
+   "attributes": [
+    {
+     "attribute": "presence",
+     "values": [
+      {
+       "value": "present",
+       "effect": "omit",
+       "cite": {
+        "src": "S1",
+        "loc": "Part I ch.XII p.93",
+        "level": "toc"
+       }
+      }
+     ]
+    }
+   ],
+   "citations": [
+    {
+     "src": "S1",
+     "loc": "Part I ch.XII p.93",
+     "level": "toc"
+    }
+   ],
+   "app_safe_reading": "OMIT",
+   "avoid_claims": [
+    "addiction or sexual claims"
+   ],
+   "sensitivity": [
+    "sexuality",
+    "addiction"
+   ],
+   "region_ref": null,
+   "auto_detect": "never",
+   "confidence": "low"
+  },
+  {
+   "id": "classical_ayu_line",
+   "kind": "line",
+   "name_en": "Classical 'age' line (line to the base of the index finger)",
+   "name_hi": "आयु रेखा (शास्त्रीय)",
+   "name_roman": "Ayu Rekha (classical sense)",
+   "tier": "classical",
+   "aliases": [],
+   "summary": "In Brihat Samhita 68.50, a line reaching the root of the forefinger signals a life of 100 years; shorter lines scale the figure down. This is one source of the 'life line = lifespan' idea.",
+   "attributes": [
+    {
+     "attribute": "length",
+     "values": [
+      {
+       "value": "reaches the root of the index finger",
+       "effect": "100 years, scaled by length (classical lifespan rule)",
+       "cite": {
+        "src": "S3",
+        "loc": "Brihat Samhita 68.50",
+        "level": "read"
+       }
+      },
+      {
+       "value": "cut/broken lines",
+       "effect": "classical text associates breaks with early decline",
+       "cite": {
+        "src": "S3",
+        "loc": "Brihat Samhita 68.50",
+        "level": "read"
+       }
+      }
+     ]
+    }
+   ],
+   "citations": [
+    {
+     "src": "S3",
+     "loc": "Brihat Samhita 68.50",
+     "level": "read"
+    }
+   ],
+   "app_safe_reading": "OMIT, or show only as a 'what the old text says' curiosity card",
+   "avoid_claims": [
+    "lifespan"
+   ],
+   "sensitivity": [
+    "death"
+   ],
+   "region_ref": null,
+   "auto_detect": "never",
+   "confidence": "high"
+  },
+  {
+   "id": "classical_wrist_lines",
+   "kind": "line",
+   "name_en": "Three lines from the wrist to mid-palm",
+   "name_hi": "तीन रेखाएँ (कलाई से हथेली)",
+   "name_roman": "Trirekha",
+   "tier": "classical",
+   "aliases": [],
+   "summary": "BS 68.44: three lines rising from the wrist and reaching the middle of the palm signal kingship; two fish marks in the palm-middle signal one who feeds many people daily.",
+   "attributes": [
+    {
+     "attribute": "count_and_reach",
+     "values": [
+      {
+       "value": "three lines from wrist to palm middle",
+       "effect": "'royal' bearing, authority (classical)",
+       "cite": {
+        "src": "S3",
+        "loc": "Brihat Samhita 68.44",
+        "level": "read"
+       }
+      },
+      {
+       "value": "two fish marks mid-palm",
+       "effect": "generosity: feeds many (classical)",
+       "cite": {
+        "src": "S3",
+        "loc": "Brihat Samhita 68.44",
+        "level": "read"
+       }
+      }
+     ]
+    }
+   ],
+   "citations": [
+    {
+     "src": "S3",
+     "loc": "Brihat Samhita 68.44",
+     "level": "read"
+    }
+   ],
+   "app_safe_reading": "fun 'royal marks' achievement card",
+   "avoid_claims": [],
+   "sensitivity": [],
+   "region_ref": "palm-regions.json#lines/bracelets",
+   "auto_detect": "would need wrist lines + fish detection; Layer-2 trace",
+   "confidence": "medium"
+  },
+  {
+   "id": "line_quality_general",
+   "kind": "line-attribute",
+   "name_en": "General line quality (all lines)",
+   "name_hi": "-",
+   "name_roman": "-",
+   "tier": "general",
+   "aliases": [],
+   "summary": "Rules that apply to every line: depth, colour, texture.",
+   "attributes": [
+    {
+     "attribute": "depth_and_gloss",
+     "values": [
+      {
+       "value": "glossy, deep, clear",
+       "effect": "prosperity, clarity (BS 68.43); Cheiro: clear thin deep = nerve and will",
+       "cite": {
+        "src": "S3",
+        "loc": "Brihat Samhita 68.43",
+        "level": "read"
+       }
+      },
+      {
+       "value": "broad, coarse",
+       "effect": "robust constitutional type rather than mental type",
+       "cite": {
+        "src": "S1",
+        "loc": "Part I ch.II p.8-15",
+        "level": "read"
+       }
+      },
+      {
+       "value": "faint, sparse, many fine lines",
+       "effect": "a sensitive, nervous, or restless type (modern)",
+       "cite": {
+        "src": "S7",
+        "loc": "modern Indian guides",
+        "level": "web"
+       }
+      }
+     ]
+    },
+    {
+     "attribute": "colour",
+     "values": [
+      {
+       "value": "pink, well-coloured",
+       "effect": "healthy, steady",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.VII p.67",
+        "level": "read"
+       }
+      },
+      {
+       "value": "pale",
+       "effect": "less vigour (Cheiro)",
+       "cite": {
+        "src": "S1",
+        "loc": "Part II ch.VII 'Mount of Mars' region",
+        "level": "toc"
+       }
+      }
+     ]
+    }
+   ],
+   "citations": [
+    {
+     "src": "S3",
+     "loc": "Brihat Samhita 68.43",
+     "level": "read"
+    },
+    {
+     "src": "S1",
+     "loc": "Part I ch.II p.8-15",
+     "level": "read"
+    },
+    {
+     "src": "S1",
+     "loc": "Part I ch.XVII 'Different classes of lines' p.107-109",
+     "level": "toc"
+    }
+   ],
+   "app_safe_reading": null,
+   "avoid_claims": [],
+   "sensitivity": [],
+   "region_ref": null,
+   "auto_detect": "ridge strength per line is a free by-product of the auto-labeler",
+   "confidence": "medium"
+  },
+  {
+   "id": "age_markers",
+   "kind": "line-attribute",
+   "name_en": "Age along the lines (timing)",
+   "name_hi": "-",
+   "name_roman": "-",
+   "tier": "general",
+   "aliases": [],
+   "summary": "Cheiro divides lines into age sections (mount boundaries on the life line; head-line and heart-line crossings on the fate line). Timing is the weakest, most contested part of the tradition.",
+   "attributes": [
+    {
+     "attribute": "method",
+     "values": [
+      {
+       "value": "sections between finger-base projections on the life line",
+       "effect": "Cheiro's age scale",
+       "cite": {
+        "src": "S1",
+        "loc": "Part I ch.XIX 'How to tell time' p.112-116",
+        "level": "toc"
+       }
+      },
+      {
+       "value": "head-line crossing on fate line ~ age 35",
+       "effect": "popular modern rule",
+       "cite": {
+        "src": "S7",
+        "loc": "Vivahika",
+        "level": "web"
+       }
+      }
+     ]
+    }
+   ],
+   "citations": [
+    {
+     "src": "S1",
+     "loc": "Part I ch.XIX p.112-116",
+     "level": "toc"
+    },
+    {
+     "src": "S7",
+     "loc": "Vivahika, PalmTalks",
+     "level": "web"
+    }
+   ],
+   "app_safe_reading": "OMIT or 'life chapters' framing without ages",
+   "avoid_claims": [
+    "dated predictions"
+   ],
+   "sensitivity": [],
+   "region_ref": null,
+   "auto_detect": "",
+   "confidence": "low"
+  },
+  {
+   "id": "jupiter",
+   "kind": "mount",
+   "name_en": "Mount of Jupiter (index finger base)",
+   "name_hi": "गुरु पर्वत",
+   "name_roman": "Guru Parvat",
+   "tier": null,
+   "aliases": [],
+   "summary": "Ambition, leadership, organising ability.",
+   "attributes": [
+    {
+     "attribute": "development",
+     "values": [
+      {
+       "value": "well developed",
+       "effect": "desire to lead and organise; best with a clear, long head line",
+       "cite": {
+        "src": "S1",
+        "loc": "Part II ch.VII p.150",
+        "level": "read"
+       }
+      },
+      {
+       "value": "flat",
+       "effect": "avoids leadership, little ambition (finger-length rules agree)",
+       "cite": {
+        "src": "S1",
+        "loc": "Part II ch.III p.133",
+        "level": "read"
+       }
+      },
+      {
+       "value": "excessive",
+       "effect": "pride, vanity, self-opinion when the head line is poor",
+       "cite": {
+        "src": "S1",
+        "loc": "Part II ch.VII p.150",
+        "level": "read"
+       }
+      }
+     ]
+    },
+    {
+     "attribute": "birth_month_link",
+     "values": [
+      {
+       "value": "born Nov 21-Dec 20",
+       "effect": "positive Jupiter: ambitious, fearless; may seem blunt",
+       "cite": {
+        "src": "S1",
+        "loc": "Part II ch.VII p.150",
+        "level": "read"
+       }
+      }
+     ]
+    },
+    {
+     "attribute": "marks",
+     "values": [
+      {
+       "value": "star",
+       "effect": "added honour, power and position",
+       "cite": {
+        "src": "S1",
+        "loc": "Part I ch.XVI p.104",
+        "level": "read"
+       }
+      },
+      {
+       "value": "cross",
+       "effect": "the one favourable cross: a fortunate affection",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.XVI p.104",
+        "level": "read"
+       }
+      },
+      {
+       "value": "grille",
+       "effect": "obstacles to ambition",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.XV p.101",
+        "level": "read"
+       }
+      }
+     ]
+    }
+   ],
+   "citations": [
+    {
+     "src": "S1",
+     "loc": "Part II ch.VII p.150-153",
+     "level": "read"
+    },
+    {
+     "src": "S2",
+     "loc": "Part I ch.XIX",
+     "level": "toc"
+    },
+    {
+     "src": "S3",
+     "loc": "Brihat Samhita 68.42",
+     "level": "read"
+    }
+   ],
+   "app_safe_reading": "leadership and ambition",
+   "avoid_claims": [],
+   "sensitivity": [],
+   "region_ref": "palm-regions.json#mounts/jupiter",
+   "auto_detect": "region from joints (no detection needed); development needs 3D depth or shading",
+   "confidence": "high"
+  },
+  {
+   "id": "saturn",
+   "kind": "mount",
+   "name_en": "Mount of Saturn (middle finger base)",
+   "name_hi": "शनि पर्वत",
+   "name_roman": "Shani Parvat",
+   "tier": null,
+   "aliases": [],
+   "summary": "Seriousness, prudence, love of solitude, belief in fate.",
+   "attributes": [
+    {
+     "attribute": "development",
+     "values": [
+      {
+       "value": "well developed",
+       "effect": "quiet determination, serious studies, solitude",
+       "cite": {
+        "src": "S1",
+        "loc": "Part II ch.VIII p.154",
+        "level": "read"
+       }
+      },
+      {
+       "value": "absent/flat",
+       "effect": "light-hearted, frivolous outlook",
+       "cite": {
+        "src": "S1",
+        "loc": "Part II ch.VIII p.154",
+        "level": "read"
+       }
+      },
+      {
+       "value": "excessive",
+       "effect": "exaggerates every Saturn quality",
+       "cite": {
+        "src": "S1",
+        "loc": "Part II ch.VIII p.154",
+        "level": "read"
+       }
+      }
+     ]
+    },
+    {
+     "attribute": "birth_month_link",
+     "values": [
+      {
+       "value": "born Dec 21-Jan 20",
+       "effect": "positive Saturn: strong will, feels isolated",
+       "cite": {
+        "src": "S1",
+        "loc": "Part II ch.VIII p.154",
+        "level": "read"
+       }
+      }
+     ]
+    },
+    {
+     "attribute": "marks",
+     "values": [
+      {
+       "value": "star",
+       "effect": "Cheiro: the one fearful star; omit",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.XVI p.104",
+        "level": "read"
+       }
+      },
+      {
+       "value": "cross",
+       "effect": "Cheiro: violent death; omit",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.XVI p.104",
+        "level": "read"
+       }
+      }
+     ]
+    }
+   ],
+   "citations": [
+    {
+     "src": "S1",
+     "loc": "Part II ch.VIII p.154-157",
+     "level": "read"
+    },
+    {
+     "src": "S2",
+     "loc": "Part I ch.XX",
+     "level": "toc"
+    }
+   ],
+   "app_safe_reading": "focus, prudence, reflective streak",
+   "avoid_claims": [
+    "violent death, tragic destiny"
+   ],
+   "sensitivity": [
+    "death"
+   ],
+   "region_ref": "palm-regions.json#mounts/saturn",
+   "auto_detect": "region from joints",
+   "confidence": "high"
+  },
+  {
+   "id": "sun_apollo",
+   "kind": "mount",
+   "name_en": "Mount of the Sun / Apollo (ring finger base)",
+   "name_hi": "सूर्य पर्वत",
+   "name_roman": "Surya Parvat",
+   "tier": null,
+   "aliases": [],
+   "summary": "Glory, brightness, artistic taste, desire to shine.",
+   "attributes": [
+    {
+     "attribute": "development",
+     "values": [
+      {
+       "value": "well developed",
+       "effect": "glory, publicity, enthusiasm for beauty, generous tastes; always a good mount",
+       "cite": {
+        "src": "S1",
+        "loc": "Part II ch.IX p.158",
+        "level": "read"
+       }
+      }
+     ]
+    },
+    {
+     "attribute": "birth_month_link",
+     "values": [
+      {
+       "value": "born Jul 21-Aug 20",
+       "effect": "positive Sun: the 'heart-force' type",
+       "cite": {
+        "src": "S1",
+        "loc": "Part II ch.IX p.158",
+        "level": "read"
+       }
+      }
+     ]
+    },
+    {
+     "attribute": "marks",
+     "values": [
+      {
+       "value": "star",
+       "effect": "riches and glory, often a public life",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.XVI p.104",
+        "level": "read"
+       }
+      },
+      {
+       "value": "circle",
+       "effect": "the only favourable place for a circle",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.XV p.101",
+        "level": "read"
+       }
+      }
+     ]
+    }
+   ],
+   "citations": [
+    {
+     "src": "S1",
+     "loc": "Part II ch.IX p.158-161",
+     "level": "read"
+    },
+    {
+     "src": "S2",
+     "loc": "Part I ch.XXI",
+     "level": "toc"
+    }
+   ],
+   "app_safe_reading": "creativity, charm",
+   "avoid_claims": [],
+   "sensitivity": [],
+   "region_ref": "palm-regions.json#mounts/sun_apollo",
+   "auto_detect": "region from joints",
+   "confidence": "high"
+  },
+  {
+   "id": "mercury",
+   "kind": "mount",
+   "name_en": "Mount of Mercury (little finger base)",
+   "name_hi": "बुध पर्वत",
+   "name_roman": "Budh Parvat",
+   "tier": null,
+   "aliases": [],
+   "summary": "Quickness of mind, wit, eloquence, commerce and science.",
+   "attributes": [
+    {
+     "attribute": "development",
+     "values": [
+      {
+       "value": "well developed with a good head line",
+       "effect": "mental aptitude and success",
+       "cite": {
+        "src": "S1",
+        "loc": "Part II ch.X p.162",
+        "level": "read"
+       }
+      },
+      {
+       "value": "with a weak head line",
+       "effect": "amplifies restlessness and unreliability",
+       "cite": {
+        "src": "S1",
+        "loc": "Part II ch.X p.162",
+        "level": "read"
+       }
+      }
+     ]
+    },
+    {
+     "attribute": "birth_month_link",
+     "values": [
+      {
+       "value": "born May 21-Jun 20",
+       "effect": "positive Mercury",
+       "cite": {
+        "src": "S1",
+        "loc": "Part II ch.X p.162",
+        "level": "read"
+       }
+      }
+     ]
+    },
+    {
+     "attribute": "marks",
+     "values": [
+      {
+       "value": "star",
+       "effect": "unusual success in commerce, science or eloquence",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.XVI p.104",
+        "level": "read"
+       }
+      },
+      {
+       "value": "cross",
+       "effect": "Cheiro: dishonesty; omit",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.XVI p.104",
+        "level": "read"
+       }
+      }
+     ]
+    }
+   ],
+   "citations": [
+    {
+     "src": "S1",
+     "loc": "Part II ch.X p.162-167",
+     "level": "read"
+    },
+    {
+     "src": "S2",
+     "loc": "Part I ch.XXII",
+     "level": "toc"
+    }
+   ],
+   "app_safe_reading": "communication, business instinct",
+   "avoid_claims": [
+    "dishonesty"
+   ],
+   "sensitivity": [],
+   "region_ref": "palm-regions.json#mounts/mercury",
+   "auto_detect": "region from joints",
+   "confidence": "high"
+  },
+  {
+   "id": "mars_lower",
+   "kind": "mount",
+   "name_en": "Lower Mount of Mars (inside the life-line start)",
+   "name_hi": "मंगल पर्वत (निचला)",
+   "name_roman": "Mangal Parvat (lower)",
+   "tier": null,
+   "aliases": [],
+   "summary": "Benham: aggressive spirit, the 'attacker'. In Cheiro this is the 'first' Mars position (physical Mars, under the upper life line).",
+   "attributes": [
+    {
+     "attribute": "development",
+     "values": [
+      {
+       "value": "large",
+       "effect": "aggression, courage to start a fight or a project",
+       "cite": {
+        "src": "S2",
+        "loc": "Part I ch.XXIII 'Mount of Mars'",
+        "level": "read"
+       }
+      },
+      {
+       "value": "small",
+       "effect": "less aggressive, avoids confrontation",
+       "cite": {
+        "src": "S2",
+        "loc": "Part I ch.XXIII",
+        "level": "read"
+       }
+      }
+     ]
+    },
+    {
+     "attribute": "birth_month_link",
+     "values": [
+      {
+       "value": "born Mar 21-Apr 21",
+       "effect": "positive Mars in Cheiro",
+       "cite": {
+        "src": "S1",
+        "loc": "Part II ch.VI p.144",
+        "level": "read"
+       }
+      }
+     ]
+    },
+    {
+     "attribute": "marks",
+     "values": [
+      {
+       "value": "star, triangle, circle, single vertical line, trident, square",
+       "effect": "strengthen the mount",
+       "cite": {
+        "src": "S2",
+        "loc": "Part I ch.XXIII",
+        "level": "read"
+       }
+      },
+      {
+       "value": "cross-bar, cross, island, dot, grille",
+       "effect": "show defects of health or character (reframe as 'friction')",
+       "cite": {
+        "src": "S2",
+        "loc": "Part I ch.XXIII",
+        "level": "read"
+       }
+      }
+     ]
+    }
+   ],
+   "citations": [
+    {
+     "src": "S1",
+     "loc": "Part II ch.VI p.144-149",
+     "level": "read"
+    },
+    {
+     "src": "S2",
+     "loc": "Part I ch.XXIII",
+     "level": "read"
+    }
+   ],
+   "app_safe_reading": "courage and initiative",
+   "avoid_claims": [],
+   "sensitivity": [],
+   "region_ref": "palm-regions.json#mounts/mars_lower",
+   "auto_detect": "region from joints",
+   "confidence": "medium"
+  },
+  {
+   "id": "mars_upper",
+   "kind": "mount",
+   "name_en": "Upper Mount of Mars (ulnar edge between heart and head lines)",
+   "name_hi": "मंगल पर्वत (ऊपरी)",
+   "name_roman": "Mangal Parvat (upper)",
+   "tier": null,
+   "aliases": [],
+   "summary": "Benham: resistance, the 'defender'. In Cheiro this is the 'second' (mental, negative) Mars.",
+   "attributes": [
+    {
+     "attribute": "development",
+     "values": [
+      {
+       "value": "large",
+       "effect": "resistance, composure, standing one's ground",
+       "cite": {
+        "src": "S2",
+        "loc": "Part I ch.XXIII",
+        "level": "read"
+       }
+      }
+     ]
+    },
+    {
+     "attribute": "birth_month_link",
+     "values": [
+      {
+       "value": "born Oct 21-Nov 21",
+       "effect": "negative Mars in Cheiro",
+       "cite": {
+        "src": "S1",
+        "loc": "Part II ch.VI p.144",
+        "level": "read"
+       }
+      }
+     ]
+    }
+   ],
+   "citations": [
+    {
+     "src": "S1",
+     "loc": "Part II ch.VI p.144-149",
+     "level": "read"
+    },
+    {
+     "src": "S2",
+     "loc": "Part I ch.XXIII",
+     "level": "read"
+    }
+   ],
+   "app_safe_reading": "composure under pressure",
+   "avoid_claims": [],
+   "sensitivity": [],
+   "region_ref": "palm-regions.json#mounts/mars_upper",
+   "auto_detect": "region from joints",
+   "confidence": "medium"
+  },
+  {
+   "id": "plain_of_mars",
+   "kind": "mount",
+   "name_en": "Plain of Mars (palm hollow)",
+   "name_hi": "मंगल क्षेत्र",
+   "name_roman": "Mangal Kshetra",
+   "tier": null,
+   "aliases": [],
+   "summary": "Centre hollow. Stars/crosses/grilles here raise irritability (Benham).",
+   "attributes": [
+    {
+     "attribute": "depth",
+     "values": [
+      {
+       "value": "deeply hollow and lined with crossing lines",
+       "effect": "temper, irritability",
+       "cite": {
+        "src": "S2",
+        "loc": "Part I ch.XXIII",
+        "level": "read"
+       }
+      }
+     ]
+    }
+   ],
+   "citations": [
+    {
+     "src": "S2",
+     "loc": "Part I ch.XXIII",
+     "level": "read"
+    }
+   ],
+   "app_safe_reading": "restless energy",
+   "avoid_claims": [],
+   "sensitivity": [],
+   "region_ref": "palm-regions.json#mounts/plain_of_mars",
+   "auto_detect": "region from joints",
+   "confidence": "medium"
+  },
+  {
+   "id": "luna_moon",
+   "kind": "mount",
+   "name_en": "Mount of the Moon / Luna (ulnar base)",
+   "name_hi": "चंद्र पर्वत",
+   "name_roman": "Chandra Parvat",
+   "tier": null,
+   "aliases": [],
+   "summary": "Imagination, romance, poetry, travel, inventiveness.",
+   "attributes": [
+    {
+     "attribute": "development",
+     "values": [
+      {
+       "value": "well developed",
+       "effect": "strong imagination, romantic ideals, inventive",
+       "cite": {
+        "src": "S1",
+        "loc": "Part II ch.XI p.168",
+        "level": "read"
+       }
+      }
+     ]
+    },
+    {
+     "attribute": "birth_month_link",
+     "values": [
+      {
+       "value": "born Jun 21-Jul 20",
+       "effect": "positive Moon",
+       "cite": {
+        "src": "S1",
+        "loc": "Part II ch.XI p.168",
+        "level": "read"
+       }
+      }
+     ]
+    },
+    {
+     "attribute": "marks",
+     "values": [
+      {
+       "value": "star",
+       "effect": "celebrity through imagination or invention",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.XVI p.104",
+        "level": "read"
+       }
+      },
+      {
+       "value": "circle or low cross",
+       "effect": "Cheiro: drowning; omit",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.XV-XVI",
+        "level": "read"
+       }
+      }
+     ]
+    }
+   ],
+   "citations": [
+    {
+     "src": "S1",
+     "loc": "Part II ch.XI p.168-172",
+     "level": "read"
+    },
+    {
+     "src": "S2",
+     "loc": "Part I ch.XXIV",
+     "level": "toc"
+    }
+   ],
+   "app_safe_reading": "imagination, romance, creative travel",
+   "avoid_claims": [
+    "death by drowning"
+   ],
+   "sensitivity": [
+    "death"
+   ],
+   "region_ref": "palm-regions.json#mounts/luna_moon",
+   "auto_detect": "region from joints",
+   "confidence": "high"
+  },
+  {
+   "id": "venus",
+   "kind": "mount",
+   "name_en": "Mount of Venus (thumb base, inside the life line)",
+   "name_hi": "शुक्र पर्वत",
+   "name_roman": "Shukra Parvat",
+   "tier": null,
+   "aliases": [],
+   "summary": "Love of companionship, beauty, art, warmth.",
+   "attributes": [
+    {
+     "attribute": "development",
+     "values": [
+      {
+       "value": "well formed, not too large",
+       "effect": "desire for love and companionship, artistic, emotional",
+       "cite": {
+        "src": "S1",
+        "loc": "Part II ch.XII p.173",
+        "level": "read"
+       }
+      },
+      {
+       "value": "large",
+       "effect": "Cheiro: passion and sensuality; reframe as warmth and vitality",
+       "cite": {
+        "src": "S1",
+        "loc": "Part II ch.XII p.173",
+        "level": "read"
+       }
+      },
+      {
+       "value": "flat or thin",
+       "effect": "cooler, more reserved warmth",
+       "cite": {
+        "src": "S1",
+        "loc": "Part II ch.XII p.173",
+        "level": "read"
+       }
+      }
+     ]
+    },
+    {
+     "attribute": "birth_month_link",
+     "values": [
+      {
+       "value": "born Apr 20-May 20",
+       "effect": "positive Venus",
+       "cite": {
+        "src": "S1",
+        "loc": "Part II ch.XII p.173",
+        "level": "read"
+       }
+      },
+      {
+       "value": "born Sep 21-Oct 20",
+       "effect": "negative Venus",
+       "cite": {
+        "src": "S1",
+        "loc": "Part II ch.XII p.173",
+        "level": "read"
+       }
+      }
+     ]
+    },
+    {
+     "attribute": "marks",
+     "values": [
+      {
+       "value": "star at the centre",
+       "effect": "success in attraction and charm",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.XVI p.104",
+        "level": "read"
+       }
+      }
+     ]
+    }
+   ],
+   "citations": [
+    {
+     "src": "S1",
+     "loc": "Part II ch.XII p.173-177",
+     "level": "read"
+    },
+    {
+     "src": "S2",
+     "loc": "Part I ch.XXV",
+     "level": "toc"
+    }
+   ],
+   "app_safe_reading": "warmth, love of beauty, artistic temperament",
+   "avoid_claims": [
+    "sensuality, passion levels"
+   ],
+   "sensitivity": [
+    "sexuality"
+   ],
+   "region_ref": "palm-regions.json#mounts/venus",
+   "auto_detect": "region from joints",
+   "confidence": "high"
+  },
+  {
+   "id": "rahu",
+   "kind": "mount",
+   "name_en": "Mount of Rahu (palm hollow above Ketu)",
+   "name_hi": "राहु पर्वत",
+   "name_roman": "Rahu Parvat",
+   "tier": null,
+   "aliases": [],
+   "summary": "Indian-system extra mount in the lower centre of the palm, just above Ketu (a 'dip' in the hollow). Position varies by teacher.",
+   "attributes": [
+    {
+     "attribute": "meaning",
+     "values": [
+      {
+       "value": "present, clean",
+       "effect": "unconventional drive, sudden turns of fortune (modern Indian reading)",
+       "cite": {
+        "src": "S7",
+        "loc": "Live Hindustan",
+        "level": "web"
+       }
+      }
+     ]
+    }
+   ],
+   "citations": [
+    {
+     "src": "S7",
+     "loc": "Live Hindustan 2025-06-15; Times of India (Ketu article)",
+     "level": "web"
+    }
+   ],
+   "app_safe_reading": "fun 'node' mount",
+   "avoid_claims": [],
+   "sensitivity": [],
+   "region_ref": "palm-regions.json#mounts/rahu",
+   "auto_detect": "region from joints; low confidence",
+   "confidence": "low",
+   "note": "Location is not agreed: sources disagree. The region is only a prior."
+  },
+  {
+   "id": "ketu",
+   "kind": "mount",
+   "name_en": "Mount of Ketu (lower centre, between Venus and Moon)",
+   "name_hi": "केतु पर्वत",
+   "name_roman": "Ketu Parvat",
+   "tier": null,
+   "aliases": [],
+   "summary": "Indian-system extra mount near the wrist, between Venus and Moon. Read as spirituality, detachment, past karma.",
+   "attributes": [
+    {
+     "attribute": "development",
+     "values": [
+      {
+       "value": "clean, slightly raised",
+       "effect": "intuition, spiritual calm, hidden help",
+       "cite": {
+        "src": "S7",
+        "loc": "Times of India Ketu article",
+        "level": "web"
+       }
+      },
+      {
+       "value": "crossed by many lines",
+       "effect": "restlessness, lack of direction",
+       "cite": {
+        "src": "S7",
+        "loc": "Times of India",
+        "level": "web"
+       }
+      }
+     ]
+    }
+   ],
+   "citations": [
+    {
+     "src": "S7",
+     "loc": "Times of India Ketu Parvat article; Live Hindustan",
+     "level": "web"
+    }
+   ],
+   "app_safe_reading": "spiritual calm",
+   "avoid_claims": [],
+   "sensitivity": [],
+   "region_ref": "palm-regions.json#mounts/ketu",
+   "auto_detect": "region from joints; low confidence",
+   "confidence": "low"
+  },
+  {
+   "id": "mount_development_general",
+   "kind": "mount-attribute",
+   "name_en": "Mount development & displacement (all mounts)",
+   "name_hi": "-",
+   "name_roman": "-",
+   "tier": "general",
+   "aliases": [],
+   "summary": "Rules for all mounts: a well-developed mount strengthens its trait, a flat one weakens it, an excessive one tips it into excess. A mount shifted toward a finger takes on that finger's traits.",
+   "attributes": [
+    {
+     "attribute": "development",
+     "values": [
+      {
+       "value": "well developed",
+       "effect": "trait strengthened",
+       "cite": {
+        "src": "S7",
+        "loc": "AstroWord 'Seven classical mounts'",
+        "level": "web"
+       }
+      },
+      {
+       "value": "flat",
+       "effect": "trait underdeveloped",
+       "cite": {
+        "src": "S7",
+        "loc": "AstroWord",
+        "level": "web"
+       }
+      },
+      {
+       "value": "overdeveloped",
+       "effect": "trait in excess (ego instead of confidence)",
+       "cite": {
+        "src": "S7",
+        "loc": "AstroWord",
+        "level": "web"
+       }
+      }
+     ]
+    },
+    {
+     "attribute": "combination",
+     "values": [
+      {
+       "value": "read mount together with the head line",
+       "effect": "Cheiro: Jupiter/Mercury/Mars readings depend on the head line",
+       "cite": {
+        "src": "S1",
+        "loc": "Part II ch.X p.162",
+        "level": "read"
+       }
+      }
+     ]
+    }
+   ],
+   "citations": [
+    {
+     "src": "S1",
+     "loc": "Part II ch.V 'The Mounts of the Hand' p.140-143",
+     "level": "toc"
+    },
+    {
+     "src": "S7",
+     "loc": "AstroWord",
+     "level": "web"
+    }
+   ],
+   "app_safe_reading": null,
+   "avoid_claims": [],
+   "sensitivity": [],
+   "region_ref": null,
+   "auto_detect": "needs 3D shape/shading: Quest depth is not available for the palm; use the 'trace/pinch' game to let the user rate it",
+   "confidence": "medium"
+  },
+  {
+   "id": "shape_square",
+   "kind": "hand-shape",
+   "name_en": "Square hand",
+   "name_hi": "चौकोर हाथ",
+   "name_roman": "Square",
+   "tier": "cheiro-seven",
+   "aliases": [],
+   "summary": "Cheiro's seven-type system: practical, logical, orderly, reliable.",
+   "attributes": [
+    {
+     "attribute": "traits",
+     "values": [
+      {
+       "value": "palm and fingers match this type",
+       "effect": "practical, logical, orderly, reliable",
+       "cite": {
+        "src": "S1",
+        "loc": "Part II ch.I p.119",
+        "level": "read"
+       }
+      }
+     ]
+    }
+   ],
+   "citations": [
+    {
+     "src": "S1",
+     "loc": "Part II ch.I p.119",
+     "level": "read"
+    }
+   ],
+   "app_safe_reading": "practical, logical, orderly, reliable",
+   "avoid_claims": [],
+   "sensitivity": [],
+   "region_ref": null,
+   "auto_detect": "classification needs finger-tip shape (spatulate/conic/pointed) and joint knottiness: not available from 21 joints. Use palm squareness + finger length (below) as a proxy and let the user confirm tip shape by choosing a silhouette.",
+   "confidence": "medium"
+  },
+  {
+   "id": "shape_spatulate",
+   "kind": "hand-shape",
+   "name_en": "Spatulate hand",
+   "name_hi": "चपटी/चम्मच उँगलियों वाला हाथ",
+   "name_roman": "Spatulate",
+   "tier": "cheiro-seven",
+   "aliases": [],
+   "summary": "Cheiro's seven-type system: energetic, original, active, restless.",
+   "attributes": [
+    {
+     "attribute": "traits",
+     "values": [
+      {
+       "value": "palm and fingers match this type",
+       "effect": "energetic, original, active, restless",
+       "cite": {
+        "src": "S1",
+        "loc": "Part II ch.I p.121",
+        "level": "toc"
+       }
+      }
+     ]
+    }
+   ],
+   "citations": [
+    {
+     "src": "S1",
+     "loc": "Part II ch.I p.121",
+     "level": "toc"
+    }
+   ],
+   "app_safe_reading": "energetic, original, active, restless",
+   "avoid_claims": [],
+   "sensitivity": [],
+   "region_ref": null,
+   "auto_detect": "classification needs finger-tip shape (spatulate/conic/pointed) and joint knottiness: not available from 21 joints. Use palm squareness + finger length (below) as a proxy and let the user confirm tip shape by choosing a silhouette.",
+   "confidence": "low"
+  },
+  {
+   "id": "shape_philosophic",
+   "kind": "hand-shape",
+   "name_en": "Philosophic (knotty) hand",
+   "name_hi": "दार्शनिक हाथ",
+   "name_roman": "Philosophic",
+   "tier": "cheiro-seven",
+   "aliases": [],
+   "summary": "Cheiro's seven-type system: thoughtful, analytical, independent.",
+   "attributes": [
+    {
+     "attribute": "traits",
+     "values": [
+      {
+       "value": "palm and fingers match this type",
+       "effect": "thoughtful, analytical, independent",
+       "cite": {
+        "src": "S1",
+        "loc": "Part II ch.I p.122",
+        "level": "toc"
+       }
+      }
+     ]
+    }
+   ],
+   "citations": [
+    {
+     "src": "S1",
+     "loc": "Part II ch.I p.122",
+     "level": "toc"
+    }
+   ],
+   "app_safe_reading": "thoughtful, analytical, independent",
+   "avoid_claims": [],
+   "sensitivity": [],
+   "region_ref": null,
+   "auto_detect": "classification needs finger-tip shape (spatulate/conic/pointed) and joint knottiness: not available from 21 joints. Use palm squareness + finger length (below) as a proxy and let the user confirm tip shape by choosing a silhouette.",
+   "confidence": "low"
+  },
+  {
+   "id": "shape_conic",
+   "kind": "hand-shape",
+   "name_en": "Conic hand",
+   "name_hi": "शंक्वाकार हाथ",
+   "name_roman": "Conic",
+   "tier": "cheiro-seven",
+   "aliases": [],
+   "summary": "Cheiro's seven-type system: artistic, impulsive, charming.",
+   "attributes": [
+    {
+     "attribute": "traits",
+     "values": [
+      {
+       "value": "palm and fingers match this type",
+       "effect": "artistic, impulsive, charming",
+       "cite": {
+        "src": "S1",
+        "loc": "Part II ch.I p.124",
+        "level": "toc"
+       }
+      }
+     ]
+    }
+   ],
+   "citations": [
+    {
+     "src": "S1",
+     "loc": "Part II ch.I p.124",
+     "level": "toc"
+    }
+   ],
+   "app_safe_reading": "artistic, impulsive, charming",
+   "avoid_claims": [],
+   "sensitivity": [],
+   "region_ref": null,
+   "auto_detect": "classification needs finger-tip shape (spatulate/conic/pointed) and joint knottiness: not available from 21 joints. Use palm squareness + finger length (below) as a proxy and let the user confirm tip shape by choosing a silhouette.",
+   "confidence": "low"
+  },
+  {
+   "id": "shape_psychic",
+   "kind": "hand-shape",
+   "name_en": "Psychic hand",
+   "name_hi": "सूक्ष्म/आदर्शवादी हाथ",
+   "name_roman": "Psychic",
+   "tier": "cheiro-seven",
+   "aliases": [],
+   "summary": "Cheiro's seven-type system: idealistic, refined, dreamy.",
+   "attributes": [
+    {
+     "attribute": "traits",
+     "values": [
+      {
+       "value": "palm and fingers match this type",
+       "effect": "idealistic, refined, dreamy",
+       "cite": {
+        "src": "S1",
+        "loc": "Part II ch.I p.125",
+        "level": "toc"
+       }
+      }
+     ]
+    }
+   ],
+   "citations": [
+    {
+     "src": "S1",
+     "loc": "Part II ch.I p.125",
+     "level": "toc"
+    }
+   ],
+   "app_safe_reading": "idealistic, refined, dreamy",
+   "avoid_claims": [],
+   "sensitivity": [],
+   "region_ref": null,
+   "auto_detect": "classification needs finger-tip shape (spatulate/conic/pointed) and joint knottiness: not available from 21 joints. Use palm squareness + finger length (below) as a proxy and let the user confirm tip shape by choosing a silhouette.",
+   "confidence": "low"
+  },
+  {
+   "id": "shape_mixed",
+   "kind": "hand-shape",
+   "name_en": "Mixed hand",
+   "name_hi": "मिश्रित हाथ",
+   "name_roman": "Mixed",
+   "tier": "cheiro-seven",
+   "aliases": [],
+   "summary": "Cheiro's seven-type system: versatile, adaptable.",
+   "attributes": [
+    {
+     "attribute": "traits",
+     "values": [
+      {
+       "value": "palm and fingers match this type",
+       "effect": "versatile, adaptable",
+       "cite": {
+        "src": "S1",
+        "loc": "Part II ch.I p.126",
+        "level": "toc"
+       }
+      }
+     ]
+    }
+   ],
+   "citations": [
+    {
+     "src": "S1",
+     "loc": "Part II ch.I p.126",
+     "level": "toc"
+    }
+   ],
+   "app_safe_reading": "versatile, adaptable",
+   "avoid_claims": [],
+   "sensitivity": [],
+   "region_ref": null,
+   "auto_detect": "classification needs finger-tip shape (spatulate/conic/pointed) and joint knottiness: not available from 21 joints. Use palm squareness + finger length (below) as a proxy and let the user confirm tip shape by choosing a silhouette.",
+   "confidence": "low"
+  },
+  {
+   "id": "shape_elementary",
+   "kind": "hand-shape",
+   "name_en": "Elementary hand",
+   "name_hi": "आदिम हाथ",
+   "name_roman": "Elementary",
+   "tier": "cheiro-seven",
+   "aliases": [],
+   "summary": "Cheiro's seven-type system: (Cheiro's text is demeaning: OMIT from the app).",
+   "attributes": [
+    {
+     "attribute": "traits",
+     "values": [
+      {
+       "value": "palm and fingers match this type",
+       "effect": "(Cheiro's text is demeaning: OMIT from the app)",
+       "cite": {
+        "src": "S1",
+        "loc": "Part II ch.I p.119",
+        "level": "read"
+       }
+      }
+     ]
+    }
+   ],
+   "citations": [
+    {
+     "src": "S1",
+     "loc": "Part II ch.I p.119",
+     "level": "read"
+    }
+   ],
+   "app_safe_reading": "OMIT",
+   "avoid_claims": [
+    "calling anyone 'brute'/'animal'"
+   ],
+   "sensitivity": [],
+   "region_ref": null,
+   "auto_detect": "classification needs finger-tip shape (spatulate/conic/pointed) and joint knottiness: not available from 21 joints. Use palm squareness + finger length (below) as a proxy and let the user confirm tip shape by choosing a silhouette.",
+   "confidence": "medium"
+  },
+  {
+   "id": "shape_elements",
+   "kind": "hand-shape",
+   "name_en": "Four hand elements (Earth / Air / Fire / Water)",
+   "name_hi": "पृथ्वी / वायु / अग्नि / जल हस्त",
+   "name_roman": "Prithvi / Vayu / Agni / Jal hand",
+   "tier": "element-four",
+   "aliases": [],
+   "summary": "Modern grouping used by most Indian and Western web guides: palm squareness x finger length. It is not in Cheiro or Benham (they use the seven types), and it echoes the five-element (pancha mahabhuta) scheme of the Samudrika tradition.",
+   "attributes": [
+    {
+     "attribute": "palm_shape_x_finger_length",
+     "values": [
+      {
+       "value": "square palm + short fingers = EARTH (Prithvi)",
+       "effect": "practical, grounded, reliable",
+       "cite": {
+        "src": "S7",
+        "loc": "AstroWord 'Hand Elements'",
+        "level": "web"
+       }
+      },
+      {
+       "value": "square palm + long fingers = AIR (Vayu)",
+       "effect": "intellectual, communicative, social",
+       "cite": {
+        "src": "S7",
+        "loc": "AstroWord 'Hand Elements'",
+        "level": "web"
+       }
+      },
+      {
+       "value": "rectangular palm + short fingers = FIRE (Agni)",
+       "effect": "energetic, spontaneous, driven",
+       "cite": {
+        "src": "S7",
+        "loc": "AstroWord 'Hand Elements'",
+        "level": "web"
+       }
+      },
+      {
+       "value": "rectangular palm + long fingers = WATER (Jal)",
+       "effect": "sensitive, intuitive, artistic",
+       "cite": {
+        "src": "S7",
+        "loc": "AstroWord 'Hand Elements'",
+        "level": "web"
+       }
+      }
+     ]
+    }
+   ],
+   "citations": [
+    {
+     "src": "S7",
+     "loc": "AstroWord 2026-09-26 'Hand Elements: Earth, Air, Fire, and Water'; Vivahika",
+     "level": "web"
+    }
+   ],
+   "app_safe_reading": "full",
+   "avoid_claims": [],
+   "sensitivity": [],
+   "region_ref": null,
+   "auto_detect": "MEASURED from joints: palm_squareness = |index-prox to pinky-prox| / |wrist to middle-prox|; finger_ratio = |middle-prox to middle-tip| / |wrist to middle-prox|. Thresholds are population medians over 600 palmar 11k-Hands images (2D, spread palm): square if palm_squareness >= 0.64; long if finger_ratio >= 0.92. Population-relative by design (conventional 'finger longer than palm' needs a wrist-crease landmark we do not have).",
+   "confidence": "medium",
+   "note": "Thresholds are camera-2D medians; re-fit on Quest 3D joint data (see calibration in palm-regions notes)."
+  },
+  {
+   "id": "finger_jupiter",
+   "kind": "finger",
+   "name_en": "Index finger (Jupiter finger)",
+   "name_hi": "तर्जनी (गुरु की उँगली)",
+   "name_roman": "Tarjani",
+   "tier": "finger",
+   "aliases": [],
+   "summary": "Long: love of power and command. Short: dislikes responsibility, less ambition.",
+   "attributes": [
+    {
+     "attribute": "length_vs_population",
+     "values": [
+      {
+       "value": "long",
+       "effect": "love of leading and commanding",
+       "cite": {
+        "src": "S1",
+        "loc": "Part II ch.III 'Fingers' p.133",
+        "level": "read"
+       }
+      },
+      {
+       "value": "short",
+       "effect": "avoids responsibility",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.III p.133",
+        "level": "read"
+       }
+      }
+     ]
+    }
+   ],
+   "citations": [
+    {
+     "src": "S1",
+     "loc": "Part II ch.III p.133",
+     "level": "read"
+    },
+    {
+     "src": "S2",
+     "loc": "Part I ch.XV-XVI long/short fingers",
+     "level": "toc"
+    }
+   ],
+   "app_safe_reading": "leadership style",
+   "avoid_claims": [],
+   "sensitivity": [],
+   "region_ref": null,
+   "auto_detect": "finger_ratio(index) = |index-prox to index-tip| / palm length; long if >= 0.89, short if <= 0.79 (p75/p25 over 600 images)",
+   "confidence": "high"
+  },
+  {
+   "id": "finger_saturn",
+   "kind": "finger",
+   "name_en": "Middle finger (Saturn finger)",
+   "name_hi": "मध्यमा (शनि की उँगली)",
+   "name_roman": "Madhyama",
+   "tier": "finger",
+   "aliases": [],
+   "summary": "Long: prudence, love of solitude, reserved studious nature. Short: frivolity.",
+   "attributes": [
+    {
+     "attribute": "length_vs_population",
+     "values": [
+      {
+       "value": "long",
+       "effect": "prudent, studious, reserved",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.III p.133",
+        "level": "read"
+       }
+      },
+      {
+       "value": "short",
+       "effect": "light-hearted, less serious",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.III p.133",
+        "level": "read"
+       }
+      }
+     ]
+    }
+   ],
+   "citations": [
+    {
+     "src": "S1",
+     "loc": "Part II ch.III p.133",
+     "level": "read"
+    }
+   ],
+   "app_safe_reading": "seriousness vs playfulness",
+   "avoid_claims": [],
+   "sensitivity": [],
+   "region_ref": null,
+   "auto_detect": "long if middle ratio >= 0.98, short if <= 0.87",
+   "confidence": "high"
+  },
+  {
+   "id": "finger_sun",
+   "kind": "finger",
+   "name_en": "Ring finger (Sun finger)",
+   "name_hi": "अनामिका (सूर्य की उँगली)",
+   "name_roman": "Anamika",
+   "tier": "finger",
+   "aliases": [],
+   "summary": "Long: love of beauty and fame; excessively long: notoriety, risk-taking and gambling. Short: dislikes these.",
+   "attributes": [
+    {
+     "attribute": "length_vs_population",
+     "values": [
+      {
+       "value": "long",
+       "effect": "love of the beautiful, wants recognition",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.III p.133",
+        "level": "read"
+       }
+      },
+      {
+       "value": "very long",
+       "effect": "risk-taking streak (Cheiro: gambling; reframe as bold)",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.III p.133",
+        "level": "read"
+       }
+      },
+      {
+       "value": "short",
+       "effect": "avoids the spotlight",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.III p.133",
+        "level": "read"
+       }
+      }
+     ]
+    }
+   ],
+   "citations": [
+    {
+     "src": "S1",
+     "loc": "Part II ch.III p.133",
+     "level": "read"
+    }
+   ],
+   "app_safe_reading": "taste and showmanship",
+   "avoid_claims": [],
+   "sensitivity": [],
+   "region_ref": null,
+   "auto_detect": "long if ring ratio >= 0.91; very long if >= 0.99; short if <= 0.8",
+   "confidence": "high"
+  },
+  {
+   "id": "finger_mercury",
+   "kind": "finger",
+   "name_en": "Little finger (Mercury finger)",
+   "name_hi": "कनिष्ठिका (बुध की उँगली)",
+   "name_roman": "Kanishthika",
+   "tier": "finger",
+   "aliases": [],
+   "summary": "Long: mental power, languages, speech. Short: difficulty expressing thoughts.",
+   "attributes": [
+    {
+     "attribute": "length_vs_population",
+     "values": [
+      {
+       "value": "long",
+       "effect": "strong command of words",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.III p.133",
+        "level": "read"
+       }
+      },
+      {
+       "value": "short",
+       "effect": "finds it harder to put thoughts into words",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.III p.133",
+        "level": "read"
+       }
+      }
+     ]
+    }
+   ],
+   "citations": [
+    {
+     "src": "S1",
+     "loc": "Part II ch.III p.133",
+     "level": "read"
+    }
+   ],
+   "app_safe_reading": "communication style",
+   "avoid_claims": [],
+   "sensitivity": [],
+   "region_ref": null,
+   "auto_detect": "long if pinky ratio >= 0.74; short if <= 0.65. Also: pinky tip above the ring finger's top knuckle is the classical 'long Mercury' marker (we use ratio instead)",
+   "confidence": "high"
+  },
+  {
+   "id": "finger_index_vs_ring",
+   "kind": "finger",
+   "name_en": "Index vs ring finger (modern ratio rule)",
+   "name_hi": "-",
+   "name_roman": "-",
+   "tier": "finger",
+   "aliases": [],
+   "summary": "Modern guides compare index and ring length (e.g. ring longer = more risk-taking/creative). Not in Cheiro p.133; treat as optional flavour.",
+   "attributes": [
+    {
+     "attribute": "ratio",
+     "values": [
+      {
+       "value": "index / ring < p25",
+       "effect": "ring finger clearly longer",
+       "cite": {
+        "src": "S7",
+        "loc": "modern guides",
+        "level": "web"
+       }
+      },
+      {
+       "value": "index / ring > p75",
+       "effect": "index finger clearly longer",
+       "cite": {
+        "src": "S7",
+        "loc": "modern guides",
+        "level": "web"
+       }
+      }
+     ]
+    }
+   ],
+   "citations": [
+    {
+     "src": "S7",
+     "loc": "modern guides (no single source)",
+     "level": "web"
+    }
+   ],
+   "app_safe_reading": "optional",
+   "avoid_claims": [],
+   "sensitivity": [],
+   "region_ref": null,
+   "auto_detect": "index_over_ring p25=0.95, p50=0.98, p75=1.0",
+   "confidence": "low"
+  },
+  {
+   "id": "finger_spacing",
+   "kind": "finger",
+   "name_en": "Gaps between fingers",
+   "name_hi": "उँगलियों के बीच दूरी",
+   "name_roman": "-",
+   "tier": "finger",
+   "aliases": [],
+   "summary": "Wide gaps = independence: thumb-index (will, fearlessness), index-middle (thought), middle-ring (circumstances), ring-little (action). Fingers curved back: open-minded and quick to grasp ideas.",
+   "attributes": [
+    {
+     "attribute": "gap",
+     "values": [
+      {
+       "value": "wide thumb-index",
+       "effect": "independence of will, fearlessness",
+       "cite": {
+        "src": "S1",
+        "loc": "Part II ch.III p.133",
+        "level": "read"
+       }
+      },
+      {
+       "value": "wide index-middle",
+       "effect": "independence of thought",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.III p.133",
+        "level": "read"
+       }
+      },
+      {
+       "value": "wide middle-ring",
+       "effect": "independence of circumstances",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.III p.133",
+        "level": "read"
+       }
+      },
+      {
+       "value": "wide ring-little",
+       "effect": "independence of action",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.III p.133",
+        "level": "read"
+       }
+      },
+      {
+       "value": "fingers curve back",
+       "effect": "open-minded, quick to grasp suggestions",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.III p.133",
+        "level": "read"
+       }
+      }
+     ]
+    }
+   ],
+   "citations": [
+    {
+     "src": "S1",
+     "loc": "Part II ch.III p.133-135",
+     "level": "read"
+    }
+   ],
+   "app_safe_reading": "independence style",
+   "avoid_claims": [],
+   "sensitivity": [],
+   "region_ref": null,
+   "auto_detect": "angle between adjacent finger proximal-phalanx directions (MCP -> PIP) from joints; hold-still pose needed. Population cut-offs to be fitted on Quest data.",
+   "confidence": "high"
+  },
+  {
+   "id": "thumb",
+   "kind": "finger",
+   "name_en": "Thumb: flexibility and phalanges",
+   "name_hi": "अंगूठा",
+   "name_roman": "Angootha",
+   "tier": "finger",
+   "aliases": [],
+   "summary": "Cheiro splits the thumb into supple- vs firm-jointed and into three phalanges (will, logic, love). Reads willpower and adaptability.",
+   "attributes": [
+    {
+     "attribute": "flexibility",
+     "values": [
+      {
+       "value": "supple, bends back",
+       "effect": "adaptable, generous, easy-going",
+       "cite": {
+        "src": "S1",
+        "loc": "Part II ch.II 'The Thumb' p.127-132",
+        "level": "toc"
+       }
+      },
+      {
+       "value": "firm, stiff",
+       "effect": "determined, stubborn, self-controlled",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.II p.127-132",
+        "level": "toc"
+       }
+      }
+     ]
+    },
+    {
+     "attribute": "phalange_proportions",
+     "values": [
+      {
+       "value": "long nail phalange",
+       "effect": "strong will",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.II p.131",
+        "level": "toc"
+       }
+      },
+      {
+       "value": "long second phalange",
+       "effect": "strong reasoning",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.II p.131",
+        "level": "toc"
+       }
+      },
+      {
+       "value": "full third phalange (Venus base)",
+       "effect": "warmth and love of beauty",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.II p.131",
+        "level": "toc"
+       }
+      }
+     ]
+    }
+   ],
+   "citations": [
+    {
+     "src": "S1",
+     "loc": "Part II ch.II p.127-132",
+     "level": "toc"
+    },
+    {
+     "src": "S2",
+     "loc": "Part I ch.XVII 'The Thumb'",
+     "level": "toc"
+    }
+   ],
+   "app_safe_reading": "willpower style",
+   "avoid_claims": [],
+   "sensitivity": [],
+   "region_ref": null,
+   "auto_detect": "thumb-tip hyperextension angle and phalanx length ratios are measurable from the 4 thumb joints (Quest, not MediaPipe 2D)",
+   "confidence": "medium"
+  },
+  {
+   "id": "mark_star",
+   "kind": "mark",
+   "name_en": "Star",
+   "name_hi": "तारा चिह्न",
+   "name_roman": "Tara",
+   "tier": "mark",
+   "aliases": [],
+   "summary": "Brilliance in the area it sits on; Cheiro: fortunate everywhere except the Saturn mount. Where: any line end or mount",
+   "attributes": [
+    {
+     "attribute": "position",
+     "values": [
+      {
+       "value": "Jupiter",
+       "effect": "honour, power, position",
+       "cite": {
+        "src": "S1",
+        "loc": "Part I ch.XVI p.104",
+        "level": "read"
+       }
+      },
+      {
+       "value": "Sun",
+       "effect": "riches, glory, public life",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.XVI p.104",
+        "level": "read"
+       }
+      },
+      {
+       "value": "Mercury",
+       "effect": "success in commerce, science or speech",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.XVI p.104",
+        "level": "read"
+       }
+      },
+      {
+       "value": "Moon",
+       "effect": "fame through imagination/invention",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.XVI p.104",
+        "level": "read"
+       }
+      },
+      {
+       "value": "Venus",
+       "effect": "charm and success with others",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.XVI p.104",
+        "level": "read"
+       }
+      },
+      {
+       "value": "Saturn",
+       "effect": "Cheiro: dreaded distinction; omit",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.XVI p.104",
+        "level": "read"
+       }
+      }
+     ]
+    }
+   ],
+   "citations": [
+    {
+     "src": "S1",
+     "loc": "Part I ch.XVI p.104-106",
+     "level": "read"
+    }
+   ],
+   "app_safe_reading": "a bright talent in that area",
+   "avoid_claims": [
+    "Saturn-star tragedy"
+   ],
+   "sensitivity": [],
+   "region_ref": null,
+   "auto_detect": "junction count >=3 crossing lines inside a mount polygon; low-res RGB unreliable, offer 'pinch to confirm'",
+   "confidence": "medium"
+  },
+  {
+   "id": "mark_cross",
+   "kind": "mark",
+   "name_en": "Cross",
+   "name_hi": "क्रॉस चिह्न",
+   "name_roman": "Kreshta",
+   "tier": "mark",
+   "aliases": [],
+   "summary": "Cheiro: mostly a warning; the only favourable place is the Jupiter mount. Where: mounts or between lines",
+   "attributes": [
+    {
+     "attribute": "position",
+     "values": [
+      {
+       "value": "Jupiter",
+       "effect": "a fortunate affection",
+       "cite": {
+        "src": "S1",
+        "loc": "Part I ch.XVI p.104",
+        "level": "read"
+       }
+      },
+      {
+       "value": "Saturn/Sun/Mercury/Venus/Moon/Mars",
+       "effect": "Cheiro: misfortune themes (death, dishonesty, opposition); omit or reframe as 'a point of friction'",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.XVI p.104",
+        "level": "read"
+       }
+      }
+     ]
+    }
+   ],
+   "citations": [
+    {
+     "src": "S1",
+     "loc": "Part I ch.XVI p.104-106",
+     "level": "read"
+    }
+   ],
+   "app_safe_reading": "only the Jupiter reading, or 'friction' flavour",
+   "avoid_claims": [
+    "death or violence claims"
+   ],
+   "sensitivity": [
+    "death"
+   ],
+   "region_ref": null,
+   "auto_detect": "2 crossing ridges inside a mount",
+   "confidence": "medium"
+  },
+  {
+   "id": "mark_square",
+   "kind": "mark",
+   "name_en": "Square",
+   "name_hi": "चतुष्कोण चिह्न",
+   "name_roman": "Chaturbhuj / Chauka",
+   "tier": "mark",
+   "aliases": [],
+   "summary": "Mark of preservation: protection at the moment where it appears. Where: on a line or mount",
+   "attributes": [
+    {
+     "attribute": "position",
+     "values": [
+      {
+       "value": "on a line",
+       "effect": "protected or recovered at that stretch",
+       "cite": {
+        "src": "S1",
+        "loc": "Part I ch.XVI p.104-106",
+        "level": "read"
+       }
+      }
+     ]
+    }
+   ],
+   "citations": [
+    {
+     "src": "S1",
+     "loc": "Part I ch.XVI p.104-106",
+     "level": "read"
+    },
+    {
+     "src": "S2",
+     "loc": "Part I ch.XXIII",
+     "level": "read"
+    }
+   ],
+   "app_safe_reading": "protection",
+   "avoid_claims": [],
+   "sensitivity": [],
+   "region_ref": null,
+   "auto_detect": "small closed 4-sided loop; very hard on RGB",
+   "confidence": "medium"
+  },
+  {
+   "id": "mark_island",
+   "kind": "mark",
+   "name_en": "Island",
+   "name_hi": "द्वीप चिह्न",
+   "name_roman": "Dweep",
+   "tier": "mark",
+   "aliases": [],
+   "summary": "Weakens whatever line or mount it sits on. Where: on a line",
+   "attributes": [
+    {
+     "attribute": "on_line",
+     "values": [
+      {
+       "value": "life",
+       "effect": "a low-energy stretch at that age",
+       "cite": {
+        "src": "S1",
+        "loc": "Part I ch.XV p.101",
+        "level": "read"
+       }
+      },
+      {
+       "value": "head",
+       "effect": "a mentally strained stretch (Cheiro: brain illness; omit)",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.XV p.101",
+        "level": "read"
+       }
+      },
+      {
+       "value": "heart",
+       "effect": "emotionally strained stretch",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.XV p.101",
+        "level": "read"
+       }
+      },
+      {
+       "value": "fate",
+       "effect": "worry about direction",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.XV p.101",
+        "level": "read"
+       }
+      },
+      {
+       "value": "sun",
+       "effect": "recognition dips",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.XV p.101",
+        "level": "read"
+       }
+      }
+     ]
+    }
+   ],
+   "citations": [
+    {
+     "src": "S1",
+     "loc": "Part I ch.XV p.101-103",
+     "level": "read"
+    }
+   ],
+   "app_safe_reading": "reframe as 'a testing stretch'",
+   "avoid_claims": [
+    "illness or insanity"
+   ],
+   "sensitivity": [
+    "health",
+    "mental-illness"
+   ],
+   "region_ref": null,
+   "auto_detect": "closed loop on a traced path (skeleton graph cycle); needs high resolution",
+   "confidence": "medium"
+  },
+  {
+   "id": "mark_circle",
+   "kind": "mark",
+   "name_en": "Circle",
+   "name_hi": "वृत्त चिह्न",
+   "name_roman": "Vritta",
+   "tier": "mark",
+   "aliases": [],
+   "summary": "Favourable only on the Sun mount; elsewhere unfavourable (Cheiro). Where: mounts",
+   "attributes": [
+    {
+     "attribute": "position",
+     "values": [
+      {
+       "value": "Sun mount",
+       "effect": "favourable, brilliance",
+       "cite": {
+        "src": "S1",
+        "loc": "Part I ch.XV p.101",
+        "level": "read"
+       }
+      },
+      {
+       "value": "elsewhere",
+       "effect": "Cheiro: unfavourable; omit",
+       "cite": {
+        "src": "S1",
+        "loc": "ch.XV p.101",
+        "level": "read"
+       }
+      }
+     ]
+    }
+   ],
+   "citations": [
+    {
+     "src": "S1",
+     "loc": "Part I ch.XV p.101-103",
+     "level": "read"
+    }
+   ],
+   "app_safe_reading": "Sun-mount reading only",
+   "avoid_claims": [],
+   "sensitivity": [],
+   "region_ref": null,
+   "auto_detect": "rare; skip",
+   "confidence": "low"
+  },
+  {
+   "id": "mark_spot",
+   "kind": "mark",
+   "name_en": "Spot / dot",
+   "name_hi": "बिंदु / तिल चिह्न",
+   "name_roman": "Bindu",
+   "tier": "mark",
+   "aliases": [],
+   "summary": "A temporary arrest of the line it sits on. Where: on a line",
+   "attributes": [
+    {
+     "attribute": "on_line",
+     "values": [
+      {
+       "value": "any",
+       "effect": "a pause in that quality of life",
+       "cite": {
+        "src": "S1",
+        "loc": "Part I ch.XV p.101-103",
+        "level": "read"
+       }
+      }
+     ]
+    }
+   ],
+   "citations": [
+    {
+     "src": "S1",
+     "loc": "Part I ch.XV p.101-103",
+     "level": "read"
+    }
+   ],
+   "app_safe_reading": "a pause or shock-then-recovery",
+   "avoid_claims": [
+    "injury/illness"
+   ],
+   "sensitivity": [],
+   "region_ref": null,
+   "auto_detect": "small dark blob on a path; skin pigment confounds",
+   "confidence": "low"
+  },
+  {
+   "id": "mark_grille",
+   "kind": "mark",
+   "name_en": "Grille",
+   "name_hi": "जाल चिह्न",
+   "name_roman": "Jaal",
+   "tier": "mark",
+   "aliases": [],
+   "summary": "Obstacles around the quality of the mount it covers. Where: mounts",
+   "attributes": [
+    {
+     "attribute": "on_mount",
+     "values": [
+      {
+       "value": "any",
+       "effect": "difficulty or friction in that mount's area",
+       "cite": {
+        "src": "S1",
+        "loc": "Part I ch.XV p.101-103",
+        "level": "read"
+       }
+      }
+     ]
+    }
+   ],
+   "citations": [
+    {
+     "src": "S1",
+     "loc": "Part I ch.XV p.101-103",
+     "level": "read"
+    },
+    {
+     "src": "S2",
+     "loc": "Part I ch.XXIII",
+     "level": "read"
+    }
+   ],
+   "app_safe_reading": "friction/obstacle flavour",
+   "avoid_claims": [],
+   "sensitivity": [],
+   "region_ref": null,
+   "auto_detect": "dense crossing ridge texture inside a mount polygon",
+   "confidence": "medium"
+  },
+  {
+   "id": "mark_triangle",
+   "kind": "mark",
+   "name_en": "Triangle",
+   "name_hi": "त्रिकोण चिह्न",
+   "name_roman": "Trikon",
+   "tier": "mark",
+   "aliases": [],
+   "summary": "Strengthens the mount or line (Benham); classical: lines in triangle shapes signal wealth or charity. Where: mounts or between lines",
+   "attributes": [
+    {
+     "attribute": "position",
+     "values": [
+      {
+       "value": "mount",
+       "effect": "strengthens the mount",
+       "cite": {
+        "src": "S2",
+        "loc": "Part I ch.XXIII",
+        "level": "read"
+       }
+      },
+      {
+       "value": "palm",
+       "effect": "rich or charitable (classical)",
+       "cite": {
+        "src": "S3",
+        "loc": "Brihat Samhita 68.46-49",
+        "level": "read"
+       }
+      }
+     ]
+    }
+   ],
+   "citations": [
+    {
+     "src": "S2",
+     "loc": "Part I ch.XXIII",
+     "level": "read"
+    },
+    {
+     "src": "S3",
+     "loc": "Brihat Samhita 68.46-49",
+     "level": "read"
+    },
+    {
+     "src": "S1",
+     "loc": "Part I ch.XVIII 'The Great Triangle' p.110",
+     "level": "toc"
+    }
+   ],
+   "app_safe_reading": "strength / generosity",
+   "avoid_claims": [],
+   "sensitivity": [],
+   "region_ref": null,
+   "auto_detect": "closed 3-sided loop",
+   "confidence": "medium"
+  },
+  {
+   "id": "mark_trident",
+   "kind": "mark",
+   "name_en": "Trident (trishul)",
+   "name_hi": "त्रिशूल चिह्न",
+   "name_roman": "Trishul",
+   "tier": "mark",
+   "aliases": [],
+   "summary": "A three-pronged mark at a line's end; strengthens the mount it lands on (Benham). Where: line end or mount",
+   "attributes": [
+    {
+     "attribute": "position",
+     "values": [
+      {
+       "value": "line end / mount",
+       "effect": "added strength to what that line or mount rules",
+       "cite": {
+        "src": "S2",
+        "loc": "Part I ch.XXIII",
+        "level": "read"
+       }
+      }
+     ]
+    }
+   ],
+   "citations": [
+    {
+     "src": "S2",
+     "loc": "Part I ch.XXIII",
+     "level": "read"
+    },
+    {
+     "src": "S7",
+     "loc": "Hindi guides: trishul on Jupiter/Saturn",
+     "level": "web"
+    }
+   ],
+   "app_safe_reading": "strength",
+   "avoid_claims": [],
+   "sensitivity": [],
+   "region_ref": null,
+   "auto_detect": "3-way fork at a path end",
+   "confidence": "medium"
+  },
+  {
+   "id": "mark_fish",
+   "kind": "mark",
+   "name_en": "Fish (matsya)",
+   "name_hi": "मत्स्य चिह्न",
+   "name_roman": "Matsya",
+   "tier": "mark",
+   "aliases": [],
+   "summary": "Auspicious: classical text says two fish marks mid-palm = one who feeds many; fish-tail lines = learned. Where: palm middle, or under the thumb",
+   "attributes": [
+    {
+     "attribute": "position",
+     "values": [
+      {
+       "value": "two fish in the palm middle",
+       "effect": "generous, feeds many daily",
+       "cite": {
+        "src": "S3",
+        "loc": "Brihat Samhita 68.44",
+        "level": "read"
+       }
+      },
+      {
+       "value": "fish-tail shaped lines",
+       "effect": "learned",
+       "cite": {
+        "src": "S3",
+        "loc": "Brihat Samhita 68.45",
+        "level": "read"
+       }
+      }
+     ]
+    }
+   ],
+   "citations": [
+    {
+     "src": "S3",
+     "loc": "Brihat Samhita 68.44",
+     "level": "read"
+    },
+    {
+     "src": "S3",
+     "loc": "Brihat Samhita 68.45",
+     "level": "read"
+    }
+   ],
+   "app_safe_reading": "auspicious mark badge",
+   "avoid_claims": [],
+   "sensitivity": [],
+   "region_ref": null,
+   "auto_detect": "template; hard on RGB",
+   "confidence": "medium"
+  },
+  {
+   "id": "mark_chain",
+   "kind": "mark",
+   "name_en": "Chain / links",
+   "name_hi": "श्रृंखला",
+   "name_roman": "Shrinkhala",
+   "tier": "mark",
+   "aliases": [],
+   "summary": "A line made of small links: lowered strength of that line. Where: on a line",
+   "attributes": [
+    {
+     "attribute": "on_line",
+     "values": [
+      {
+       "value": "life",
+       "effect": "weaker vitality",
+       "cite": {
+        "src": "S1",
+        "loc": "Part I ch.III",
+        "level": "read"
+       }
+      },
+      {
+       "value": "heart",
+       "effect": "unsteady emotions",
+       "cite": {
+        "src": "S7",
+        "loc": "Trikaal Vaani",
+        "level": "web"
+       }
+      },
+      {
+       "value": "head",
+       "effect": "scattered focus",
+       "cite": {
+        "src": "S1",
+        "loc": "Part I ch.II p.22",
+        "level": "read"
+       }
+      }
+     ]
+    }
+   ],
+   "citations": [
+    {
+     "src": "S1",
+     "loc": "Part I ch.III",
+     "level": "read"
+    },
+    {
+     "src": "S1",
+     "loc": "Part I ch.II p.22",
+     "level": "read"
+    }
+   ],
+   "app_safe_reading": "reframe as 'busy' stretch",
+   "avoid_claims": [
+    "ill-health"
+   ],
+   "sensitivity": [],
+   "region_ref": null,
+   "auto_detect": "ridge-path discontinuity / low continuity score (free from the auto-labeler)",
+   "confidence": "medium"
+  },
+  {
+   "id": "mark_break_fork",
+   "kind": "mark",
+   "name_en": "Break / fork / branch",
+   "name_hi": "टूटी रेखा / शाखा",
+   "name_roman": "Bhang / Shakha",
+   "tier": "mark",
+   "aliases": [],
+   "summary": "Break = a change at that stretch; fork = two directions; upward branch = effort. Where: on a line",
+   "attributes": [
+    {
+     "attribute": "form",
+     "values": [
+      {
+       "value": "break",
+       "effect": "a turning point",
+       "cite": {
+        "src": "S1",
+        "loc": "Part I ch.III",
+        "level": "read"
+       }
+      },
+      {
+       "value": "fork at the end",
+       "effect": "two tendencies, or drifting (context)",
+       "cite": {
+        "src": "S1",
+        "loc": "Part I ch.VIII p.73-76",
+        "level": "read"
+       }
+      },
+      {
+       "value": "upward branch",
+       "effect": "a burst of effort",
+       "cite": {
+        "src": "S1",
+        "loc": "Part I ch.III Plate X",
+        "level": "read"
+       }
+      }
+     ]
+    }
+   ],
+   "citations": [
+    {
+     "src": "S1",
+     "loc": "Part I ch.III",
+     "level": "read"
+    },
+    {
+     "src": "S1",
+     "loc": "Part I ch.VIII",
+     "level": "read"
+    }
+   ],
+   "app_safe_reading": "turning points",
+   "avoid_claims": [],
+   "sensitivity": [],
+   "region_ref": null,
+   "auto_detect": "skeleton graph: gaps and Y-junctions on a traced path",
+   "confidence": "medium"
+  },
+  {
+   "id": "mark_conch",
+   "kind": "mark",
+   "name_en": "Conch (shankh)",
+   "name_hi": "शंख चिह्न",
+   "name_roman": "Shankh",
+   "tier": "mark",
+   "aliases": [],
+   "summary": "Classical auspicious mark: lines in the shape of a conch, umbrella, palanquin, elephant, horse or lotus signal kingship. Where: palm or fingers",
+   "attributes": [
+    {
+     "attribute": "form",
+     "values": [
+      {
+       "value": "conch/umbrella/palanquin/elephant/horse/lotus-shaped lines",
+       "effect": "royal fortune (classical)",
+       "cite": {
+        "src": "S3",
+        "loc": "Brihat Samhita 68.45",
+        "level": "read"
+       }
+      }
+     ]
+    }
+   ],
+   "citations": [
+    {
+     "src": "S3",
+     "loc": "Brihat Samhita 68.45",
+     "level": "read"
+    }
+   ],
+   "app_safe_reading": "auspicious badge",
+   "avoid_claims": [],
+   "sensitivity": [],
+   "region_ref": null,
+   "auto_detect": "shape templates; not feasible on RGB",
+   "confidence": "medium"
+  },
+  {
+   "id": "mark_wheel_weapons",
+   "kind": "mark",
+   "name_en": "Wheel (chakra), sword, axe, club, spear, bow",
+   "name_hi": "चक्र / खड्ग / परशु / गदा / धनुष",
+   "name_roman": "Chakra etc.",
+   "tier": "mark",
+   "aliases": [],
+   "summary": "Classical: these shapes signal a commander of armies; a mortar shape signals one who performs sacrifices. Where: palm",
+   "attributes": [
+    {
+     "attribute": "form",
+     "values": [
+      {
+       "value": "discus, sword, axe, club, spear, bow",
+       "effect": "leadership, commands armies (classical)",
+       "cite": {
+        "src": "S3",
+        "loc": "Brihat Samhita 68.47",
+        "level": "read"
+       }
+      },
+      {
+       "value": "mortar",
+       "effect": "performs sacrificial rites (classical)",
+       "cite": {
+        "src": "S3",
+        "loc": "Brihat Samhita 68.47",
+        "level": "read"
+       }
+      }
+     ]
+    }
+   ],
+   "citations": [
+    {
+     "src": "S3",
+     "loc": "Brihat Samhita 68.47",
+     "level": "read"
+    }
+   ],
+   "app_safe_reading": "auspicious badge",
+   "avoid_claims": [],
+   "sensitivity": [],
+   "region_ref": null,
+   "auto_detect": "templates",
+   "confidence": "medium"
+  },
+  {
+   "id": "mark_flag_pot_goad_swastika",
+   "kind": "mark",
+   "name_en": "Pot (kalasha), lotus stem, flag (dhvaja), goad (ankusha), rope, swastika",
+   "name_hi": "कलश / पताका / अंकुश / स्वस्तिक",
+   "name_roman": "Kalasha / Dhvaja / Ankusha / Swastika",
+   "tier": "mark",
+   "aliases": [],
+   "summary": "Classical: pot, lotus-stem, flag or goad = 'guardian of treasure'; rope-twist or triangle = rich; swastika = sovereignty/wealth. Where: palm",
+   "attributes": [
+    {
+     "attribute": "form",
+     "values": [
+      {
+       "value": "pot, lotus-stem, flag, goad",
+       "effect": "keeper of treasure (classical)",
+       "cite": {
+        "src": "S3",
+        "loc": "Brihat Samhita 68.46",
+        "level": "read"
+       }
+      },
+      {
+       "value": "rope-like twisted or triangular lines",
+       "effect": "wealth",
+       "cite": {
+        "src": "S3",
+        "loc": "Brihat Samhita 68.46",
+        "level": "read"
+       }
+      },
+      {
+       "value": "swastika",
+       "effect": "prosperity and rule",
+       "cite": {
+        "src": "S3",
+        "loc": "Brihat Samhita 68.46",
+        "level": "read"
+       }
+      },
+      {
+       "value": "crocodile, flag or cow-shed shapes",
+       "effect": "great wealth",
+       "cite": {
+        "src": "S3",
+        "loc": "Brihat Samhita 68.48",
+        "level": "read"
+       }
+      }
+     ]
+    }
+   ],
+   "citations": [
+    {
+     "src": "S3",
+     "loc": "Brihat Samhita 68.46",
+     "level": "read"
+    },
+    {
+     "src": "S3",
+     "loc": "Brihat Samhita 68.48",
+     "level": "read"
+    }
+   ],
+   "app_safe_reading": "auspicious badge",
+   "avoid_claims": [],
+   "sensitivity": [],
+   "region_ref": null,
+   "auto_detect": "templates",
+   "confidence": "medium"
+  },
+  {
+   "id": "mark_barley_thumb",
+   "kind": "mark",
+   "name_en": "Barley (yava) marks on the thumb",
+   "name_hi": "यव चिह्न (अंगूठा)",
+   "name_roman": "Yava",
+   "tier": "mark",
+   "aliases": [],
+   "summary": "Barley-shaped lines mid-thumb signal wealth; at the thumb root, sons. Also: long finger joints signal popularity and long life. Where: thumb",
+   "attributes": [
+    {
+     "attribute": "position",
+     "values": [
+      {
+       "value": "mid-thumb barley marks",
+       "effect": "wealth",
+       "cite": {
+        "src": "S3",
+        "loc": "Brihat Samhita 68.42",
+        "level": "read"
+       }
+      },
+      {
+       "value": "long finger joints",
+       "effect": "popular, long-lived (classical)",
+       "cite": {
+        "src": "S3",
+        "loc": "Brihat Samhita 68.42",
+        "level": "read"
+       }
+      }
+     ]
+    }
+   ],
+   "citations": [
+    {
+     "src": "S3",
+     "loc": "Brihat Samhita 68.42",
+     "level": "read"
+    }
+   ],
+   "app_safe_reading": "wealth badge only",
+   "avoid_claims": [
+    "sons"
+   ],
+   "sensitivity": [
+    "fertility"
+   ],
+   "region_ref": null,
+   "auto_detect": "not feasible",
+   "confidence": "medium"
+  }
+ ],
+ "not_found": [
+  "No open-source JSON/YAML rule set encoding line or mount meanings was found. Checked: GitHub repository search for 'palmistry' (30 results), openoccult/openoccult-data (tarot/runes/crystals; no palmistry file in its 78-file tree), SpandanM110/Local-First-AI-Astrologer (uses Cheiro's book as a RAG source, ships no rules), himajin315/palmistry (MIT, Japanese rule-to-text site; not reviewed in depth).",
+  "No public-domain English translation of a Sanskrit 'Hasta Samudrika' manual was found. The usable Indian primary material is verse-level (Brihat Samhita 68; Agni, Garuda, Bhavishya, Vishnudharmottara Puranas via S4/S5)."
+ ]
+}

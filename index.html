@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <link rel="icon" href="data:," />
+    <title>Hast Rekha · हस्त रेखा</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Mukta:wght@500;600;700&family=Rozha+One&family=Tiro+Devanagari+Hindi&display=swap" rel="stylesheet" />
+    <style>
+      :root { --ink: #fff3dc; --gold: #f2c46c; --bg: #1a0a06; }
+      body { margin: 0; background: var(--bg); color: var(--ink); font-family: 'Mukta', system-ui, sans-serif; }
+      #page { position: fixed; inset: 0; overflow: auto; z-index: 5; background: radial-gradient(ellipse at 50% 30%, rgba(120,50,20,0.55), rgba(20,8,4,0.92) 70%); padding: 32px 16px 48px; box-sizing: border-box; }
+      #page.hidden { display: none; }
+      .wrap { max-width: 720px; margin: 0 auto; text-align: center; }
+      h1 { font-family: 'Rozha One', serif; font-weight: 400; font-size: clamp(48px, 10vw, 84px); margin: 8px 0 0; color: #ffd57a; line-height: 1.1; }
+      .sub { font-size: 20px; color: var(--gold); letter-spacing: 0.12em; text-transform: uppercase; }
+      p { font-size: 18px; line-height: 1.55; }
+      .frame { border: 1px solid rgba(242,196,108,0.6); border-radius: 14px; padding: 14px 18px; margin: 18px 0; background: rgba(30,10,5,0.6); text-align: left; }
+      button { font: 700 20px 'Mukta', sans-serif; padding: 14px 28px; border-radius: 999px; border: 2px solid var(--gold); background: #6d2a10; color: var(--ink); cursor: pointer; }
+      button:disabled { opacity: 0.5; cursor: default; }
+      #cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; margin-top: 12px; }
+      #cards figure { margin: 0; }
+      #cards img { width: 100%; border-radius: 8px; box-shadow: 0 4px 18px rgba(0,0,0,0.5); }
+      #cards a { color: var(--gold); font-size: 15px; }
+      .small { font-size: 14px; opacity: 0.8; }
+    </style>
+  </head>
+  <body>
+    <div id="scene-container"></div>
+    <div id="page">
+      <div class="wrap">
+        <div class="sub">Indian palmistry in mixed reality</div>
+        <h1>हस्त रेखा</h1>
+        <div class="sub">Hast Rekha</div>
+        <p>Panditji sits across your table. Hold up your real palm: glowing lines appear on your hand, the seven mounts light up, and you touch each one to hear what the tradition says. Pick the line shapes you see on your own palm, and leave with a Rekha card.</p>
+        <p><button id="enter" disabled>Checking for Quest…</button></p>
+        <p id="xrnote" class="small"></p>
+        <div class="frame">
+          <b>Culture, not prediction.</b> Hast Rekha (part of Samudrika Shastra) is presented as a heritage tradition and for fun. Readings are "what the tradition says", drawn from Cheiro (1916), Benham (1900), the Brihat Samhita and modern Indian guides. Teachers disagree, and nothing here is a forecast or advice.<br /><br />
+          <b>Privacy.</b> No camera is used. The app reads only the positions of your hand joints, on this device. Nothing is uploaded. Your past cards are stored in this browser only.
+        </div>
+        <h2 style="font-family:'Rozha One',serif;font-weight:400;color:#ffd57a">Your Rekha cards</h2>
+        <p id="nocards" class="small">Your cards appear here after a reading.</p>
+        <div id="cards"></div>
+        <p class="small">Hands only · seated · about 5 minutes · Meta Quest 3 / 3S, Quest Browser.</p>
+      </div>
+    </div>
+    <script type="module" src="/src/index.ts"></script>
+  </body>
+</html>

@@ -1,0 +1,2045 @@
+{
+ "version": 1,
+ "description": "Joint-space regions for Hast Rekha. Every polygon is in palm-frame (a,b) coordinates built from 4 tracked joints; works for left and right hands, 2D (camera) and 3D (Quest hand joints).",
+ "frame": {
+  "joints_webxr": {
+   "O": "wrist",
+   "Ey_to": "middle-finger-phalanx-proximal",
+   "Ex_from": "index-finger-phalanx-proximal",
+   "Ex_to": "pinky-finger-phalanx-proximal"
+  },
+  "joints_mediapipe": {
+   "O": 0,
+   "Ey_to": 9,
+   "Ex_from": 5,
+   "Ex_to": 17
+  },
+  "formula": "q(a,b) = P[wrist] + a*(P[middle-prox] - P[wrist]) + b*(P[pinky-prox] - P[index-prox])",
+  "conventions": "a: 0 at wrist, 1 at the middle-finger knuckle (distal = positive). b: 0 below the middle finger, + toward the little finger, - toward the thumb. Same sign convention for both hands because Ex flips with the hand. Palm must face the viewer; for the back of the hand, regions do not apply.",
+  "three_d_note": "On Quest use the 3D joint poses: the palm plane normal is cross(Ey, Ex); a region is a planar polygon in that frame, lifted ~5 mm off the skin. Palm curvature is ignored.",
+  "js_snippet": "const O=j.wrist, Ey=sub(j.mid,O), Ex=sub(j.pinky,j.index); const q=(a,b)=>add(O,add(mul(Ey,a),mul(Ex,b)));",
+  "mean_landmarks_ab": {
+   "wrist": [
+    0,
+    0
+   ],
+   "thumb-metacarpal": [
+    0.09,
+    -0.56
+   ],
+   "thumb-phalanx-proximal": [
+    0.36,
+    -0.87
+   ],
+   "thumb-phalanx-distal": [
+    0.66,
+    -0.97
+   ],
+   "thumb-tip": [
+    0.86,
+    -1.11
+   ],
+   "index-finger-phalanx-proximal": [
+    0.91,
+    -0.37
+   ],
+   "middle-finger-phalanx-proximal": [
+    1.0,
+    0.0
+   ],
+   "ring-finger-phalanx-proximal": [
+    0.99,
+    0.32
+   ],
+   "pinky-finger-phalanx-proximal": [
+    0.91,
+    0.63
+   ]
+  },
+  "mean_landmarks_note": "Mean over 150 palmar 11k-Hands images (2D). Sd of tip joints ~0.1-0.3 (finger spread); MCP rows sd <= 0.01 by construction."
+ },
+ "mounts": [
+  {
+   "id": "jupiter",
+   "planet": "Jupiter",
+   "name_hi": "गुरु पर्वत",
+   "name_roman": "Guru Parvat",
+   "polygon_ab": [
+    [
+     0.95,
+     -0.6
+    ],
+    [
+     0.949,
+     -0.495
+    ],
+    [
+     0.935,
+     -0.39
+    ],
+    [
+     0.923,
+     -0.285
+    ],
+    [
+     0.913,
+     -0.18
+    ],
+    [
+     1.126,
+     -0.18
+    ],
+    [
+     1.101,
+     -0.285
+    ],
+    [
+     1.08,
+     -0.39
+    ],
+    [
+     1.08,
+     -0.495
+    ],
+    [
+     1.08,
+     -0.6
+    ]
+   ],
+   "centroid_ab": [
+    1.014,
+    -0.39
+   ],
+   "confidence": "high"
+  },
+  {
+   "id": "saturn",
+   "planet": "Saturn",
+   "name_hi": "शनि पर्वत",
+   "name_roman": "Shani Parvat",
+   "polygon_ab": [
+    [
+     0.913,
+     -0.18
+    ],
+    [
+     0.899,
+     -0.095
+    ],
+    [
+     0.874,
+     -0.01
+    ],
+    [
+     0.84,
+     0.075
+    ],
+    [
+     0.808,
+     0.16
+    ],
+    [
+     1.165,
+     0.16
+    ],
+    [
+     1.168,
+     0.075
+    ],
+    [
+     1.168,
+     -0.01
+    ],
+    [
+     1.147,
+     -0.095
+    ],
+    [
+     1.126,
+     -0.18
+    ]
+   ],
+   "centroid_ab": [
+    1.011,
+    -0.01
+   ],
+   "confidence": "high"
+  },
+  {
+   "id": "sun_apollo",
+   "planet": "Sun/Apollo",
+   "name_hi": "सूर्य पर्वत",
+   "name_roman": "Surya Parvat",
+   "polygon_ab": [
+    [
+     0.808,
+     0.16
+    ],
+    [
+     0.792,
+     0.238
+    ],
+    [
+     0.784,
+     0.315
+    ],
+    [
+     0.778,
+     0.392
+    ],
+    [
+     0.774,
+     0.47
+    ],
+    [
+     1.121,
+     0.47
+    ],
+    [
+     1.141,
+     0.392
+    ],
+    [
+     1.16,
+     0.315
+    ],
+    [
+     1.163,
+     0.238
+    ],
+    [
+     1.165,
+     0.16
+    ]
+   ],
+   "centroid_ab": [
+    0.969,
+    0.315
+   ],
+   "confidence": "high"
+  },
+  {
+   "id": "mercury",
+   "planet": "Mercury",
+   "name_hi": "बुध पर्वत",
+   "name_roman": "Budh Parvat",
+   "polygon_ab": [
+    [
+     0.774,
+     0.47
+    ],
+    [
+     0.77,
+     0.558
+    ],
+    [
+     0.77,
+     0.645
+    ],
+    [
+     0.77,
+     0.732
+    ],
+    [
+     0.77,
+     0.82
+    ],
+    [
+     1.03,
+     0.82
+    ],
+    [
+     1.03,
+     0.732
+    ],
+    [
+     1.03,
+     0.645
+    ],
+    [
+     1.049,
+     0.558
+    ],
+    [
+     1.071,
+     0.47
+    ]
+   ],
+   "centroid_ab": [
+    0.906,
+    0.645
+   ],
+   "confidence": "high"
+  },
+  {
+   "id": "mars_upper",
+   "planet": "Mars (upper / resistance)",
+   "name_hi": "मंगल पर्वत (ऊपरी)",
+   "name_roman": "Mangal Parvat (upper)",
+   "polygon_ab": [
+    [
+     0.74,
+     0.45
+    ],
+    [
+     0.75,
+     0.8
+    ],
+    [
+     0.5,
+     0.77
+    ],
+    [
+     0.52,
+     0.45
+    ]
+   ],
+   "centroid_ab": [
+    0.627,
+    0.618
+   ],
+   "confidence": "medium"
+  },
+  {
+   "id": "mars_lower",
+   "planet": "Mars (lower / aggression)",
+   "name_hi": "मंगल पर्वत (निचला)",
+   "name_roman": "Mangal Parvat (lower)",
+   "polygon_ab": [
+    [
+     0.92,
+     -0.6
+    ],
+    [
+     0.92,
+     -0.22
+    ],
+    [
+     0.74,
+     -0.22
+    ],
+    [
+     0.62,
+     -0.3
+    ],
+    [
+     0.62,
+     -0.6
+    ]
+   ],
+   "centroid_ab": [
+    0.764,
+    -0.388
+   ],
+   "confidence": "medium"
+  },
+  {
+   "id": "plain_of_mars",
+   "planet": "Plain of Mars",
+   "name_hi": "मंगल क्षेत्र",
+   "name_roman": "Mangal Kshetra",
+   "polygon_ab": [
+    [
+     0.74,
+     -0.08
+    ],
+    [
+     0.74,
+     0.45
+    ],
+    [
+     0.52,
+     0.45
+    ],
+    [
+     0.32,
+     0.22
+    ],
+    [
+     0.38,
+     -0.08
+    ]
+   ],
+   "centroid_ab": [
+    0.54,
+    0.192
+   ],
+   "confidence": "medium"
+  },
+  {
+   "id": "luna_moon",
+   "planet": "Moon/Luna",
+   "name_hi": "चंद्र पर्वत",
+   "name_roman": "Chandra Parvat",
+   "polygon_ab": [
+    [
+     0.5,
+     0.45
+    ],
+    [
+     0.5,
+     0.74
+    ],
+    [
+     0.3,
+     0.72
+    ],
+    [
+     0.05,
+     0.6
+    ],
+    [
+     0.0,
+     0.3
+    ],
+    [
+     0.2,
+     0.26
+    ]
+   ],
+   "centroid_ab": [
+    0.258,
+    0.512
+   ],
+   "confidence": "medium"
+  },
+  {
+   "id": "venus",
+   "planet": "Venus",
+   "name_hi": "शुक्र पर्वत",
+   "name_roman": "Shukra Parvat",
+   "polygon_ab": [
+    [
+     0.62,
+     -0.58
+    ],
+    [
+     0.62,
+     -0.3
+    ],
+    [
+     0.52,
+     -0.2
+    ],
+    [
+     0.4,
+     -0.13
+    ],
+    [
+     0.28,
+     -0.07
+    ],
+    [
+     0.15,
+     -0.03
+    ],
+    [
+     0.04,
+     0.02
+    ],
+    [
+     0.0,
+     -0.5
+    ],
+    [
+     0.09,
+     -0.62
+    ],
+    [
+     0.36,
+     -0.82
+    ],
+    [
+     0.55,
+     -0.72
+    ]
+   ],
+   "centroid_ab": [
+    0.33,
+    -0.359
+   ],
+   "confidence": "high"
+  },
+  {
+   "id": "rahu",
+   "planet": "Rahu",
+   "name_hi": "राहु पर्वत",
+   "name_roman": "Rahu Parvat",
+   "polygon_ab": [
+    [
+     0.13,
+     -0.08
+    ],
+    [
+     0.13,
+     0.2
+    ],
+    [
+     0.3,
+     0.22
+    ],
+    [
+     0.3,
+     -0.08
+    ]
+   ],
+   "centroid_ab": [
+    0.215,
+    0.065
+   ],
+   "confidence": "low"
+  },
+  {
+   "id": "ketu",
+   "planet": "Ketu",
+   "name_hi": "केतु पर्वत",
+   "name_roman": "Ketu Parvat",
+   "polygon_ab": [
+    [
+     -0.05,
+     -0.1
+    ],
+    [
+     -0.05,
+     0.16
+    ],
+    [
+     0.13,
+     0.18
+    ],
+    [
+     0.13,
+     -0.1
+    ]
+   ],
+   "centroid_ab": [
+    0.04,
+    0.035
+   ],
+   "confidence": "low"
+  }
+ ],
+ "lines": [
+  {
+   "id": "heart",
+   "tier": "major",
+   "centerline_ab": [
+    [
+     0.95,
+     -0.5
+    ],
+    [
+     0.93,
+     -0.35
+    ],
+    [
+     0.91,
+     -0.15
+    ],
+    [
+     0.89,
+     -0.05
+    ],
+    [
+     0.85,
+     0.05
+    ],
+    [
+     0.81,
+     0.15
+    ],
+    [
+     0.79,
+     0.25
+    ],
+    [
+     0.78,
+     0.35
+    ],
+    [
+     0.77,
+     0.55
+    ],
+    [
+     0.77,
+     0.75
+    ]
+   ],
+   "halfwidth": 0.085,
+   "corridor_polygon_ab": [
+    [
+     1.014,
+     -0.34
+    ],
+    [
+     0.995,
+     -0.142
+    ],
+    [
+     0.993,
+     -0.133
+    ],
+    [
+     0.973,
+     -0.033
+    ],
+    [
+     0.971,
+     -0.026
+    ],
+    [
+     0.969,
+     -0.018
+    ],
+    [
+     0.929,
+     0.082
+    ],
+    [
+     0.892,
+     0.174
+    ],
+    [
+     0.874,
+     0.263
+    ],
+    [
+     0.865,
+     0.356
+    ],
+    [
+     0.855,
+     0.552
+    ],
+    [
+     0.855,
+     0.75
+    ],
+    [
+     0.685,
+     0.75
+    ],
+    [
+     0.685,
+     0.55
+    ],
+    [
+     0.685,
+     0.546
+    ],
+    [
+     0.695,
+     0.346
+    ],
+    [
+     0.695,
+     0.342
+    ],
+    [
+     0.705,
+     0.242
+    ],
+    [
+     0.707,
+     0.233
+    ],
+    [
+     0.727,
+     0.133
+    ],
+    [
+     0.729,
+     0.126
+    ],
+    [
+     0.731,
+     0.118
+    ],
+    [
+     0.771,
+     0.018
+    ],
+    [
+     0.808,
+     -0.074
+    ],
+    [
+     0.826,
+     -0.163
+    ],
+    [
+     0.845,
+     -0.358
+    ],
+    [
+     0.846,
+     -0.361
+    ],
+    [
+     0.866,
+     -0.511
+    ],
+    [
+     1.034,
+     -0.489
+    ]
+   ],
+   "start_anchor": {
+    "name": "ulnar edge below the little finger",
+    "polygon_ab": [
+     [
+      0.7,
+      0.6
+     ],
+     [
+      0.7,
+      0.84
+     ],
+     [
+      0.86,
+      0.84
+     ],
+     [
+      0.86,
+      0.6
+     ]
+    ]
+   },
+   "end_anchors": [
+    {
+     "name": "under Jupiter (index) base",
+     "polygon_ab": [
+      [
+       0.86,
+       -0.62
+      ],
+      [
+       0.86,
+       -0.38
+      ],
+      [
+       1.0,
+       -0.38
+      ],
+      [
+       1.0,
+       -0.62
+      ]
+     ]
+    },
+    {
+     "name": "between Jupiter and Saturn",
+     "polygon_ab": [
+      [
+       0.86,
+       -0.38
+      ],
+      [
+       0.86,
+       -0.2
+      ],
+      [
+       1.0,
+       -0.2
+      ],
+      [
+       1.0,
+       -0.38
+      ]
+     ]
+    },
+    {
+     "name": "under Saturn (middle) base",
+     "polygon_ab": [
+      [
+       0.84,
+       -0.2
+      ],
+      [
+       0.84,
+       0.05
+      ],
+      [
+       0.98,
+       0.05
+      ],
+      [
+       0.98,
+       -0.2
+      ]
+     ]
+    }
+   ],
+   "direction_prior": "ulnar -> radial",
+   "ordering": "above head line",
+   "may_be_absent": false,
+   "source": "data-prior"
+  },
+  {
+   "id": "head",
+   "tier": "major",
+   "centerline_ab": [
+    [
+     0.77,
+     -0.52
+    ],
+    [
+     0.75,
+     -0.35
+    ],
+    [
+     0.73,
+     -0.15
+    ],
+    [
+     0.7,
+     -0.05
+    ],
+    [
+     0.67,
+     0.05
+    ],
+    [
+     0.64,
+     0.15
+    ],
+    [
+     0.6,
+     0.25
+    ],
+    [
+     0.58,
+     0.35
+    ],
+    [
+     0.55,
+     0.5
+    ],
+    [
+     0.5,
+     0.62
+    ]
+   ],
+   "halfwidth": 0.095,
+   "corridor_polygon_ab": [
+    [
+     0.844,
+     -0.34
+    ],
+    [
+     0.825,
+     -0.141
+    ],
+    [
+     0.823,
+     -0.132
+    ],
+    [
+     0.821,
+     -0.123
+    ],
+    [
+     0.791,
+     -0.023
+    ],
+    [
+     0.761,
+     0.077
+    ],
+    [
+     0.731,
+     0.177
+    ],
+    [
+     0.728,
+     0.185
+    ],
+    [
+     0.691,
+     0.277
+    ],
+    [
+     0.673,
+     0.369
+    ],
+    [
+     0.643,
+     0.519
+    ],
+    [
+     0.641,
+     0.528
+    ],
+    [
+     0.638,
+     0.537
+    ],
+    [
+     0.588,
+     0.657
+    ],
+    [
+     0.412,
+     0.583
+    ],
+    [
+     0.459,
+     0.472
+    ],
+    [
+     0.487,
+     0.331
+    ],
+    [
+     0.507,
+     0.231
+    ],
+    [
+     0.509,
+     0.223
+    ],
+    [
+     0.512,
+     0.215
+    ],
+    [
+     0.55,
+     0.119
+    ],
+    [
+     0.579,
+     0.023
+    ],
+    [
+     0.609,
+     -0.077
+    ],
+    [
+     0.636,
+     -0.169
+    ],
+    [
+     0.655,
+     -0.359
+    ],
+    [
+     0.656,
+     -0.361
+    ],
+    [
+     0.676,
+     -0.531
+    ],
+    [
+     0.864,
+     -0.509
+    ]
+   ],
+   "start_anchor": {
+    "name": "radial edge, between thumb and index (alone or joined to life line)",
+    "polygon_ab": [
+     [
+      0.64,
+      -0.64
+     ],
+     [
+      0.64,
+      -0.3
+     ],
+     [
+      0.86,
+      -0.3
+     ],
+     [
+      0.86,
+      -0.64
+     ]
+    ]
+   },
+   "end_anchors": [
+    {
+     "name": "straight: ulnar edge under Mars",
+     "polygon_ab": [
+      [
+       0.46,
+       0.5
+      ],
+      [
+       0.46,
+       0.8
+      ],
+      [
+       0.68,
+       0.8
+      ],
+      [
+       0.68,
+       0.5
+      ]
+     ]
+    },
+    {
+     "name": "sloping: Moon mount",
+     "polygon_ab": [
+      [
+       0.2,
+       0.4
+      ],
+      [
+       0.2,
+       0.72
+      ],
+      [
+       0.46,
+       0.72
+      ],
+      [
+       0.46,
+       0.4
+      ]
+     ]
+    }
+   ],
+   "direction_prior": "radial -> ulnar",
+   "ordering": "between heart and life; crosses plain of Mars",
+   "may_be_absent": false,
+   "source": "data-prior"
+  },
+  {
+   "id": "life",
+   "tier": "major",
+   "centerline_ab": [
+    [
+     0.78,
+     -0.5
+    ],
+    [
+     0.7,
+     -0.38
+    ],
+    [
+     0.62,
+     -0.27
+    ],
+    [
+     0.52,
+     -0.2
+    ],
+    [
+     0.4,
+     -0.13
+    ],
+    [
+     0.28,
+     -0.07
+    ],
+    [
+     0.15,
+     -0.03
+    ],
+    [
+     0.04,
+     0.02
+    ]
+   ],
+   "halfwidth": 0.12,
+   "corridor_polygon_ab": [
+    [
+     0.8,
+     -0.313
+    ],
+    [
+     0.797,
+     -0.309
+    ],
+    [
+     0.717,
+     -0.199
+    ],
+    [
+     0.709,
+     -0.189
+    ],
+    [
+     0.699,
+     -0.18
+    ],
+    [
+     0.689,
+     -0.172
+    ],
+    [
+     0.589,
+     -0.102
+    ],
+    [
+     0.58,
+     -0.096
+    ],
+    [
+     0.46,
+     -0.026
+    ],
+    [
+     0.454,
+     -0.023
+    ],
+    [
+     0.334,
+     0.037
+    ],
+    [
+     0.325,
+     0.041
+    ],
+    [
+     0.315,
+     0.045
+    ],
+    [
+     0.193,
+     0.082
+    ],
+    [
+     0.09,
+     0.129
+    ],
+    [
+     -0.01,
+     -0.089
+    ],
+    [
+     0.1,
+     -0.139
+    ],
+    [
+     0.115,
+     -0.145
+    ],
+    [
+     0.235,
+     -0.182
+    ],
+    [
+     0.343,
+     -0.236
+    ],
+    [
+     0.455,
+     -0.301
+    ],
+    [
+     0.535,
+     -0.357
+    ],
+    [
+     0.602,
+     -0.449
+    ],
+    [
+     0.68,
+     -0.567
+    ],
+    [
+     0.88,
+     -0.433
+    ]
+   ],
+   "start_anchor": {
+    "name": "radial edge between thumb and index, above the thumb web",
+    "polygon_ab": [
+     [
+      0.62,
+      -0.64
+     ],
+     [
+      0.62,
+      -0.34
+     ],
+     [
+      0.86,
+      -0.34
+     ],
+     [
+      0.86,
+      -0.64
+     ]
+    ]
+   },
+   "end_anchors": [
+    {
+     "name": "wrist-side base of the thenar (Venus) mount",
+     "polygon_ab": [
+      [
+       -0.08,
+       -0.2
+      ],
+      [
+       -0.08,
+       0.14
+      ],
+      [
+       0.14,
+       0.14
+      ],
+      [
+       0.14,
+       -0.2
+      ]
+     ]
+    }
+   ],
+   "direction_prior": "radial edge -> wrist, encloses Venus mount",
+   "ordering": "encloses Venus",
+   "may_be_absent": false,
+   "source": "data-prior+anatomy"
+  },
+  {
+   "id": "fate",
+   "tier": "major",
+   "centerline_ab": [
+    [
+     0.0,
+     0.03
+    ],
+    [
+     0.25,
+     0.04
+    ],
+    [
+     0.5,
+     0.05
+    ],
+    [
+     0.75,
+     0.04
+    ],
+    [
+     0.92,
+     0.0
+    ]
+   ],
+   "halfwidth": 0.13,
+   "corridor_polygon_ab": [
+    [
+     0.5,
+     -0.08
+    ],
+    [
+     0.732,
+     -0.089
+    ],
+    [
+     0.89,
+     -0.127
+    ],
+    [
+     0.95,
+     0.127
+    ],
+    [
+     0.78,
+     0.167
+    ],
+    [
+     0.768,
+     0.169
+    ],
+    [
+     0.755,
+     0.17
+    ],
+    [
+     0.505,
+     0.18
+    ],
+    [
+     0.495,
+     0.18
+    ],
+    [
+     -0.005,
+     0.16
+    ],
+    [
+     0.005,
+     -0.1
+    ]
+   ],
+   "start_anchor": {
+    "name": "wrist centre / life line / Moon mount / mid-palm (varies)",
+    "polygon_ab": [
+     [
+      -0.08,
+      -0.12
+     ],
+     [
+      -0.08,
+      0.45
+     ],
+     [
+      0.4,
+      0.45
+     ],
+     [
+      0.4,
+      -0.12
+     ]
+    ]
+   },
+   "end_anchors": [
+    {
+     "name": "Saturn mount base",
+     "polygon_ab": [
+      [
+       0.78,
+       -0.12
+      ],
+      [
+       0.78,
+       0.12
+      ],
+      [
+       0.98,
+       0.12
+      ],
+      [
+       0.98,
+       -0.12
+      ]
+     ]
+    }
+   ],
+   "direction_prior": "wrist -> Saturn",
+   "ordering": "crosses head and heart lines; may stop at either",
+   "may_be_absent": true,
+   "source": "anatomy"
+  },
+  {
+   "id": "sun",
+   "tier": "minor",
+   "centerline_ab": [
+    [
+     0.3,
+     0.2
+    ],
+    [
+     0.55,
+     0.26
+    ],
+    [
+     0.8,
+     0.31
+    ],
+    [
+     0.92,
+     0.32
+    ]
+   ],
+   "halfwidth": 0.09,
+   "corridor_polygon_ab": [
+    [
+     0.569,
+     0.172
+    ],
+    [
+     0.813,
+     0.221
+    ],
+    [
+     0.927,
+     0.23
+    ],
+    [
+     0.913,
+     0.41
+    ],
+    [
+     0.793,
+     0.4
+    ],
+    [
+     0.782,
+     0.398
+    ],
+    [
+     0.532,
+     0.348
+    ],
+    [
+     0.529,
+     0.348
+    ],
+    [
+     0.279,
+     0.288
+    ],
+    [
+     0.321,
+     0.112
+    ]
+   ],
+   "start_anchor": {
+    "name": "anywhere in lower palm / Moon / life / fate / head / heart",
+    "polygon_ab": [
+     [
+      0.05,
+      0.05
+     ],
+     [
+      0.05,
+      0.5
+     ],
+     [
+      0.6,
+      0.5
+     ],
+     [
+      0.6,
+      0.05
+     ]
+    ]
+   },
+   "end_anchors": [
+    {
+     "name": "Sun (ring) mount base",
+     "polygon_ab": [
+      [
+       0.78,
+       0.18
+      ],
+      [
+       0.78,
+       0.46
+      ],
+      [
+       1.0,
+       0.46
+      ],
+      [
+       1.0,
+       0.18
+      ]
+     ]
+    }
+   ],
+   "direction_prior": "up toward ring finger",
+   "ordering": "parallel to fate line, ulnar of it",
+   "may_be_absent": true,
+   "source": "anatomy"
+  },
+  {
+   "id": "mercury_health",
+   "tier": "minor",
+   "centerline_ab": [
+    [
+     0.78,
+     0.64
+    ],
+    [
+     0.6,
+     0.46
+    ],
+    [
+     0.42,
+     0.28
+    ],
+    [
+     0.24,
+     0.1
+    ],
+    [
+     0.14,
+     0.0
+    ]
+   ],
+   "halfwidth": 0.09,
+   "corridor_polygon_ab": [
+    [
+     0.536,
+     0.524
+    ],
+    [
+     0.356,
+     0.344
+    ],
+    [
+     0.176,
+     0.164
+    ],
+    [
+     0.076,
+     0.064
+    ],
+    [
+     0.204,
+     -0.064
+    ],
+    [
+     0.304,
+     0.036
+    ],
+    [
+     0.484,
+     0.216
+    ],
+    [
+     0.664,
+     0.396
+    ],
+    [
+     0.844,
+     0.576
+    ],
+    [
+     0.716,
+     0.704
+    ]
+   ],
+   "start_anchor": {
+    "name": "base of Mercury (little finger) mount",
+    "polygon_ab": [
+     [
+      0.62,
+      0.5
+     ],
+     [
+      0.62,
+      0.8
+     ],
+     [
+      0.86,
+      0.8
+     ],
+     [
+      0.86,
+      0.5
+     ]
+    ]
+   },
+   "end_anchors": [
+    {
+     "name": "toward life line / wrist",
+     "polygon_ab": [
+      [
+       0.0,
+       -0.1
+      ],
+      [
+       0.0,
+       0.2
+      ],
+      [
+       0.3,
+       0.2
+      ],
+      [
+       0.3,
+       -0.1
+      ]
+     ]
+    }
+   ],
+   "direction_prior": "diagonal across ulnar half",
+   "ordering": "should not touch life line",
+   "may_be_absent": true,
+   "source": "anatomy"
+  },
+  {
+   "id": "marriage",
+   "tier": "minor",
+   "centerline_ab": [
+    [
+     0.9,
+     0.62
+    ],
+    [
+     0.9,
+     0.82
+    ]
+   ],
+   "halfwidth": 0.06,
+   "corridor_polygon_ab": [
+    [
+     0.96,
+     0.82
+    ],
+    [
+     0.84,
+     0.82
+    ],
+    [
+     0.84,
+     0.62
+    ],
+    [
+     0.96,
+     0.62
+    ]
+   ],
+   "start_anchor": {
+    "name": "ulnar edge",
+    "polygon_ab": [
+     [
+      0.84,
+      0.76
+     ],
+     [
+      0.84,
+      0.86
+     ],
+     [
+      0.98,
+      0.86
+     ],
+     [
+      0.98,
+      0.76
+     ]
+    ]
+   },
+   "end_anchors": [
+    {
+     "name": "short, horizontal, between heart line and Mercury finger base",
+     "polygon_ab": [
+      [
+       0.84,
+       0.6
+      ],
+      [
+       0.84,
+       0.76
+      ],
+      [
+       0.98,
+       0.76
+      ],
+      [
+       0.98,
+       0.6
+      ]
+     ]
+    }
+   ],
+   "direction_prior": "horizontal from the edge inward",
+   "ordering": "between heart line and little finger",
+   "may_be_absent": true,
+   "source": "anatomy"
+  },
+  {
+   "id": "bracelets",
+   "tier": "minor",
+   "centerline_ab": [
+    [
+     -0.1,
+     -0.5
+    ],
+    [
+     -0.1,
+     0.0
+    ],
+    [
+     -0.1,
+     0.52
+    ]
+   ],
+   "halfwidth": 0.07,
+   "corridor_polygon_ab": [
+    [
+     -0.03,
+     0.52
+    ],
+    [
+     -0.17,
+     0.52
+    ],
+    [
+     -0.17,
+     -0.5
+    ],
+    [
+     -0.03,
+     -0.5
+    ]
+   ],
+   "start_anchor": {
+    "name": "wrist crease, radial",
+    "polygon_ab": [
+     [
+      -0.3,
+      -0.6
+     ],
+     [
+      -0.3,
+      -0.4
+     ],
+     [
+      0.0,
+      -0.4
+     ],
+     [
+      0.0,
+      -0.6
+     ]
+    ]
+   },
+   "end_anchors": [
+    {
+     "name": "wrist crease, ulnar",
+     "polygon_ab": [
+      [
+       -0.3,
+       0.4
+      ],
+      [
+       -0.3,
+       0.62
+      ],
+      [
+       0.0,
+       0.62
+      ],
+      [
+       0.0,
+       0.4
+      ]
+     ]
+    }
+   ],
+   "direction_prior": "across the wrist, 1-3 parallel creases",
+   "ordering": "below the palm",
+   "may_be_absent": true,
+   "source": "anatomy"
+  },
+  {
+   "id": "girdle_of_venus",
+   "tier": "minor",
+   "centerline_ab": [
+    [
+     0.98,
+     -0.25
+    ],
+    [
+     0.97,
+     -0.05
+    ],
+    [
+     0.96,
+     0.2
+    ],
+    [
+     0.97,
+     0.45
+    ]
+   ],
+   "halfwidth": 0.05,
+   "corridor_polygon_ab": [
+    [
+     1.02,
+     -0.048
+    ],
+    [
+     1.01,
+     0.2
+    ],
+    [
+     1.02,
+     0.448
+    ],
+    [
+     0.92,
+     0.452
+    ],
+    [
+     0.91,
+     0.202
+    ],
+    [
+     0.91,
+     0.198
+    ],
+    [
+     0.92,
+     -0.052
+    ],
+    [
+     0.92,
+     -0.052
+    ],
+    [
+     0.93,
+     -0.252
+    ],
+    [
+     1.03,
+     -0.248
+    ]
+   ],
+   "start_anchor": {
+    "name": "between index and middle finger bases",
+    "polygon_ab": [
+     [
+      0.9,
+      -0.32
+     ],
+     [
+      0.9,
+      -0.18
+     ],
+     [
+      1.08,
+      -0.18
+     ],
+     [
+      1.08,
+      -0.32
+     ]
+    ]
+   },
+   "end_anchors": [
+    {
+     "name": "between ring and little finger bases",
+     "polygon_ab": [
+      [
+       0.88,
+       0.4
+      ],
+      [
+       0.88,
+       0.55
+      ],
+      [
+       1.06,
+       0.55
+      ],
+      [
+       1.06,
+       0.4
+      ]
+     ]
+    }
+   ],
+   "direction_prior": "semicircle above the heart line",
+   "ordering": "above heart line, under the finger bases",
+   "may_be_absent": true,
+   "source": "anatomy"
+  },
+  {
+   "id": "mars_line",
+   "tier": "minor",
+   "centerline_ab": [
+    [
+     0.55,
+     -0.3
+    ],
+    [
+     0.4,
+     -0.23
+    ],
+    [
+     0.28,
+     -0.17
+    ],
+    [
+     0.15,
+     -0.12
+    ]
+   ],
+   "halfwidth": 0.05,
+   "corridor_polygon_ab": [
+    [
+     0.422,
+     -0.185
+    ],
+    [
+     0.302,
+     -0.125
+    ],
+    [
+     0.298,
+     -0.123
+    ],
+    [
+     0.168,
+     -0.073
+    ],
+    [
+     0.132,
+     -0.167
+    ],
+    [
+     0.26,
+     -0.216
+    ],
+    [
+     0.378,
+     -0.275
+    ],
+    [
+     0.379,
+     -0.275
+    ],
+    [
+     0.529,
+     -0.345
+    ],
+    [
+     0.571,
+     -0.255
+    ]
+   ],
+   "start_anchor": {
+    "name": "lower Mars mount",
+    "polygon_ab": [
+     [
+      0.5,
+      -0.4
+     ],
+     [
+      0.5,
+      -0.22
+     ],
+     [
+      0.7,
+      -0.22
+     ],
+     [
+      0.7,
+      -0.4
+     ]
+    ]
+   },
+   "end_anchors": [
+    {
+     "name": "inside the life line",
+     "polygon_ab": [
+      [
+       0.05,
+       -0.2
+      ],
+      [
+       0.05,
+       -0.05
+      ],
+      [
+       0.25,
+       -0.05
+      ],
+      [
+       0.25,
+       -0.2
+      ]
+     ]
+    }
+   ],
+   "direction_prior": "parallel just inside the life line",
+   "ordering": "between life line and thumb",
+   "may_be_absent": true,
+   "source": "anatomy"
+  },
+  {
+   "id": "intuition",
+   "tier": "minor",
+   "centerline_ab": [
+    [
+     0.62,
+     0.66
+    ],
+    [
+     0.45,
+     0.58
+    ],
+    [
+     0.28,
+     0.5
+    ]
+   ],
+   "halfwidth": 0.07,
+   "corridor_polygon_ab": [
+    [
+     0.42,
+     0.643
+    ],
+    [
+     0.25,
+     0.563
+    ],
+    [
+     0.31,
+     0.437
+    ],
+    [
+     0.48,
+     0.517
+    ],
+    [
+     0.65,
+     0.597
+    ],
+    [
+     0.59,
+     0.723
+    ]
+   ],
+   "start_anchor": {
+    "name": "Mercury/Mars edge",
+    "polygon_ab": [
+     [
+      0.55,
+      0.55
+     ],
+     [
+      0.55,
+      0.82
+     ],
+     [
+      0.8,
+      0.82
+     ],
+     [
+      0.8,
+      0.55
+     ]
+    ]
+   },
+   "end_anchors": [
+    {
+     "name": "Moon mount",
+     "polygon_ab": [
+      [
+       0.15,
+       0.3
+      ],
+      [
+       0.15,
+       0.65
+      ],
+      [
+       0.4,
+       0.65
+      ],
+      [
+       0.4,
+       0.3
+      ]
+     ]
+    }
+   ],
+   "direction_prior": "crescent along the ulnar edge",
+   "ordering": "ulnar of fate/sun lines",
+   "may_be_absent": true,
+   "source": "anatomy"
+  }
+ ],
+ "ordering_constraints": [
+  "heart line is distal (larger a) than head line at every b where both exist",
+  "head line is distal to life-line end; head line may share its first 0-1.5 cm with the life line (joined start)",
+  "fate line, if present, crosses the head line and ends at/below the heart line unless it reaches the Saturn mount",
+  "mercury_health line must not be assigned the same pixels as life or fate lines",
+  "priority when corridors overlap: life > heart > head > fate > sun > mercury_health > minor"
+ ],
+ "calibration": {
+  "data_prior": "mean/variance of palm-line-reader (MIT) predictions on 399 palmar images of 11k Hands, in this frame: heart a=0.91->0.77 for b=-0.15->0.65 (sd 0.04); head a=0.75->0.56 for b=-0.35->0.45 (sd 0.05-0.07); life b=-0.22..-0.02 over a=0.75..0.25 (sd 0.05-0.08).",
+  "caveat": "The prior inherits palm-line-reader's bias (life line truncated near the wrist, head line often stops before the ulnar edge). Corridors are deliberately wider than the prior (2-2.5 sd) and the life corridor is extended by anatomy. Minor-line corridors and Rahu/Ketu are anatomy-only and unvalidated."
+ }
+}
