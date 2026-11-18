@@ -15,7 +15,7 @@ export const PANDIT: PanditScript = {
   disclaimer: 'A cultural entertainment. Not a forecast. Not advice.',
   privacy: 'I see only the positions of your hand joints. No camera images, and nothing leaves this headset.',
   todaysMount: 'Today the tradition would light your {mount}.',
-  raisePalm: 'Hold up the hand you write with, palm toward you, a little below eye level.',
+  raisePalm: 'Hold up either hand, palm toward you, a little below eye level. Many readers begin with the hand you write with.',
   raiseRetry: 'Take your time. Raise your writing hand, palm facing you, fingers gently open.',
   scanning: 'Hold still a moment, please. Let me study the shape of your hand.',
   linesAppear: 'There. Here are the great rekhas as the tradition draws them: Jeevan, Mastishk, Hridaya and Bhagya.',

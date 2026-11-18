@@ -218,7 +218,7 @@ export class ShapeCard extends PokeCard {
     readonly strokes: Stroke[],
     readonly label: string,
   ) {
-    super(id, 0.085, 0.112, 384);
+    super(id, 0.095, 0.124, 448);
     this.paint();
   }
 
@@ -232,7 +232,7 @@ export class ShapeCard extends PokeCard {
     g.lineJoin = 'round';
     g.lineCap = 'round';
     // fingers
-    g.strokeStyle = 'rgba(236,206,160,0.35)';
+    g.strokeStyle = 'rgba(236,206,160,0.42)';
     g.lineWidth = W * 0.07;
     for (const f of FINGERS) {
       const [x0, y0] = P(f.base[0], f.base[1]);
@@ -258,7 +258,7 @@ export class ShapeCard extends PokeCard {
       else g.moveTo(px, py);
     });
     g.closePath();
-    g.fillStyle = 'rgba(236,206,160,0.22)';
+    g.fillStyle = 'rgba(236,206,160,0.3)';
     g.fill();
     g.strokeStyle = 'rgba(236,206,160,0.5)';
     g.lineWidth = 2;
@@ -278,7 +278,7 @@ export class ShapeCard extends PokeCard {
     }
     for (const s of this.strokes) {
       const { pts } = smoothStroke(s, 6);
-      for (const [lw, st] of [[W * 0.045, col + '55'], [W * 0.018, '#fff7e0']] as const) {
+      for (const [lw, st] of [[W * 0.075, col + '66'], [W * 0.034, col], [W * 0.012, '#fffbea']] as const) {
         g.beginPath();
         pts.forEach(([a, b], i) => {
           const [px, py] = P(a, b);
@@ -298,7 +298,7 @@ export class ShapeCard extends PokeCard {
     const words = this.label.split(' ');
     const lines: string[] = [];
     let cur = '';
-    g.font = `700 ${Math.round(W * 0.085)}px ${FONT_BODY}`;
+    g.font = `700 ${Math.round(W * 0.098)}px ${FONT_BODY}`;
     for (const w of words) {
       const next = cur ? `${cur} ${w}` : w;
       if (g.measureText(next).width > W * 0.84 && cur) {
@@ -307,7 +307,7 @@ export class ShapeCard extends PokeCard {
       } else cur = next;
     }
     if (cur) lines.push(cur);
-    lines.slice(0, 2).forEach((l, i) => g.fillText(l, W / 2, H * (lines.length > 1 ? 0.83 : 0.87) + i * W * 0.1));
+    lines.slice(0, 2).forEach((l, i) => g.fillText(l, W / 2, H * (lines.length > 1 ? 0.82 : 0.87) + i * W * 0.115));
     this.tex.needsUpdate = true;
   }
 

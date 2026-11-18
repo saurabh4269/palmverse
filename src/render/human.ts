@@ -20,8 +20,8 @@ import {
  * Drives the realistic Panditji (public/models/pandit.glb, built by
  * tools/pandit/build_pandit.py from MakeHuman CC0 + our costume) entirely
  * procedurally:
- *  - seated cross-legged on his gaddi (leg IK); the real table hides what's behind it
- *    through depth occlusion, not a clipping hack
+ *  - seated cross-legged on his gaddi (leg IK), behind the virtual takht that hides his
+ *    legs (no depth occlusion in this project)
  *  - analytic two-bone IK for both arms (reach, lift, dip under the table, throw, stroke beard)
  *  - leaning forward when a target is out of reach
  *  - head + neck look with eyes leading, clamped and spring-smoothed

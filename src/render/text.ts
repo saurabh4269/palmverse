@@ -21,21 +21,11 @@ export const FONT_SERIF = `'Tiro Devanagari Hindi', Georgia, serif`;
 
 let fontsReady: Promise<void> | null = null;
 
-/** Load the OFL display font from Google Fonts once; resolves even offline. */
+/** Wait (bounded) for the bundled OFL fonts, imported as CSS in index.ts, before painting canvases. */
 export function loadFonts(): Promise<void> {
   if (fontsReady) return fontsReady;
   fontsReady = (async () => {
     try {
-      const link = document.createElement('link');
-      link.rel = 'stylesheet';
-      link.href =
-        'https://fonts.googleapis.com/css2?family=Mukta:wght@500;600;700&family=Rozha+One&family=Tiro+Devanagari+Hindi&display=swap';
-      document.head.appendChild(link);
-      await new Promise((r) => {
-        link.onload = r;
-        link.onerror = r;
-        setTimeout(r, 2500);
-      });
       await Promise.race([
         Promise.all([
           document.fonts.load(`64px 'Tiro Devanagari Hindi'`, 'हस्त रेखा Hast Rekha'),

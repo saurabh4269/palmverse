@@ -145,7 +145,7 @@ export const READINGS: ReadingText[] = [
     key: 'join:joined',
     rule: { feature: 'head', attribute: 'start', value: 'joined to the life line' },
     title: 'Head & life · joined',
-    text: 'Your head and life lines begin together. Cheiro read this as a careful, thoughtful nature, someone who looks before leaping and grows more independent with each passing chapter.',
+    text: 'Your head and life lines begin together. Cheiro read this as a careful, thoughtful temperament, one that likes to look before it leaps.',
     short: 'Careful, thoughtful, looks before leaping',
   },
   {
@@ -182,7 +182,7 @@ export const READINGS: ReadingText[] = [
     key: 'life:break',
     rule: { feature: 'life', attribute: 'continuity', value: 'break or island' },
     title: 'Life line · a turning',
-    text: 'Your Jeevan Rekha shows a gap or a small loop. The tradition reads this simply as a turning point, a new chapter where you changed direction and began afresh.',
+    text: 'Your Jeevan Rekha shows a gap or a small loop. The tradition treats a break as a symbol of change and fresh starts, never as something to fear.',
     short: 'Turning points, fresh chapters',
   },
 
@@ -198,14 +198,14 @@ export const READINGS: ReadingText[] = [
     key: 'fate:wrist',
     rule: { feature: 'fate', attribute: 'start', value: 'straight from the wrist' },
     title: 'Bhagya Rekha · from wrist',
-    text: 'Your Bhagya Rekha rises straight from the wrist. The tradition reads this as a sense of direction found early, someone who knew quite young what pulled at them.',
+    text: 'Your Bhagya Rekha rises straight from the wrist. The tradition links this to a strong sense of direction, a mind that knows what draws it.',
     short: 'Found their direction early',
   },
   {
     key: 'fate:moon',
     rule: { feature: 'fate', attribute: 'start', value: 'from the Moon mount' },
     title: 'Bhagya Rekha · from Moon',
-    text: 'Your Bhagya Rekha begins on Chandra Parvat, the moon side of the palm. Cheiro linked this to a varied, eventful path in which friends and the wider public lend a hand.',
+    text: 'Your Bhagya Rekha begins on Chandra Parvat, the moon side of the palm. Cheiro linked this to a sociable, varied temperament that draws on the people around it.',
     short: 'A varied path, helped by many hands',
   },
   {

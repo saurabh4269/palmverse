@@ -584,7 +584,7 @@ export class HastRekhaSystem extends createSystem({}) {
     const line = LINE_ORDER[this.lineIdx];
     this.say(PANDIT.linePrompt[line]);
     const values = LINE_VALUES[line];
-    const n = values.length, gap = 0.098;
+    const n = values.length, gap = 0.106;
     values.forEach((v, i) => {
       const label = LINE_OPTIONS.find((o) => o.line === line && o.value === v)?.label ?? v;
       const c = new ShapeCard(`${line}-${v}`, line, v, shapeFor(line, v), label);

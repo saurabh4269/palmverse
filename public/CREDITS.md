@@ -1,0 +1,51 @@
+# Credits: Hast Rekha
+
+Everything that ships in the app or shaped its content, with licences. Code and art not listed here were written by the team for this project.
+
+## Character
+**Panditji** (`public/models/pandit.glb`) is an original character and does not depict any real person. It was built with MakeHuman / MPFB 2: the tool is GPL-3.0, its output is CC0, and the MakeHuman system assets (skin, eyes, brows, lashes, teeth, tongue, hair) are CC0. The costume (beard, kurta, shawl) was generated in code by the team. The full table is in [models/CREDITS.md](models/CREDITS.md); the build pipeline is `tools/pandit/`.
+
+## Palmistry content
+The readings are the team's own paraphrases. No source text is copied. Each reading cites one rule in `src/data/palmistry-rules.json`, which is a copy of `data/palmistry-rules.json` at the repo root. The readable version is `research/palmistry-rulebook.md`.
+
+| Source | Status | Used for |
+|---|---|---|
+| Cheiro (Count Louis Hamon), *Palmistry for All*, 1916 ([Project Gutenberg #20480](https://www.gutenberg.org/ebooks/20480)) | Public domain in the USA | Main source: lines, mounts, hand shape, fingers |
+| William G. Benham, *The Laws of Scientific Hand Reading*, 1900 ([Internet Archive](https://archive.org/details/lawsscientifich00benhgoog)) | Public domain in the USA | Second opinion; upper and lower Mars |
+| Varahamihira, *Brihat Samhita*, ch. 68, verses 42–50 (6th c. CE), English rendering read at [siva.sh](https://www.siva.sh/brihat-samhita/68/41-45) | Sanskrit original is public domain. The rendering has no stated licence, so it was only paraphrased. | The classical Indian hand signs in the rulebook |
+| Modern Indian hast-rekha guides (AstroWord, Vivahika and others) | Copyrighted web articles; facts only, no text copied | Hindi names, the four-element hand types, the "life line is not lifespan" reframing |
+| Kenneth G. Zysk, *The Indian System of Human Marks* (Brill, 2016); Tamal, *Hasta Samudrika* (RKMVU) | Consulted as references; nothing copied | The historical note that heart and head lines and planetary mounts came through Cheiro and Benham |
+| [Wikipedia: Palmistry](https://en.wikipedia.org/wiki/Palmistry) | CC BY-SA 4.0; consulted only | Framing: conflicting interpretations, pseudoscience status |
+
+## Palm regions and line shapes
+`src/data/palm-regions.json` (mount polygons and line corridors in palm coordinates) and the candidate line shapes in `src/core/line-shapes.ts` were made by the team.
+- The mount polygons follow Cheiro's and Benham's anatomical locations.
+- The heart, head and life centrelines are mean shapes computed by our offline pipeline (`scripts/palm/`, `research/palm-autolabel/`).
+- That pipeline ran [palm-line-reader](https://github.com/samuelwbarber/palm-line-reader) (MIT) on 399 palms from the **11k Hands** dataset (Afifi, 2019, academic use only).
+- The landmark means behind the frame calibration also come from 11k Hands statistics.
+- No images or per-image data from 11k Hands ship with the app. Only aggregate averages, as coordinates, are included. ⚠ Check that shipping aggregate statistics derived from an academic-use-only dataset is acceptable.
+
+## Fonts
+They are bundled with the app from the `@fontsource/mukta`, `@fontsource/rozha-one` and `@fontsource/tiro-devanagari-hindi` npm packages (imported in `src/index.ts`); the app makes no font requests to third parties.
+
+| Font | Licence |
+|---|---|
+| [Mukta](https://fonts.google.com/specimen/Mukta) (body and UI text) | SIL Open Font License 1.1 |
+| [Rozha One](https://fonts.google.com/specimen/Rozha+One) (display titles) | SIL Open Font License 1.1 |
+| [Tiro Devanagari Hindi](https://fonts.google.com/specimen/Tiro+Devanagari+Hindi) (mount sigils, serif fallback) | SIL Open Font License 1.1 |
+
+## Sound and voice
+- **All sound effects are synthesised at runtime** with the Web Audio API in `src/render/audio.ts`: the bell, tick, press, swell, mount tones and drone. No audio files are used.
+- **Panditji's voice** is the browser's built-in `speechSynthesis`, using whatever system voice is available. No voice is bundled.
+
+## Software
+| Package | Licence |
+|---|---|
+| [IWSDK](https://github.com/facebook/immersive-web-sdk) `@iwsdk/core`, `@iwsdk/cli`, `@iwsdk/vite-plugin-dev` 1.1.0 | MIT |
+| three.js, as `super-three` 0.185.0 | MIT |
+| `@pmndrs/uikit`, `uikit-horizon`, `uikit-lucide` (IWSDK spatial UI dependency) | MIT (licence file © 2024 Bela Bohlender) |
+| Vite, TypeScript, esbuild | MIT, Apache-2.0, MIT |
+| `vercel.json`, copied from [meta-quest/iwsdk-v0-template](https://github.com/meta-quest/iwsdk-v0-template) | Apache-2.0 |
+
+## Tools used to make the assets (not shipped)
+Blender (GPL), MPFB 2 (GPL-3.0, CC0 output), MediaPipe (Apache-2.0), OpenCV (Apache-2.0), scikit-image (BSD-3-Clause), ONNX Runtime (MIT).

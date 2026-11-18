@@ -1,0 +1,131 @@
+# Judging self-assessment: Hast Rekha
+
+How the build meets the Meta VR Start Developer Competition 2026 rules and its four judging criteria, each worth 25%.
+
+- **Sources:** the kit's mirrored [rules](../../../resources/devpost/rules.md) (§6 judging criteria), [judging page](../../../resources/devpost/details_judging.md) and [special awards](../../../resources/devpost/details_special-awards.md).
+- **Evidence:** "E2E" means the emulator run in [TESTING.md](TESTING.md). ⚠ marks anything not yet verified on a physical Quest, which so far is everything that depends on the device.
+
+## Entry choices
+- **Track: Entertainment.** It is a piece of cultural storytelling: a character tells you what a tradition says about your own hand.
+- **Division: New Experience.** It was conceived and built inside the competition window, starting from the official IWSDK starter.
+- **Special awards to name:**
+  - **Boldest Original Concept.** Your real palm is the canvas. The lines and mounts are drawn on your own skin and follow it as you turn your hand. On a flat screen, or in VR without passthrough, there is no palm to read. A search of the 2026 gallery found no palmistry entry, and no MR palm reader was found on Quest ([idea-ranking.md](../../../research/idea-ranking.md)).
+  - **Best First Five Minutes.** The payoff arrives early. About 2 seconds after you raise your palm (0.6 s to confirm it, then 45 tracked frames to measure it), lines draw themselves on your hand with a rising chime. The only interactions are holding up a palm and poking with a fingertip. Each is taught by Panditji's spoken line plus one world-anchored hint ("Hold up your palm, facing you ✋"), not a wall of text.
+
+## Hard requirements (pass/fail)
+| Requirement | Status | Evidence |
+|---|---|---|
+| Hands-first, completes without a controller | ✅ emulator | E2E plays the whole reading with emulated hands only (`set-input-mode hand`): Continue poke, palm up, scan, mounts poked by the other hand's fingertip, five line choices by poke, skip to card, Finish. `iwsdk.config.json` turns on `handTracking`. There is no controller code path. |
+| Quest 3 / 3S at 60 fps or more | ✅ design / ⚠ device | Overlay: one ribbon mesh per visible line, one mesh for all seven mount sigils, one sheen quad. All placement happens in the vertex shader from four uniforms (`src/render/palm-overlay.ts`). The dome is one draw. No shadows, no post-processing, no physics. The pandit GLB is 3.6 MB with a 2048² skin. Measured in the emulator (`npx @iwsdk/cli scene render-stats`, mounts phase): **70 draw calls, about 105k triangles, 28 programs**. The 21 static setting props are merged into one mesh per material at load (`mergeStatic` in `src/render/dome.ts`), which took 98 calls down to 70. **Frame rate not yet measured on a device.** |
+| English | ✅ | All speech and captions are in English. Devanagari appears as titles and names (हस्त रेखा, गुरु पर्वत) next to their romanised and English forms. |
+| No logos, brands or identifiable people | ✅ | Panditji is an original character generated from MakeHuman parameters, not a likeness. The pavilion, cards and sigils are procedural. |
+| Original, not a wrapper | ✅ | No external service. The palm frame, measurement, rule engine, shaders and sound all run locally. |
+| Hosted URL, works logged out | ⚠ to do | `vercel.json` is ready. Deploying needs the user's approval. See [SUBMISSION.md](SUBMISSION.md#pre-submission-checklist). |
+| Public video under 3 minutes | ⚠ to do | Shot list in [SUBMISSION.md](SUBMISSION.md#trailer-shot-list-under-3-minutes). It must be filmed on a Quest. |
+
+## Guidelines
+| Guideline | How |
+|---|---|
+| Seated, 2 ft radius | At session start the pavilion is anchored to your head (`anchorStage()` in `src/director.ts`): the origin goes under your head, facing where you look, and eye height is clamped to 0.9 to 1.5 m. It re-seats when you raise your palm if you have moved more than 25 cm or changed height by more than 8 cm. Buttons and cards sit 0.40 to 0.46 m in front of you, and your palm is held 18 to 65 cm from your eyes. No locomotion. |
+| Easy in and out | One Enter button. A full reading is about 5 minutes, and **Continue ›** appears when each step's talking is done. Readings are saved automatically. |
+| Satisfying within 10 minutes | Lines glow on your palm within the first minute. A complete reading with a card takes about 5 minutes. |
+
+## Criterion 1: Innovation & Creativity
+- **The real palm is the canvas.** The overlay lives in palm coordinates, `q(a,b) = wrist + a·(middle knuckle − wrist) + b·(pinky knuckle − index knuckle)`, and is rebuilt from the live joints every frame. So the lines and mounts stretch, tilt and turn with your actual hand (`src/core/palm-frame.ts`, `src/render/palm-overlay.ts`).
+- **A real tradition, handled with care.**
+  - The 63-feature rulebook ([palmistry-rulebook.md](../../../research/palmistry-rulebook.md), `data/palmistry-rules.json`) is built from Cheiro (1916), Benham (1900), Varahamihira's Brihat Samhita ch. 68 and modern Indian guides, with a citation for every rule.
+  - Every reading in `src/content/readings.ts` points at exactly one rule (feature, attribute, value), and a test checks that every pointer resolves.
+- **Honest framing as part of the design.** Panditji says up front that this is culture and story. In the outro he explains the Barnum effect. He also notes that heart and head lines and planetary mounts reached Indian practice through Western 20th-century authors.
+- **You read your own palm.** Rather than fake detection, the app asks you to look at your own hand and pick the closest shape. The candidate glows on your palm while you hover over its card, so comparing your real crease with the drawn line is the game.
+- **Two hands, two stories.** Reading your other hand triggers a comparison with the saved first hand ("the left shows what you were given, the right what you built from it"). There is also a daily "today's mount" line in the greeting, which is the same for everyone on a given date (`todaysMountIndex`).
+
+## Criterion 2: Experience Design
+- **Passthrough is the point.** The dome fades out below −15° so your table, lap and hands stay real (`src/render/dome.ts`). Dome opacity drops from 0.96 to 0.6 when you raise your palm "to let the room (and your real hand) in". Turn passthrough off and there is nothing to read.
+- **Two gestures only:**
+  - **Palm up:** facing the eye within about 55°, 18 to 65 cm away, held for 0.6 s (`isReadablePalm`).
+  - **Fingertip poke.**
+    - Mounts: the other hand's index tip within 1.7 cm of a mount centre, between 2 cm below and 3 cm above the palm plane, for 0.25 s.
+    - Cards and buttons: hover within about 3.5 cm, press when the tip crosses the plane moving forward, with a cooldown, and a card only takes input after every fingertip has been clear of it (`src/render/cards.ts`).
+- **Onboarding by voice and one hint.** Each step has one short spoken line. Captions always show, so it works muted. If you haven't raised your palm after 14 s, a gentle retry line plays. If tracking drops for 2.5 s during the mounts, Panditji asks for your hand again (at most once every 15 s).
+- **Comfort and legibility** (`src/render/ui.ts`): body text in Mukta, a humanist sans. Subtitles sit about 1 m away and about 18° below gaze, lazy-follow and are never head-locked, with at most 2 lines of about 32 characters per page. Glyph height is about 1.4 to 1.6° at the viewing distance. The subtitles slide aside to the side opposite your reading hand while it is up, so they don't cover your palm.
+- **FoV.** Everything you need is straight ahead and below eye level, where you are already looking at your palm: the cards are about 0.47 m below eye height and 0.4 m forward, and the buttons are 0.36 to 0.40 m below and 0.46 m forward. Nothing needs a sideways head turn. ⚠ Not checked against the narrower Meta VR Glasses view, or for how far people actually tilt their heads on a device.
+- **Something to keep.** The Rekha card (1080×1350, `src/render/share-card.ts`) shows your element, your chosen line shapes on a palm diagram, a one-line summary and "Not a forecast." It is stored locally and downloadable from the 2D page.
+
+## Criterion 3: Technical Implementation
+- **Hand tracking:**
+  - Reads 25 joints per hand each frame with `XRFrame.fillPoses`, then applies exponential smoothing (time constant about 36 ms).
+  - The palm frame comes from 4 joints, with handedness-corrected normals. A palm counts as readable based on facing, distance and plausible size.
+  - Tracking-loss grace period is 150 ms (`src/director.ts`, `readHands`).
+- **Layer 1, measured from joints only** (`src/core/measure.ts`):
+  - Palm squareness, finger-to-palm ratio, index length, index/ring ratio and thumb spread angle (projected onto the palm plane). Each is a median over 45 frames, so one bad frame cannot flip it.
+  - Finger lengths are sums of bone segments, which doesn't change when fingers curl.
+  - Thresholds are population medians and quartiles from the rulebook's notes.
+- **Layer 2, line shapes confirmed by you** (`src/core/line-shapes.ts`):
+  - 2 to 4 candidates per line, written in palm coordinates.
+  - They vary the mean heart, head and life centrelines of 399 palms, produced by the offline pipeline in [research/palm-autolabel](../../../research/palm-autolabel/README.md), and stay inside each line's corridor.
+  - Endings fall in named anchor regions, for example a heart line ending under Jupiter, between Jupiter and Saturn, or under Saturn.
+- **Safety enforced in code, not left to content** (`src/core/rules.ts`). A reading is dropped if:
+  - its rule doesn't resolve;
+  - the rulebook marks that value "do not use" or "omit";
+  - its text matches the banned-claims pattern (death, lifespan, illness, insanity, fertility, divorce, accident, money loss, "you will", "predict", …).
+- **Overlay rendering:**
+  - Static geometry in (a, b) coordinates; the vertex shader maps it into the world.
+  - Premultiplied "glow over passthrough" blending, so dark parts stay see-through on Quest.
+  - Double-sided materials, because winding flips with stroke direction and handedness.
+  - A soft dark ink bed under each ribbon for contrast on bright skin.
+  - An ink-drawing reveal animation, and Devanagari mount sigils in one atlas, drawn in one call.
+- **Character:** Panditji is MakeHuman/MPFB, built headless in Blender by script (`tools/pandit/`). It is animated procedurally (`src/render/human.ts`, `pandit.ts`):
+  - seated pose, breathing and blinks;
+  - head and eyes on your palm while it is up, otherwise on your face;
+  - jaw moves while he talks;
+  - namaste and explaining gestures.
+- **Text:** Canvas2D text so the browser shapes Devanagari, which uikit/troika cannot do (`src/render/text.ts`). Card text is measured and shrunk to fit.
+- **Tests:** palm-frame 41 checks, rules 2,581 checks (including 4,000 fuzzed profile and choice combinations), share-layout 283 checks, and a 44-check emulator E2E. See [TESTING.md](TESTING.md).
+- ⚠ **Gaps relative to the rubric:**
+  - **No MRUK, planes, anchors or depth occlusion.** The stage is anchored to your head pose, not to a detected table. That was a deliberate choice: the content is your palm, which needs no room understanding. Judges who weight scene understanding will see this gap.
+  - **No gaze interactions.** Gaze input is a Unity/Unreal Interaction SDK feature.
+
+## Criterion 4: Polish & Presentation
+- **Art direction:**
+  - a lamp-lit pavilion: a procedural dome with a dusk sky between carved pillars;
+  - a low chowki with diyas and a flickering warm light;
+  - lacquer and parchment cards with gilded corners;
+  - Rozha One for display, Tiro Devanagari Hindi for sigils, and Mukta for body text;
+  - a line colour code shared by the overlay, the choice cards and the share card.
+- **Sound** (`src/render/audio.ts`), all synthesised:
+  - a temple-bell chime, a soft tanpura-like drone, and a rising swell when the lines first glow;
+  - mount "tings" that climb the Bhupali scale (Sa Re Ga Pa Dha);
+  - tick and press sounds.
+  - Voice is browser speech synthesis, preferring an Indian English voice. Devanagari is stripped before speaking.
+- **Submission materials:** see [SUBMISSION.md](SUBMISSION.md).
+
+## Decisions and rationale
+- **Physics: none.** This is an overlay and character experience. Nothing falls, collides or is thrown. Motion is tweens, springs and shaders. `iwsdk.config.json` has `physics: false`, `grabbing: false` and `locomotion: false`.
+- **Engine: IWSDK / WebXR, not Unity or Godot:**
+  - IWSDK has an emulator (IWER) driven from a CLI. That made a scripted, hands-only, end-to-end test of the whole reading possible, plus close-up stills, all without a headset.
+  - Judges get an instant URL with no APK sideload or release channel.
+  - Godot has no comparable emulator path for scripted hand input.
+  - Unity is not installed on the build machine.
+  - The cost: no Passthrough Camera API on the web (see Layer 3) and no Interaction SDK gaze.
+- **Layers:**
+  - **Layer 1 (ships):** hand-tracking-only measurement of shape, fingers and thumb.
+  - **Layer 2 (ships):** line shapes you confirm by comparing your palm with glowing candidates.
+  - **Layer 3 (what's next):** a camera crease scan. Real creases would be read from the passthrough cameras, then traced and classified inside the same corridors.
+    - **Evidence it is feasible offline:** the root `scripts/palm/` pipeline and its write-up in [research/palm-autolabel](../../../research/palm-autolabel/README.md).
+      - It runs MediaPipe, palm rectification, CLAHE plus Frangi ridges, and a minimum-cost path per line corridor, cross-checked against palm-line-reader.
+      - On 300 photos, 148 passed the quality gate. Agreement on heart, head and life was 0.92, 0.95 and 0.80.
+      - There is no human ground truth, and end classes are unreliable.
+    - **The open question** is whether a web page on Quest can get passthrough camera frames at all. Unity has the Passthrough Camera API; WebXR raw camera access was reported as unsupported in Quest Browser in early 2026 ([ideas-7-8.md §8.4](../../../research/ideas-7-8.md)).
+    - `public/probe.html` is a small, standalone page that tests two routes on the headset: WebXR `camera-access` (`XRView.camera` and `getCameraImage`) and `getUserMedia`. It reports the resolution and shows a preview so creases can be judged by eye. ⚠ **It has not been run on a Quest, so the answer is unknown.**
+- **Fingertip tracing is not implemented.** The research plan had a "trace your line with a fingertip" mode. The shipped Layer 2 uses pick-the-closest-shape cards instead: a poke is more robust than tracing a few millimetres above your own skin with jittery tracking, and the result maps directly onto rulebook values. `src/core/one-euro.ts` (a One Euro filter for fingertips) exists but is not wired in.
+- **No LLM.** The reading comes from a fixed, cited, safety-filtered library. There is no network dependency, no prompt that could drift into prediction, and nothing leaves the device.
+
+## Known limitations and risks
+- ⚠ **Overlay registration on a real palm is unverified.** The palm frame is a plane through four joints. Real palms are curved, and Quest joint positions are estimates. The lines could sit a few millimetres off the actual creases, or float at some hand angles. Mount centroids are population averages, not fitted to the person.
+- ⚠ **Palm-up tracking stability is unverified.** Quest hand tracking is tuned for common poses. A palm held up facing the eyes, possibly with the other hand's fingertip touching it (the mount poke), may cause occlusion and jitter. The two-hand poke is the riskiest interaction.
+- ⚠ **Thresholds come from 2D photos.** The element, finger and thumb thresholds are medians from photo datasets, not Quest joint data. On real hands the class distribution may be skewed, for example most people coming out "Fire".
+- ⚠ **The first lines are a template.** The reveal draws the tradition's typical shape, not your creases. Panditji says "as the tradition draws them", and you then pick your own. The trailer and text must not imply detection.
+- ⚠ **Legibility on real skin.** The ink bed and thicker core were tuned in the emulator against a rendered hand. Real skin under room light, especially bright or very dark skin, is untested.
+- ⚠ **Frame rate:** not measured on a device.
+- ⚠ **Voice:** `speechSynthesis` voices in Quest Browser are unknown. Captions are the fallback.
+- **Dev keys** (`n`, `1`–`4`, `o`) also work in production builds. That is harmless on a headset with no keyboard.
