@@ -173,6 +173,16 @@ Record in the table below: the median and worst frame time, missed frames, CPU- 
 - **The palm overlay flickered in the mounts phase.** In 72 of 128 samples, the palm was tilted between 0.2 and 0.57 (cosine to the eye) while the other hand poked it. It dropped out of "readable", and Panditji kept saying "I cannot see your hand". Fixed with hysteresis: `isReadablePalm` (0.57) acquires the palm, and the looser `isHeldPalm` (0.2, 12–80 cm) keeps it. The line only plays when the hand really isn't tracked. `fillPoses` now also falls back to per-joint `getJointPose`.
 - The dev relay (`tools/quest-debug.mjs`, which writes `artifacts/quest-log.jsonl`) only runs on Quest Browser, or with `?questdebug`. Its console, rAF and WebGL wrappers made the emulator e2e miss the language-button poke.
 
+### Retest on the headset after the 18 Nov evening changes
+Put the controllers down first. Every line below is visible in `artifacts/quest-log.jsonl` (dev server).
+1. **Opening:** the planets circle you at about arm's length for about 12 s while Aakashvani speaks, then fade. Note any judder. The log shows `opening dur=` and, every 2 s, `perf` fps.
+2. **Onboarding time:** from Enter XR to `palm-up` should take well under a minute. Try raising your palm during Panditji's greeting: it should skip straight to the scan.
+3. **Mounts:** poke Guru. Its world opens and he tells it from inside, then it closes by itself. Poke a second mount while you are inside a world: it should switch. Each planet has its own music. Watch `perf` while a world is open.
+4. **Line picking (the reported bug):** hover the yellow-orange life line. It brightens, the others dim, and the card names it. Pinch: **the life line opens, not the green fate line.** Repeat for each line, near the wrist where they run close. The log shows `line-hover line=…` then `line-select line=… by=pinch` with the same line.
+5. **Pronunciation:** listen for "Hridaya Rekha", "Shani Parvat" and "Mastishk" in the English voice.
+6. **Cards:** the line-choice cards show a natural palm, and the line sits where your own heart, head, life or fate line is.
+7. **Banyan:** open the life line's world. The tree stands on the horizon and doesn't cover the subtitles.
+
 ## Device checklist
 To be done by a person with a Quest 3 or 3S, in Quest Browser, at the hosted HTTPS URL or the dev server's network URL. ⚠ **None of these has been done yet.** Record the results here.
 

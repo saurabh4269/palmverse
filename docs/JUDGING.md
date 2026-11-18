@@ -93,6 +93,15 @@ How the build meets the Meta VR Start Developer Competition 2026 rules and its f
   - **No MRUK, planes, anchors or depth occlusion.** The stage is anchored to your head pose, not to a detected table. That was a deliberate choice: the content is your palm, which needs no room understanding. Judges who weight scene understanding will see this gap.
   - **No gaze interactions.** Gaze input is a Unity/Unreal Interaction SDK feature.
 
+- **After the first headset session (18 Nov evening), from the player's notes:**
+  - **A divine opening, then straight to your palm.** The nine grahas revolve around you while a second, calmer voice (Aakashvani) speaks two lines. Panditji then greets you in one line, and a palm held up early goes straight to the reading. The old welcome ran four lines, about 52 s.
+  - **The mounts lesson happens inside each planet's world.** Poke a mount and the room gives way to that graha's sky, with its own music. Panditji tells the mount from inside, and the world closes by itself. Poke another mount to switch worlds.
+  - **Line picking that does what you see.** The hovered line is lit, the others step back, and its name is shown. A pinch opens the hovered line, not whichever line is nearest the pinch midpoint. Another line has to be 4 mm nearer before it takes over. A select made while the last world is still folding away is queued, not dropped.
+  - **The palm stays put on device.** It is acquired at 55° and kept down to about 78° (hysteresis), so tilting it to poke no longer blinks the overlay or brings the "I cannot see your hand" line.
+  - **Music per moment:** 14 instrumental loops (the opening, one per graha, one per line world), mixed 10 dB under the voice.
+  - **Hindi words said the Hindi way in English lines** (Rekha, Hridaya, Parvat…): they are voiced from Devanagari, and the captions stay roman.
+  - **Natural palms on the line cards** (rendered from the MakeHuman human), and a **real banyan model** in the life world.
+
 ## Criterion 4: Polish & Presentation
 - **Lighting and materials (visual pass, 18 Nov):**
   - the takht, chowki, diyas and brass lamp stands are rebuilt in Blender at their exact runtime sizes, bevelled, with **baked ambient occlusion** and a **floor contact shadow cut from their real footprints** (`tools/setting/build_setting.py`). The platform stands on your real floor instead of floating over passthrough;
