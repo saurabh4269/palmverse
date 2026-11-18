@@ -1,10 +1,13 @@
 /**
  * Synthesised sound (nothing to license) and the pandit's voice.
+ *  - voice: pre-rendered clips first (src/render/voice-clips.ts), speechSynthesis as the fallback.
  *  - temple-bell chime (inharmonic partials), soft tick, glow swell, mount "ting"
  *    pitched up a raga-like scale (Bhupali: Sa Re Ga Pa Dha), tanpura-like drone.
  *  - voice: the browser's speechSynthesis, preferring an Indian English voice;
  *    captions always show, so the app works muted or with no voices installed.
  */
+
+import { ClipVoice } from './voice-clips.js';
 
 const BHUPALI = [0, 2, 4, 7, 9, 12, 14, 16];
 
@@ -156,8 +159,16 @@ export class Voice {
   enabled = true;
   private voice: SpeechSynthesisVoice | null = null;
   speaking = false;
+  readonly clips = new ClipVoice(`${import.meta.env.BASE_URL}voice/en/`);
+  private sound: Sound | null = null;
+
+  /** Clips play through the effects' AudioContext (unlocked on Enter). */
+  attach(sound: Sound): void {
+    this.sound = sound;
+  }
 
   constructor() {
+    void this.clips.load();
     try {
       const pick = () => {
         const vs = speechSynthesis.getVoices();
@@ -174,8 +185,23 @@ export class Voice {
     }
   }
 
-  say(text: string): void {
-    if (!this.enabled) return;
+  /** Speak a line. Returns the clip's duration (seconds) when a pre-rendered clip plays, else null. */
+  say(text: string): number | null {
+    if (!this.enabled) return null;
+    const ctx = this.sound?.ctx;
+    if (ctx && ctx.state !== 'closed') {
+      const d = this.clips.play(ctx, text, () => this.speak(text));
+      if (d !== null) return d;
+    }
+    this.speak(text);
+    return null;
+  }
+
+  prefetch(texts: string[]): void {
+    this.clips.prefetch(this.sound?.ctx ?? null, texts);
+  }
+
+  private speak(text: string): void {
     try {
       // Speak Devanagari words by their roman form: strip the Devanagari, keep the rest.
       const spoken = text.replace(/[ऀ-ॿ]+[,\s]*/g, '').replace(/\s+/g, ' ').trim();
@@ -193,6 +219,7 @@ export class Voice {
   }
 
   stop(): void {
+    this.clips.stop();
     try {
       speechSynthesis.cancel();
     } catch {

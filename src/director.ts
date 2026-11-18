@@ -32,6 +32,7 @@ import { renderShareCard } from './render/share-card.js';
 import { gpuStats } from './render/gpu-stats.js';
 import { WorldPortal, type WorldId } from './render/worlds.js';
 import { WORLD_NARRATION } from './content/worlds.js';
+import { CARD_LINE, elementIntroLine, otherHandRaiseLine, pickedLine, todaysMountLine } from './content/spoken.js';
 import { FONT_BODY, Label, loadFonts } from './render/text.js';
 import { Hint, Subtitles } from './render/ui.js';
 
@@ -149,6 +150,7 @@ export class HastRekhaSystem extends createSystem({}) {
 
   init(): void {
     void loadFonts();
+    this.voice.attach(this.sound);
     // Fixed foveation: three defaults to 1.0 (maximum), which visibly softens the periphery where
     // the captions and line cards sit (~20° off centre). 0.5 keeps them crisp; the scene is light
     // (≈75 draw calls), so the GPU can afford it. Verify on device (docs/TESTING.md).
@@ -208,8 +210,10 @@ export class HastRekhaSystem extends createSystem({}) {
       log('xr', { presenting });
       if (presenting) {
         this.sound.unlock();
+        this.voice.prefetch(PANDIT.greeting);
         this.anchored = false;
         this.logXRRender();
+        log('voice', { clips: this.voice.clips.count });
         this.go('welcome');
       } else {
         this.voice.stop();
@@ -376,10 +380,10 @@ export class HastRekhaSystem extends createSystem({}) {
   // ───────────────────────── speech ─────────────────────────
 
   private say(text: string): number {
-    const dur = this.subs.say(text, 'pandit');
-    this.voice.say(text);
+    const clip = this.voice.say(text);
+    const dur = this.subs.say(text, 'pandit', clip ?? undefined);
     this.talkUntil = Math.max(this.talkUntil, this.time) + dur;
-    log('say', { dur }, { text });
+    log('say', { dur, clip: clip ? 1 : 0 }, { text });
     return dur;
   }
 
@@ -418,7 +422,7 @@ export class HastRekhaSystem extends createSystem({}) {
         this.intro.setText(`हस्त रेखा  ·  Hast Rekha\n${PANDIT.disclaimer}\n${PANDIT.privacy}`);
         const returning = this.saveData.readings.length > 0;
         for (const l of PANDIT.greeting) this.say(l);
-        this.say(PANDIT.todaysMount.replace('{mount}', `${today.name_roman} (${today.name_hi}), ${today.short.toLowerCase()}`));
+        this.say(todaysMountLine(today));
         log('welcome', { returning: returning ? 1 : 0, today: today.id });
         break;
       }
@@ -427,7 +431,7 @@ export class HastRekhaSystem extends createSystem({}) {
         if (this.immersive && (Math.abs(this.headWorld.y - this.H) > 0.08 || Math.hypot(this.headWorld.x - this.stage.position.x, this.headWorld.z - this.stage.position.z) > 0.25)) this.anchorStage();
         this.intro.opacity = 0;
         this.setting.dome.opacityTarget = 0.6; // let the room (and your real hand) in
-        this.say(this.readCount > 0 ? PANDIT.otherHand.split('?')[0] + '? Hold it up, palm toward you.' : PANDIT.raisePalm);
+        this.say(this.readCount > 0 ? otherHandRaiseLine() : PANDIT.raisePalm);
         this.hint.show('Hold up your palm, facing you  ✋', new Vector3(0, this.H - 0.32, -0.45), 0);
         this.retrySaid = false;
         this.readyT = 0;
@@ -442,7 +446,7 @@ export class HastRekhaSystem extends createSystem({}) {
         this.sound.swell();
         this.say(PANDIT.linesAppear);
         const el = ELEMENTS.find((e) => e.id === this.profile!.element)!;
-        this.say(PANDIT.elementIntro.replace('{element_en}', el.name_en).replace('{element_hi}', `${el.name_hi}, ${el.name_roman}`));
+        this.say(elementIntroLine(el));
         const r = READINGS.find((x) => x.key === `element:${el.id}`);
         if (r) this.say(r.text);
         break;
@@ -721,7 +725,7 @@ export class HastRekhaSystem extends createSystem({}) {
     this.subs.clear();
     this.voice.stop();
     this.talkUntil = this.time;
-    this.say(`${['Good.', 'I see.', 'Ah.', 'Yes.', 'Hmm, good.'][this.lineIdx % 5]} ${opt?.label ?? ''}.`);
+    this.say(pickedLine(this.lineIdx, opt?.label ?? ''));
     this.lineIdx++;
     if (this.lineIdx >= LINE_ORDER.length) this.go('explore');
     else this.showLineCards();
@@ -752,6 +756,8 @@ export class HastRekhaSystem extends createSystem({}) {
     this.say(PANDIT.explore);
     this.hint.show('Touch or pinch a glowing line  ✨', new Vector3(0, this.H - 0.32, -0.45), 0);
     log('explore', { lines: this.touchLines.map((l) => l.id).join(',') });
+    // warm the clips each world will need, so the voice starts on time inside it
+    this.voice.prefetch(this.touchLines.flatMap((l) => [WORLD_NARRATION[l.id].intro, this.lineItem(l.id)?.text ?? '', WORLD_NARRATION[l.id].outro]));
   }
 
   /** Thumb tip to index tip, on the toucher hand. */
@@ -1013,7 +1019,7 @@ export class HastRekhaSystem extends createSystem({}) {
     storeSave(this.saveData);
     window.dispatchEvent(new CustomEvent('hast-saved'));
     this.sound.bell(523, 0.2);
-    this.say('Here is your Rekha card. It is saved on this headset only. After you leave, you can download it from this page.');
+    this.say(CARD_LINE);
     log('card', { lines: lines.length, saved: this.saveData.readings.length, bytes: dataUrl?.length ?? 0 }, { card: r3(mesh.getWorldPosition(new Vector3())) });
   }
 

@@ -103,13 +103,17 @@ export class Subtitles {
    * Queue a line after whatever is already queued, so a telling of several lines is captioned in
    * full and stays in step with the voice queue (callers interrupt with clear() first).
    */
-  say(text: string, voice: Voice = 'pandit'): number {
+  say(text: string, voice: Voice = 'pandit', spokenFor?: number): number {
+    const pages = paginate(text);
+    const durs = pages.map((page) => Math.max(1.9, 0.75 + page.length * 0.06));
+    // with a voice clip, the pages share the clip's real length (in proportion to their text)
+    const k = spokenFor ? spokenFor / durs.reduce((a, b) => a + b, 0) : 1;
     let total = 0;
-    for (const page of paginate(text)) {
-      const dur = Math.max(1.9, 0.75 + page.length * 0.06);
+    pages.forEach((page, i) => {
+      const dur = durs[i] * k;
       total += dur;
       this.queue.push({ text: page, voice, dur });
-    }
+    });
     return total;
   }
 
