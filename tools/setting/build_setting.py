@@ -1,5 +1,5 @@
 """
-Hast Rekha · the pavilion props as one baked GLB (public/models/setting.glb).
+Hast Rekha · the pavilion props as one baked GLB (assets-src/models/setting.glb → KTX2 in public/models/).
 
 The takht (platform), durrie, chowki (low table) with runner, brass plate and
 clay diyas, and the two brass lamp stands, at exactly the sizes and positions
@@ -16,7 +16,7 @@ Two outputs inside the GLB:
     contact shadow cut from the props' real footprints (not a blob).
 
 Run from projects/hast-rekha/:
-  /Applications/Blender.app/Contents/MacOS/Blender -b -P tools/setting/build_setting.py -- --out public/models/setting.glb
+  /Applications/Blender.app/Contents/MacOS/Blender -b -P tools/setting/build_setting.py -- --out assets-src/models/setting.glb && tools/textures/compress.sh
 Takes about a minute on CPU (Cycles AO bakes).
 """
 import argparse
@@ -28,7 +28,7 @@ import bmesh
 import bpy
 
 ap = argparse.ArgumentParser()
-ap.add_argument("--out", default="public/models/setting.glb")
+ap.add_argument("--out", default="assets-src/models/setting.glb")
 ap.add_argument("--ao-size", type=int, default=1024)
 ap.add_argument("--floor-size", type=int, default=512)
 ap.add_argument("--samples", type=int, default=192)

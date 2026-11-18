@@ -5,11 +5,37 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+import { readFileSync, readdirSync } from 'node:fs';
+import { join } from 'node:path';
 import { iwsdkDev } from '@iwsdk/vite-plugin-dev';
-import { defineConfig } from 'vite';
+import { defineConfig, type Plugin } from 'vite';
+
+/**
+ * Serve the Basis Universal transcoder (KTX2 textures) from IWSDK's vendored copy at /basis/,
+ * in dev and in the build, so nothing is fetched from a CDN at runtime (src/index.ts points
+ * the KTX2 loader here).
+ */
+function basisTranscoder(): Plugin {
+  const dir = join(__dirname, 'node_modules/@iwsdk/core/dist/vendor/basis');
+  const files = readdirSync(dir).filter((f) => f.startsWith('basis_transcoder'));
+  return {
+    name: 'hast-basis-transcoder',
+    configureServer(server) {
+      server.middlewares.use((req, res, next) => {
+        const m = req.url?.match(/\/basis\/(basis_transcoder\.(js|wasm))(\?.*)?$/);
+        if (!m) return next();
+        res.setHeader('Content-Type', m[2] === 'wasm' ? 'application/wasm' : 'text/javascript');
+        res.end(readFileSync(join(dir, m[1])));
+      });
+    },
+    generateBundle() {
+      for (const f of files) this.emitFile({ type: 'asset', fileName: `basis/${f}`, source: readFileSync(join(dir, f)) });
+    },
+  };
+}
 
 export default defineConfig({
-  plugins: [iwsdkDev()],
+  plugins: [iwsdkDev(), basisTranscoder()],
   server: { host: '0.0.0.0', port: 8087, open: false },
   build: {
     outDir: 'dist',

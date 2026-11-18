@@ -1,6 +1,6 @@
 # Pandit character build
 
-`build_pandit.py` builds `public/models/pandit.glb` headless in Blender. The character is a warm elderly scholar-palmist: MakeHuman/MPFB body and face, the MPFB "default" rig, runtime morph targets, and a code-built beard, kurta and shawl. One run takes about 6 seconds.
+`build_pandit.py` builds `assets-src/models/pandit.glb` headless in Blender (with a rest-pose AO bake); `tools/textures/compress.sh` then writes the KTX2 version the app loads, `public/models/pandit.glb`. The character is a warm elderly scholar-palmist: MakeHuman/MPFB body and face, the MPFB "default" rig, runtime morph targets, and a code-built beard, kurta and shawl. One run takes about 6 seconds.
 
 It is adapted from `projects/chausar/tools/shakuni/`, so the GLB keeps the same conventions as chausar's `src/game/human.ts`: bone names, morph names and mesh naming.
 
@@ -30,7 +30,8 @@ It is adapted from `projects/chausar/tools/shakuni/`, so the GLB keeps the same 
 From `projects/hast-rekha/`:
 ```sh
 B=/Applications/Blender.app/Contents/MacOS/Blender
-$B -b -P tools/pandit/build_pandit.py -- --out public/models/pandit.glb      # [--skin-size 1024] [--no-costume]
+$B -b -P tools/pandit/build_pandit.py -- --out assets-src/models/pandit.glb   # [--skin-size 1024] [--no-costume] [--no-ao]
+tools/textures/compress.sh                                                    # → public/models/*.glb (KTX2)
 $B -b -P tools/pandit/preview_pandit.py -- public/models/pandit.glb artifacts/pandit   # add 'cycles' for Cycles
 ```
 The build log prints `BONE` landmarks (glTF space, metres), a `MESH` line per mesh (tris, morph keys, materials) and the total triangle count.
