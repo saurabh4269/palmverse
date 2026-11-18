@@ -112,14 +112,23 @@ function skyMaterial(): ShaderMaterial {
         uCore: { value: new Color() },
         uHalo: { value: new Color() },
       },
+      // the low-frequency nebula is evaluated per vertex (64×40 sphere) and interpolated: the sky
+      // covers the whole view, so per-pixel noise there is the costliest thing in a world on Quest
       vertexShader: /* glsl */ `
-        varying vec3 vPos;
-        void main(){ vec4 w = modelMatrix * vec4(position, 1.0); vPos = w.xyz; gl_Position = projectionMatrix * viewMatrix * w; }`,
+        uniform vec3 uCenter; uniform float uTime; uniform int uKind;
+        varying vec3 vPos; varying float vNeb;
+        ${NOISE_GLSL}
+        void main(){
+          vec4 w = modelMatrix * vec4(position, 1.0); vPos = w.xyz;
+          vec3 d = normalize(w.xyz - uCenter);
+          vNeb = uKind == 1 ? fbm(d * 3.0 + uTime * 0.02) : uKind == 2 ? fbm(d * 2.5 + vec3(0.0, uTime * 0.01, 0.0)) : uKind == 3 ? fbm(d * 2.0 + 3.0) : uKind == 4 ? fbm(d * 2.2 + 7.0) : 0.0;
+          gl_Position = projectionMatrix * viewMatrix * w;
+        }`,
       fragmentShader: /* glsl */ `
         precision highp float;
         uniform vec3 uCenter; uniform vec3 uOrigin; uniform vec3 uFwd; uniform float uReveal; uniform float uTint; uniform float uTime;
         uniform int uKind; uniform vec3 uCore; uniform vec3 uHalo;
-        varying vec3 vPos;
+        varying vec3 vPos; varying float vNeb;
         ${NOISE_GLSL}
         float stars(vec3 d, float dens, float keep){
           vec3 p = d * dens; vec3 i = floor(p); float h = hash(i);
@@ -158,32 +167,32 @@ function skyMaterial(): ShaderMaterial {
             col = mix(col, vec3(0.03, 0.1, 0.09), smoothstep(0.55, 1.0, y));
             float sd = dot(d, sun);
             col += uHalo * pow(max(sd, 0.0), 24.0) * 0.8 + vec3(1.0, 0.95, 0.8) * smoothstep(0.996, 0.998, sd);
-            col += vec3(0.6, 0.9, 0.6) * fbm(d * 3.0 + uTime * 0.02) * 0.08 * smoothstep(0.1, 0.6, y);
+            col += vec3(0.6, 0.9, 0.6) * vNeb * 0.08 * smoothstep(0.1, 0.6, y);
             if (y < 0.0) {
               vec3 p = d * (1.15 / max(-y, 0.015));
               float z = dot(p.xz, fw.xz), x = dot(p.xz, rt.xz);
               float cx = sin(z * 0.7 + 0.6) * 0.7;
               float band = exp(-pow((x - cx) * 2.6, 2.0));
               float flow = 0.55 + 0.45 * sin(z * 5.0 - uTime * 2.4 + x * 2.0);
-              vec3 ground = vec3(0.02, 0.07, 0.04) + uCore * 0.08 * fbm(p * 1.5);
+              vec3 ground = vec3(0.02, 0.07, 0.04) + uCore * 0.08 * noise(p * 1.5);
               col = ground + uHalo * band * flow * 1.1 * exp(-abs(z) * 0.08) + uCore * band * 0.25;
               col = mix(col, uHalo * 0.6, exp(y * 30.0));
             }
           } else if (uKind == 2) {
             // head: a night sky all around, a milky band, dense stars
-            float neb = fbm(d * 2.5 + vec3(0.0, uTime * 0.01, 0.0));
+            float neb = vNeb;
             float band = exp(-pow(dot(d, normalize(up + rt * 0.6)) * 3.0, 2.0));
             col = vec3(0.005, 0.006, 0.025) + uHalo * (0.12 * neb + 0.22 * band * neb);
             col += uCore * (stars(d, 90.0, 0.84) * 0.9 + stars(d, 45.0, 0.93) * 0.8);
           } else if (uKind == 4) {
             // graha: deep space tinted with the planet's gem colour, its light glowing from ahead
-            float neb = fbm(d * 2.2 + 7.0);
+            float neb = vNeb;
             col = uHalo * (0.6 + 0.6 * neb) + uCore * pow(neb, 2.5) * 0.25;
             col += vec3(0.9, 0.92, 1.0) * stars(d, 85.0, 0.85) * 0.8;
             col += uCore * (pow(max(dot(d, normalize(fw + up * 0.06)), 0.0), 7.0) * 0.45 + pow(max(dot(d, normalize(fw + up * 0.06)), 0.0), 60.0) * 0.6);
           } else {
             // fate: deep space, a nebula, and a path of light crossing toward the ringed planet
-            float neb = fbm(d * 2.0 + 3.0);
+            float neb = vNeb;
             col = uHalo * (0.35 + 0.5 * neb) + vec3(0.25, 0.15, 0.4) * pow(neb, 3.0) * 0.6;
             col += uCore * stars(d, 80.0, 0.86) * 0.9;
             vec3 n = normalize(cross(fw, normalize(up * 0.55 + rt)));
@@ -195,7 +204,8 @@ function skyMaterial(): ShaderMaterial {
           }
           // the portal: a dissolving rim that sweeps out from the palm's direction
           float ang = acos(clamp(dot(d, uOrigin), -1.0, 1.0));
-          float n = (fbm(d * 7.0 + uTime * 0.15) - 0.5) * 0.5;
+          // the dissolve noise only matters near the rim: skip it elsewhere (and once the world is fully open)
+          float n = abs(ang - uReveal) < 0.4 ? (fbm(d * 7.0 + uTime * 0.15) - 0.5) * 0.5 : 0.0;
           float e = ang + n - uReveal;
           float m = 1.0 - smoothstep(-0.06, 0.0, e);
           float rim = exp(-pow(e * 14.0, 2.0)) * step(0.02, uReveal);
@@ -737,7 +747,7 @@ export class WorldPortal {
   constructor() {
     this.group.name = 'world-portal';
     this.skyMat = skyMaterial();
-    this.sky = new Mesh(new SphereGeometry(SKY_R, 48, 32), this.skyMat);
+    this.sky = new Mesh(new SphereGeometry(SKY_R, 64, 40), this.skyMat);
     this.sky.name = 'world-sky';
     this.motes = motes();
     this.motes.name = 'world-motes';

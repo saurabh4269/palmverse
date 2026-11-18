@@ -37,12 +37,20 @@ How the build meets the Meta VR Start Developer Competition 2026 rules and its f
   - Every reading in `src/content/readings.ts` points at exactly one rule (feature, attribute, value), and a test checks that every pointer resolves.
 - **Honest framing as part of the design.** Panditji says up front that this is culture and story. In the outro he explains the Barnum effect. He also notes that heart and head lines and planetary mounts reached Indian practice through Western 20th-century authors.
 - **You read your own palm.** Rather than fake detection, the app asks you to look at your own hand and pick the closest shape. The candidate glows on your palm while you hover over its card, so comparing your real crease with the drawn line is the game.
+- **Touch a line, enter its world** (18 Nov). In the explore phase your chosen lines breathe with light. Touching or pinching one blooms a portal out of your palm that grows into a world around you, and Panditji tells that line's reading from inside it. Each world is in the design pack's palette ([research/hast-rekha-magic-design.md §3](../../../research/hast-rekha-magic-design.md)): **heart**, lotuses opening on a dusk ocean; **life**, a banyan of light with aerial roots over a river of light; **head**, a constellation joining star by star; **fate**, Shani's ringed planet above a path of light. Touch a mount and its **graha's sky** opens: the planet in its Navagraha gem colour. A fist folds the world back into the palm.
+- **Prior art and how we differ.** The 2025 Meta Horizon Start winner *Magic Wonders* (Devpost: [magic-wonders](https://devpost.com/software/magic-wonders)) set the bar for "hand gestures that feel like magic": glowing strokes with a white-hot core and a coloured halo, and a real room that reacts. We studied its stills for the glow language only ([research/hast-rekha/reference/magic-wonders](../../../research/hast-rekha/reference/magic-wonders/README.md), internal, not shipped) and copied none of its art. The differences:
+  - their magic is a spell you draw in the air with a wand on a phone; ours is written on **your own palm**, in passthrough, and the "spell" is touching a line of your hand;
+  - the theme is a living cultural tradition (Samudrika Shastra, the Navagraha) told by a character, with every reading cited and safety-filtered, rather than a fantasy duel;
+  - the "room answers" beat is a gold veil over the real room as a world opens, and the world dissolves open from the palm's direction while your real hands stay visible inside.
 - **Two hands, two stories.** Reading your other hand triggers a comparison with the saved first hand ("the left shows what you were given, the right what you built from it"). There is also a daily "today's mount" line in the greeting, which is the same for everyone on a given date (`todaysMountIndex`).
 
 ## Criterion 2: Experience Design
 - **Passthrough is the point.** The dome fades out below −15° so your table, lap and hands stay real (`src/render/dome.ts`). Dome opacity drops from 0.96 to 0.6 when you raise your palm "to let the room (and your real hand) in". Turn passthrough off and there is nothing to read.
-- **Two gestures only:**
+- **Three gestures only** (the design pack's vocabulary: show palm, touch or pinch, close fist):
   - **Palm up:** facing the eye within about 55°, 18 to 65 cm away, held for 0.6 s (`isReadablePalm`).
+  - **Close a fist** (either hand, every fingertip within 11.5 cm of the wrist, for 0.25 s): the open world folds back into the palm. Pointing doesn't count, because the index stays out.
+  - **Touch or pinch a glowing line** (`src/core/line-touch.ts`, no physics): the fingertip is projected into palm space and compared with each line's polyline. Hover within 3.5 cm of the skin and 1.1 cm of the line (it leaves at 1.7 cm: hysteresis); touch within 1.2 cm of the skin; select after a 140 ms dwell, or on a pinch within 2.5 cm of a line. A 200 ms grace period keeps the hover through a dropped tracking frame. Where a line runs past a mount, whichever is nearer the fingertip wins.
+  - **Feedback without haptics** (design pack §5): hover brightens and widens the line, with a soft shimmer that rises as the finger nears. Touch sends a ripple both ways along the line, with a bell and a low 80 ms thump. Select flares the line and plays a singing bowl over a sub drop. Embers rise off every glowing line.
   - **Fingertip poke.**
     - Mounts: the other hand's index tip within 1.7 cm of a mount centre, between 2 cm below and 3 cm above the palm plane, for 0.25 s.
     - Cards and buttons: hover within about 3.5 cm, press when the tip crosses the plane moving forward, with a cooldown, and a card only takes input after every fingertip has been clear of it (`src/render/cards.ts`).
@@ -103,6 +111,15 @@ How the build meets the Meta VR Start Developer Competition 2026 rules and its f
   - mount "tings" that climb the Bhupali scale (Sa Re Ga Pa Dha);
   - tick and press sounds.
   - Voice is browser speech synthesis, preferring an Indian English voice. Devanagari is stripped before speaking.
+- **Portal worlds** (`src/render/worlds.ts`), each about 7 draw calls on top of the scene, all unlit and procedural, with no textures except the title canvas:
+  - an orb swells at the palm, then an inside-out sky sphere around the head dissolves open from the palm's direction (an angular mask with fbm noise and a gold rim);
+  - outside the opened part, a 14 % gold veil tints the real room. In WebXR that is a premultiplied layer, not a camera effect;
+  - **the hands stay real:** 50 instanced spheres on the joints write alpha 0 after the world, so passthrough shows through exactly where your hands are, and the palm lines draw on top;
+  - per world: one hero mesh (lotus petals that open in the vertex shader; a generated banyan of tubes that grows from the ground; constellation quads drawn edge by edge; a banded ringed planet), one shared 600-point particle system whose motion changes per world (falling petals, fireflies and a leaf canopy, star dust, orbiting motes), and a Devanagari title;
+  - the sky is drawn with depth test off, after the opaque pavilion, so it covers the pavilion with no extra pass. The low-frequency nebula is computed per vertex, and the rim noise only near the rim.
+  - Measured in the emulator inside a world: 72 draw calls, 68.5k triangles and 22.6 MB of textures, against 80 calls and 110k triangles at the busiest pavilion moment.
+- **Divine voice, pre-rendered** (`tools/voice/`, `src/render/voice-clips.ts`): an original voice made with ElevenLabs Voice Design (described in text, nothing cloned), rendered per line, then our ffmpeg chain from the design pack §4.3: low-octave weight, octave-up whisper, fifth pad, chorus, a synthetic stone-temple impulse response, and a synthetic tanpura bed at −16 LUFS. All 96 lines are listed by `src/content/spoken.ts` and found at runtime by an FNV-1a hash. Clips play back to back through Web Audio, captions take each clip's real length, each world's lines are prefetched when explore starts, and any line without a clip falls back to speech synthesis. No key or API call is in the app.
+- **Hindi** (`src/content/hindi.ts`): all 96 lines, as captions and voice. Each Hindi line maps 1:1 to a vetted English line (the safety filter is English-only, so a test checks coverage, and that the Hindi is Devanagari only).
 - **Submission materials:** see [SUBMISSION.md](SUBMISSION.md).
 
 ## Decisions and rationale
@@ -132,6 +149,9 @@ How the build meets the Meta VR Start Developer Competition 2026 rules and its f
 - ⚠ **Thresholds come from 2D photos.** The element, finger and thumb thresholds are medians from photo datasets, not Quest joint data. On real hands the class distribution may be skewed, for example most people coming out "Fire".
 - ⚠ **The first lines are a template.** The reveal draws the tradition's typical shape, not your creases. Panditji says "as the tradition draws them", and you then pick your own. The trailer and text must not imply detection.
 - ⚠ **Legibility on real skin.** The ink bed and thicker core were tuned in the emulator against a rendered hand. Real skin under room light, especially bright or very dark skin, is untested.
-- ⚠ **Frame rate:** not measured on a device.
-- ⚠ **Voice:** `speechSynthesis` voices in Quest Browser are unknown. Captions are the fallback.
+- ⚠ **Frame rate:** not measured on a device. Inside a world the sky shader covers the whole view; the levers, if it is GPU-bound: drop the rim fbm to one octave, lower the star density, or fall back to foveation 0.75 (docs/TESTING.md §4).
+- ⚠ **Fist and pinch on a real hand are unverified.** The fist threshold (11.5 cm, every fingertip) and the pinch threshold (1.8 cm, thumb to index) are emulator values. If a world fails to close, it still closes by itself when Panditji finishes.
+- ⚠ **The gold veil and the hand mask assume `alpha-blend` passthrough** (immersive-ar on Quest Browser). On an opaque display the mask would show black hand shapes.
+- ⚠ **Voice:** lines without a pre-rendered clip use `speechSynthesis`, whose voices in Quest Browser are unknown. Captions are always on.
+- ⚠ **The Hindi translations were written by Claude (AI)** and have not yet been reviewed by a native speaker.
 - **Dev keys** (`n`, `1`–`4`, `o`) also work in production builds. That is harmless on a headset with no keyboard.

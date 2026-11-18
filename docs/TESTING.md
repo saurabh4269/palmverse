@@ -5,13 +5,19 @@ There are three automated layers: unit tests in node, an emulator end-to-end tes
 ## 1. Unit tests (`npm test`)
 `tools/run-unit.mjs` bundles each `tests/*.test.ts` with esbuild and runs it in node. Rendering is not involved: the logic under test is pure TypeScript over plain arrays.
 
-Latest run (18 Nov 2026):
+Latest run (18 Nov 2026, evening):
 ```
+ok   line-touch: 69/69        (includes the 41 palm-frame checks it imports)
 ok   one-euro: 3/3
 ok   palm-frame: 41/41
-ok   rules (4000 fuzz combos, 29982 items): 2581/2581
+ok   rules (4000 fuzz combos, 29982 items): 2583/2583
 ok   share-layout: 283/283
+ok   spoken (96 lines, 11167 chars): 203/203
+ok   worlds: 17/17
 ```
+- `tests/line-touch.test.ts`: the nearest line and the position along it for points on each line; hover at 2.5 cm; touch; no select before the dwell; exactly one select per touch; the grace period keeps a hover through dropped frames; loss unhovers; touching again selects again; a pinch selects once, on its rising edge.
+- `tests/worlds.test.ts`: every world's narration passes the safety filter and is framed as tradition.
+- `tests/spoken.test.ts`: all 96 spoken lines are unique and safe; the FNV-1a hash matches the Python renderer's reference vectors (including UTF-8 Devanagari); every English line has Hindi, in Devanagari only, with no stale entries.
 `npx tsc --noEmit` also passes.
 
 ### `tests/one-euro.test.ts` (3 checks)
@@ -49,7 +55,7 @@ The share-card layout is tested with normal, very long and two-line content:
 - no two text boxes overlap;
 - the palm diagram is present and clear of all text.
 
-## 2. Emulator end-to-end (`npm run test:xr`, 44 checks)
+## 2. Emulator end-to-end (`npm run test:xr`, 56 checks; `--worlds`, 65)
 `tools/e2e.py` drives IWER (the IWSDK emulator) with the Meta Quest 3 profile in the "sunlit living room". It uses emulated hands only, as a seated user (head at 1.2 m). It reads the app's dev-only `[hast]` console log lines through the IWSDK CLI, and takes world positions of buttons, cards and mounts from the `layout={json}` lines.
 
 ```bash
@@ -61,6 +67,7 @@ Options: `--hand` sets the reading hand; `--jitter` adds random fingertip error 
 
 **The journey and its checks:**
 1. Enter XR in hand input mode. The **welcome** phase starts and the **stage is anchored**.
+1b. **Poke the language button twice:** it toggles English and Hindi, and Panditji's next line after switching to Hindi is in Devanagari. The run is left in English.
 2. **Poke Continue** with the left index fingertip, approaching from the head side. The press registers and the phase goes to **raise**.
 3. Raise the right hand in the open pose, palm toward the head. The app reports **palm-up for the correct hand**, then a **hand-shape profile** with a valid element.
 4. **Four lines glow** (life, head, heart, fate). **Seven mounts light**, and the mount positions are logged.
@@ -70,13 +77,19 @@ Options: `--hand` sets the reading hand; `--jitter` adds random fingertip error 
    - 2 to 4 cards appear;
    - hovering a card **previews** that card's value on the palm;
    - poking it **picks** that value.
+7b. **Explore:** the four chosen lines glow.
+   - Approach the **heart line** at a logged point (the sample farthest from every other line). It **hovers** at 2 cm, is **touched** at 3 mm, and is **selected** after the dwell.
+   - **The heart world opens**, the GPU stats inside it are logged, and screenshots are taken from the palm view and looking ahead. Making the poking hand a **fist closes it**.
+   - Touch the **Sun mount**: **its graha world opens** (Surya), and a fist closes it.
+   - With `--worlds`, the **life, head and fate** lines are each touched, opened, screenshotted and closed in turn.
+   - Poke Continue. The phase goes to **reading**.
 8. The **reading is built** with at least 6 items, and **no reading was dropped or missing**.
 9. Poke Continue to skip to the card. The **card is rendered and saved**: at least 3 lines, at least 1 saved, and a JPEG over 10 kB.
 10. **Poke Finish.** The **farewell** phase starts.
 
 Screenshots go to `artifacts/e2e-*.png`.
 
-I did not re-run it for these docs. The emulator was in use by another session. The 44-check run is the one described in commit `a6c2d80`.
+Latest runs (18 Nov 2026): `npm run test:xr` **56/56**; `python3 tools/e2e.py --worlds` **65/65**.
 
 ## 3. Close-up stills (`tools/shots.py`)
 ```bash
@@ -116,6 +129,8 @@ Measured with the dev `gpu` log (press `g`, or automatic 1.5 s into the mounts p
 | Texture memory (estimate) | 40.0 MB, none compressed | **21.1 MB**, 18 compressed (KTX2: UASTC and ETC1S) |
 | Download: `pandit.glb` | 3.6 MB (JPEG/PNG) | 6.6 MB (UASTC skin atlas 2.7 MB; everything else ETC1S) |
 | Download: new files | none | `setting.glb` 0.23 MB, `env/pavilion.hdr` 0.22 MB, Basis transcoder 0.58 MB |
+
+**Inside a world** (the `gpu world=heart` log, 4 s after it opens): **72 draw calls, 68.5k triangles, 30 GPU textures, 22.6 MB** (the sky covers the pavilion, so the total stays below the 80 calls at the mounts). Each world adds about 7 calls (sky, hero, motes, hand mask, orb, title) and the title canvas.
 
 `npx @iwsdk/cli scene render-stats` samples a different frame and reports about 60 calls and 108k triangles after this pass.
 
