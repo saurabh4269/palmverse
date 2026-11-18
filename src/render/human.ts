@@ -5,8 +5,10 @@ import {
   DoubleSide,
   Material,
   Mesh,
+  MeshPhysicalMaterial,
   MeshStandardMaterial,
   Object3D,
+  Color,
   Plane,
   Quaternion,
   SkinnedMesh,
@@ -63,6 +65,45 @@ const qA = new Quaternion();
 const qB = new Quaternion();
 const qC = new Quaternion();
 
+/**
+ * Skin and cloth as MeshPhysicalMaterial (Hast Rekha visual pass):
+ *  - skin: a low warm sheen gives the soft, blood-warm rim that subsurface scattering would,
+ *    at a fraction of the cost; slightly lower specular so the IBL doesn't make it plasticky;
+ *  - cotton kurta/pyjama: a broad, pale sheen (matte fibres catching grazing light);
+ *  - the angavastram (shawl) is read as silk: tighter, brighter sheen in its own warm tone.
+ * Everything else (eyes, teeth, strands) stays MeshStandardMaterial.
+ */
+function upgradeMaterial(mat: Material, mesh: Mesh): Material {
+  const name = `${mat.name} ${mesh.name}`.toLowerCase();
+  const kind = /body/.test(name) && !/eyebrow|eyelash|high-poly|teeth|tongue/.test(name) ? 'skin' : /shawl/.test(name) ? 'silk' : /kurta|pyjama/.test(name) ? 'cotton' : null;
+  if (!kind || !(mat as MeshStandardMaterial).isMeshStandardMaterial) return mat;
+  const p = new MeshPhysicalMaterial();
+  MeshStandardMaterial.prototype.copy.call(p, mat as MeshStandardMaterial);
+  p.defines = { STANDARD: '', PHYSICAL: '' }; // Standard.copy resets defines; keep the physical path
+  if (kind === 'skin') {
+    p.roughness = 0.58;
+    p.sheen = 0.3;
+    p.sheenRoughness = 0.55;
+    p.sheenColor = new Color(0.5, 0.24, 0.17);
+    p.specularIntensity = 0.45;
+  } else if (kind === 'cotton') {
+    p.roughness = 0.82;
+    // sheen is energy-conserving (it takes ~sheen·sheenColor off the diffuse): keep it light
+    p.sheen = 0.25;
+    p.sheenRoughness = 0.8;
+    p.sheenColor = new Color(0.7, 0.66, 0.58);
+    p.specularIntensity = 0.3;
+  } else {
+    p.roughness = 0.5;
+    p.sheen = 1.0;
+    p.sheenRoughness = 0.32;
+    p.sheenColor = new Color(0.95, 0.45, 0.3);
+    p.specularIntensity = 0.5;
+  }
+  p.name = (mat as MeshStandardMaterial).name;
+  return p;
+}
+
 export class PanditHuman {
   readonly root: Object3D;
   private bones = new Map<string, Bone>();
@@ -105,7 +146,8 @@ export class PanditHuman {
         if (m.morphTargetDictionary && Object.keys(m.morphTargetDictionary).some((k) => k.startsWith('blink'))) {
           this.morphMeshes.push(m);
         }
-        const mats = Array.isArray(m.material) ? m.material : [m.material];
+        const mats = (Array.isArray(m.material) ? m.material : [m.material]).map((mat) => upgradeMaterial(mat, m));
+        m.material = Array.isArray(m.material) ? mats : mats[0];
         for (const mat of mats) this.prepareMaterial(mat, m);
       }
     });
@@ -243,8 +285,8 @@ export class PanditHuman {
       m.alphaTest = 0;
       m.depthWrite = true;
     }
-    if (/body/.test(name) && 'roughness' in m) m.roughness = 0.6;
-    if (/turban|robe|kurta|shawl/.test(name)) {
+    if (/body/.test(name) && 'roughness' in m && !(m as MeshPhysicalMaterial).isMeshPhysicalMaterial) m.roughness = 0.6;
+    if (/turban|robe|kurta|shawl/.test(name) && !(m as MeshPhysicalMaterial).isMeshPhysicalMaterial) {
       m.roughness = /shawl/.test(name) ? 0.85 : 0.66;
       m.metalness = 0;
       if (m.specularIntensity !== undefined) m.specularIntensity = 0.35;

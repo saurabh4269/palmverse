@@ -173,6 +173,35 @@ function mergeStatic(root: Group): void {
   }
 }
 
+/**
+ * Surfaces for the baked props, lit by the pavilion IBL (public/env/pavilion.hdr):
+ * brass is real metal (it shows the lamps), lacquered wood a satin sheen, clay and
+ * textiles stay rough. The baked AO multiplies the image-based light.
+ */
+function tuneProp(m: MeshStandardMaterial): void {
+  m.aoMapIntensity = 1;
+  switch (m.name) {
+    case 'brass':
+      m.color.setRGB(0.8, 0.56, 0.22);
+      m.metalness = 1;
+      m.roughness = 0.32;
+      m.envMapIntensity = 2.0; // the pavilion is dim: polished brass needs the lamps' reflection to read as gold
+      break;
+    case 'wood':
+      m.roughness = 0.42;
+      m.envMapIntensity = 0.9;
+      break;
+    case 'clay':
+      m.roughness = 0.88;
+      break;
+    case 'cloth':
+    case 'durrie':
+      m.roughness = 0.97;
+      m.envMapIntensity = 0.8;
+      break;
+  }
+}
+
 export class Setting {
   readonly group = new Group();
   readonly dome = new Dome();
@@ -302,9 +331,7 @@ export class Setting {
           m.material = new MeshBasicMaterial({ color: 0x000000, map: src.map, transparent: true, depthWrite: false, opacity: 0.9 });
           m.renderOrder = 1;
         } else {
-          for (const x of mats as MeshStandardMaterial[]) {
-            x.aoMapIntensity = 1;
-          }
+          for (const x of mats as MeshStandardMaterial[]) tuneProp(x);
         }
       });
       for (const o of [...this.group.children]) if (o.name.startsWith('setting-merged-')) o.removeFromParent();

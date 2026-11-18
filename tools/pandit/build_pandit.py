@@ -424,7 +424,7 @@ def bake_ao_rest(sizes, distance=0.06, samples=64):
         if n_pl:
             for poly in o.data.polygons[-n_pl:]:
                 for li in poly.loop_indices:
-                    o.data.uv_layers["AO"].data[li].uv = (0.997, 0.997)
+                    o.data.uv_layers["AO"].data[li].uv = (0.985, 0.985)
         img = bpy.data.images.new(f"{name}_ao", size, size, alpha=False)
         img.colorspace_settings.name = "Non-Color"
         img.generated_color = (1, 1, 1, 1)
@@ -444,7 +444,7 @@ def bake_ao_rest(sizes, distance=0.06, samples=64):
         for axis in (0, 1):
             a = (np.roll(a, -1, axis) + a + np.roll(a, 1, axis)) / 3
         if n_pl:
-            a[-8:, -8:, :3] = 1.0  # the white corner the placket samples
+            a[-64:, -64:, :3] = 1.0  # the white corner the placket samples (64 px: survives KTX2 mips)
         img.pixels[:] = a.ravel()
         img.pack()
         for nt, tex in texes:

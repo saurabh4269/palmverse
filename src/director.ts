@@ -9,7 +9,7 @@
  * Dev-only structured logs for the emulator harness:
  *   [hast] #<page>.<seq> <event> key=value … layout={json}
  */
-import { CanvasTexture, createSystem, Group, Matrix4, Mesh, MeshBasicMaterial, PlaneGeometry, Quaternion, SRGBColorSpace, Vector3 } from '@iwsdk/core';
+import { CanvasTexture, createSystem, IBLTexture, Group, Matrix4, Mesh, MeshBasicMaterial, PlaneGeometry, Quaternion, SRGBColorSpace, Vector3 } from '@iwsdk/core';
 import { ELEMENTS, LINE_OPTIONS, MOUNTS, READINGS } from './content/readings.js';
 import { PANDIT } from './content/script.js';
 import type { HandProfile, LineChoices, LineId, MountId, Side } from './content/types.js';
@@ -131,6 +131,10 @@ export class HastRekhaSystem extends createSystem({}) {
     this.pandit.group.position.set(0, 0, -1.45);
     void this.pandit.load();
     void this.setting.loadBaked();
+    // image-based light from the pavilion itself (tools/setting/bake_env.py), not a studio:
+    // the lamps and the dusk dome show in the brass, the silk and Panditji's eyes
+    const root = this.world.activeLevel.value;
+    root.addComponent(IBLTexture, { src: `${import.meta.env.BASE_URL}env/pavilion.hdr`, intensity: 1.5 });
 
     this.overlay = new PalmOverlay(MOUNT_CENTROIDS, MOUNT_TEXT.map((m) => m.sigil));
     // overlay vertices are computed in world space by its shader: keep it at the scene root
@@ -225,6 +229,12 @@ export class HastRekhaSystem extends createSystem({}) {
     this.stage.rotation.set(0, yaw, 0);
     this.H = Math.max(0.9, Math.min(1.5, this.headWorld.y));
     this.anchored = true;
+    // the IBL is in world space: turn it with the stage so the lamps stay where they are drawn
+    const root = this.world.activeLevel.value;
+    if (root.hasComponent(IBLTexture)) {
+      root.getVectorView(IBLTexture, 'rotation')[1] = yaw;
+      root.setValue(IBLTexture, '_needsUpdate', true);
+    }
     this.layoutUI();
     log('anchor', { H: this.H, yaw }, { head: r3(this.headWorld) });
   }
