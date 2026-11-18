@@ -20,7 +20,7 @@
 
 ## Try it
 
-- **Live demo:** coming soon <!-- LIVE_URL: replace with the deployed HTTPS URL; open it in Meta Quest Browser -->
+- **Live demo:** https://palmverse-lilac.vercel.app (open it in Meta Quest Browser)
 - **Demo video:** coming soon <!-- VIDEO_URL: replace with the YouTube/Vimeo link -->
 
 Open the live URL in Meta Quest Browser on a Quest 3 or 3S, press **Enter**, and hold up your palm. No install, no controllers, no account.
