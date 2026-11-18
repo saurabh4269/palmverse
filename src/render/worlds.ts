@@ -25,6 +25,7 @@
  *   fate  — a ringed planet and a path of light    #9FB7FF / #1B2A49 + gold
  */
 import {
+  AssetManager,
   BackSide,
   BufferAttribute,
   BufferGeometry,
@@ -36,7 +37,9 @@ import {
   Matrix4,
   Mesh,
   MeshBasicMaterial,
+  type MeshStandardMaterial,
   NoBlending,
+  type Object3D,
   OneFactor,
   OneMinusSrcAlphaFactor,
   PlaneGeometry,
@@ -729,6 +732,40 @@ export class WorldPortal {
   private readonly sky: Mesh;
   private readonly skyMat: ShaderMaterial;
   private readonly heroes = new Map<WorldId, Mesh>();
+  /**
+   * The life world's banyan: a real model (public/models/banyan.glb, CC-BY, see models/CREDITS.md)
+   * in place of the procedural tubes. Loaded the first time the life world opens; grows by scale.
+   */
+  private banyan: Object3D | null = null;
+  private banyanMats: MeshStandardMaterial[] = [];
+  private banyanLoading = false;
+
+  private loadBanyan(): void {
+    if (this.banyanLoading) return;
+    this.banyanLoading = true;
+    void AssetManager.loadGLTF(`${import.meta.env.BASE_URL}models/banyan.glb`, 'banyan')
+      .then((g) => {
+        const root = g.scene;
+        root.traverse((o) => {
+          const m = (o as Mesh).material as MeshStandardMaterial | undefined;
+          if (m && !this.banyanMats.includes(m)) {
+            m.transparent = true;
+            m.depthWrite = true;
+            // a little of the world's own light on the leaves and bark
+            m.emissive?.set('#2a1a08');
+            this.banyanMats.push(m);
+          }
+          o.frustumCulled = false;
+          (o as Mesh).renderOrder = 6;
+        });
+        root.visible = false;
+        this.banyan = root;
+        this.group.add(root);
+      })
+      .catch(() => {
+        this.banyanLoading = false;
+      });
+  }
   private readonly motes: Points;
   private readonly orb: Mesh;
   private readonly mask: InstancedMesh;
@@ -827,7 +864,10 @@ export class WorldPortal {
     const eyeToFloor = 1.15;
     const base = hu.uBase.value as Vector3;
     if (id === 'heart') base.copy(head).addScaledVector(this.up, -eyeToFloor + 0.05);
-    else if (id === 'life') base.copy(head).addScaledVector(this.fwd, 2.3).addScaledVector(this.up, -eyeToFloor);
+    else if (id === 'life') {
+      base.copy(head).addScaledVector(this.fwd, 2.3).addScaledVector(this.up, -eyeToFloor);
+      this.loadBanyan();
+    }
     else if (id === 'head') base.copy(head).addScaledVector(this.fwd, 2.4).addScaledVector(this.up, -0.1);
     else base.copy(head).addScaledVector(this.fwd, 2.3).addScaledVector(this.right, 0.25).addScaledVector(this.up, 0.3);
     if (hu.uRing) {
@@ -904,6 +944,21 @@ export class WorldPortal {
     hu.uGrow.value = this.state === 'fold' ? this.grow * heroA : this.grow;
     hu.uOpacity.value = heroA * Math.min(1, this.surround * 1.5);
     h.visible = hu.uOpacity.value > 0.005;
+    if (this.banyan) {
+      const on = this.world === 'life' && h.visible;
+      this.banyan.visible = on;
+      if (on) {
+        h.visible = false; // the model replaces the procedural tree
+        const g = hu.uGrow.value as number;
+        const k = Math.max(0.001, g * g * (3 - 2 * g));
+        // further back than the procedural tree stood: a real canopy is wide and must not fill the view
+        this.banyan.position.copy(hu.uBase.value as Vector3).addScaledVector(this.fwd, PortalBanyan.AHEAD - 2.3);
+        // face the viewer: the model's front (−Z) toward the eye
+        this.banyan.rotation.set(0, Math.atan2(this.fwd.x, this.fwd.z), 0);
+        this.banyan.scale.setScalar(PortalBanyan.H * k);
+        for (const m of this.banyanMats) m.opacity = hu.uOpacity.value as number;
+      }
+    }
     const ou = (this.orb.material as ShaderMaterial).uniforms;
     ou.uTime.value = this.time;
     ou.uOpacity.value = orbA;
@@ -1119,3 +1174,5 @@ export class GrahaRing {
     });
   }
 }
+
+const PortalBanyan = { H: 2.0, AHEAD: 3.4 };

@@ -12,3 +12,14 @@ The palmist character. It is an original design and does not depict any real per
 | Beard and moustache (alpha shells and cards, procedural strand texture), kurta and pyjama, front placket, maroon shawl (procedural cotton and wool textures) | Generated in code by `tools/pandit/costume.py` | Ours |
 
 The pipeline is adapted from `projects/chausar/tools/shakuni/` in this repository. No third-party textures beyond the MakeHuman CC0 assets are used.
+
+## banyan.glb
+
+The banyan in the "life line" world. It is adapted from a low-poly tree; the banyan-specific parts are ours.
+
+| Part | Source | Licence |
+|---|---|---|
+| Trunk, branches, root flare, canopy blobs, small hanging vines | "Vine Covered Tree" by **Zacharylll**, via Poly Pizza: <https://poly.pizza/m/dlW4hGKBpiS> | **CC-BY 3.0** (<https://creativecommons.org/licenses/by/3.0/>) |
+| 48 aerial roots (7 prop roots reaching the ground, 41 hanging strands) | Generated in Blender by ray-casting up from under the canopy | Ours |
+
+Changes to the original: we removed the grass base slab and spread the tree 1.4× horizontally so it reads as a wide banyan. We decimated the bark (to 40%) and the vines (to 25%), merged everything into one mesh with three materials (bark, canopy, vines), dropped the unused UVs, set the origin to the base of the trunk, scaled it to 1.0 unit tall and made the vines material double-sided. The model has no textures; the colours come from the original flat material colours.
