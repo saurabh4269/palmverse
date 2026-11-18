@@ -87,6 +87,9 @@ class HandRead {
   constructor(readonly side: Side) {}
 }
 
+/** music track (public/audio/music) for each mount's graha */
+const GRAHA_TRACK: Record<string, string> = { jupiter: 'guru', saturn: 'shani', sun_apollo: 'surya', mercury: 'budh', mars_upper: 'mangal', luna_moon: 'chandra', venus: 'shukra' };
+
 const LINE_NAME: Record<TouchId, [string, string]> = { heart: ['Hridaya Rekha', 'हृदय रेखा'], head: ['Mastishk Rekha', 'मस्तिष्क रेखा'], life: ['Jeevan Rekha', 'जीवन रेखा'], fate: ['Bhagya Rekha', 'भाग्य रेखा'] };
 
 export class HastRekhaSystem extends createSystem({}) {
@@ -282,6 +285,7 @@ export class HastRekhaSystem extends createSystem({}) {
     const opening = this.time < this.openingUntil;
     this.pandit.talking = this.time < this.talkUntil && !opening;
     this.grahaRing.want = this.time < this.openingUntil - 0.6 ? 1 : 0;
+    if (this.sound.musicId === 'opening' && this.time > this.openingUntil + 3) this.sound.music(null);
     this.grahaRing.update(dt, this.headWorld);
     this.pandit.fadeTarget = this.setting.appearTarget;
     this.pandit.gesture =
@@ -519,6 +523,7 @@ export class HastRekhaSystem extends createSystem({}) {
           for (const o of OPENING) d += this.sayAs(this.lang === 'hi' ? o.hi : o.en, 'akash');
           this.openingUntil = this.time + d;
           this.grahaRing.want = 1;
+          this.sound.music('opening', 1.5);
           log('opening', { dur: +d.toFixed(1) });
         } else this.openingUntil = this.time;
         for (const l of PANDIT.greeting) this.say(l);
@@ -1032,6 +1037,7 @@ export class HastRekhaSystem extends createSystem({}) {
     this.palmPt.set(c[0], c[1], c[2]);
     this.portal.open(id as WorldId, this.palmPt, this.headWorld);
     this.sound.setWorld(id);
+    this.sound.music(id);
     this.worldLine = id;
     this.worldT = 0;
     this.worldSaid = false;
@@ -1060,6 +1066,7 @@ export class HastRekhaSystem extends createSystem({}) {
     const c = q(f, MOUNT_CENTROIDS[i][0], MOUNT_CENTROIDS[i][1], 0.01);
     this.palmPt.set(c[0], c[1], c[2]);
     this.sound.setWorld('graha');
+    this.sound.music(GRAHA_TRACK[m.id] ?? 'guru');
     this.portal.open('graha', this.palmPt, this.headWorld, { color: g.color, title: [`${hi} ग्रह`, `${ro} · ${m.planet}`], ring: m.id === 'saturn', sun: m.id === 'sun_apollo' });
     this.worldLine = 'graha';
     this.worldMount = i;
@@ -1121,6 +1128,7 @@ export class HastRekhaSystem extends createSystem({}) {
     this.portal.close();
     this.sound.fold();
     this.sound.setWorld(null);
+    this.sound.music(null);
     this.setting.appearTarget = 1;
     if (reason !== 'told') {
       this.subs.clear();

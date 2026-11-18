@@ -1,0 +1,86 @@
+{
+ "opening": {
+  "f": "opening.mp3",
+  "d": 44.6,
+  "src": "elevenlabs-music",
+  "prompt": "Cosmic and divine: planets slowly revolving in deep space, awe and stillness. Warm tanpura drone in Sa-Pa, shimmering swarmandal glissandi far away, deep singing bowls, airy pads. Very calm, about 60 BPM feel, no rhythm. Instrumental only, no vocals, no singing, no lyrics, no choir. Calm, sparse, ambient background bed to sit under spoken narration: soft dynamics, no lead melody in the midrange, long sustained tones, slow evolution, no drum kit, no build-ups, no big ending. Indian classical devotional ambient, steady throughout so it loops well."
+ },
+ "surya": {
+  "f": "surya.mp3",
+  "d": 47.6,
+  "src": "elevenlabs-music",
+  "prompt": "The Sun, Surya: radiant, regal, dawn. Morning raga feel like Bhairav or Ahir Bhairav. Bright tanpura drone, slow sarangi long notes in the low register, gentle swarmandal sparkles like first light, a temple bell far away. Instrumental only, no vocals, no singing, no lyrics, no choir. Calm, sparse, ambient background bed to sit under spoken narration: soft dynamics, no lead melody in the midrange, long sustained tones, slow evolution, no drum kit, no build-ups, no big ending. Indian classical devotional ambient, steady throughout so it loops well."
+ },
+ "chandra": {
+  "f": "chandra.mp3",
+  "d": 45.0,
+  "src": "elevenlabs-music",
+  "prompt": "The Moon, Chandra: cool, tender, night. Night raga feel like Yaman or Bageshri. Soft low bansuri breaths, slow and distant, tanpura drone, gentle santoor tremolo very quiet, moonlit stillness. Instrumental only, no vocals, no singing, no lyrics, no choir. Calm, sparse, ambient background bed to sit under spoken narration: soft dynamics, no lead melody in the midrange, long sustained tones, slow evolution, no drum kit, no build-ups, no big ending. Indian classical devotional ambient, steady throughout so it loops well."
+ },
+ "mangal": {
+  "f": "mangal.mp3",
+  "d": 52.9,
+  "src": "elevenlabs-music",
+  "prompt": "Mars, Mangal: brave, restrained energy, warrior calm. Low tanpura drone, a soft steady tabla and dholak hand-drum pulse played very quietly, deep low sitar plucks, controlled strength, never loud. Instrumental only, no vocals, no singing, no lyrics, no choir. Calm, sparse, ambient background bed to sit under spoken narration: soft dynamics, no lead melody in the midrange, long sustained tones, slow evolution, no drum kit, no build-ups, no big ending. Indian classical devotional ambient, steady throughout so it loops well."
+ },
+ "budh": {
+  "f": "budh.mp3",
+  "d": 51.8,
+  "src": "elevenlabs-music",
+  "prompt": "Mercury, Budh: quick, playful, bright and clever. Light santoor patterns played softly and sparsely in the upper register, gentle tanpura drone, a light finger-tapped tabla texture very quiet, curious and nimble but relaxed. Instrumental only, no vocals, no singing, no lyrics, no choir. Calm, sparse, ambient background bed to sit under spoken narration: soft dynamics, no lead melody in the midrange, long sustained tones, slow evolution, no drum kit, no build-ups, no big ending. Indian classical devotional ambient, steady throughout so it loops well."
+ },
+ "guru": {
+  "f": "guru.mp3",
+  "d": 51.7,
+  "src": "elevenlabs-music",
+  "prompt": "Jupiter, Guru: wise, expansive, warm, benevolent teacher. Rich low tanpura drone, slow deep bansuri long notes, warm harmonium-like pads, singing bowls, spacious and generous, raga Yaman Kalyan feel. Instrumental only, no vocals, no singing, no lyrics, no choir. Calm, sparse, ambient background bed to sit under spoken narration: soft dynamics, no lead melody in the midrange, long sustained tones, slow evolution, no drum kit, no build-ups, no big ending. Indian classical devotional ambient, steady throughout so it loops well."
+ },
+ "shukra": {
+  "f": "shukra.mp3",
+  "d": 50.7,
+  "src": "elevenlabs-music",
+  "prompt": "Venus, Shukra: beauty, romance, grace. Gentle sitar alaap played slowly and softly with meend slides, tanpura drone, delicate swarmandal shimmer, tender and elegant, raga Khamaj or Des feel. Instrumental only, no vocals, no singing, no lyrics, no choir. Calm, sparse, ambient background bed to sit under spoken narration: soft dynamics, no lead melody in the midrange, long sustained tones, slow evolution, no drum kit, no build-ups, no big ending. Indian classical devotional ambient, steady throughout so it loops well."
+ },
+ "shani": {
+  "f": "shani.mp3",
+  "d": 46.7,
+  "src": "elevenlabs-music",
+  "prompt": "Saturn, Shani: slow, patient, deep and grave. Very low tanpura drone, deep low sarangi or esraj long bowed notes, large low singing bowl, very slow, heavy but peaceful, raga Darbari Kanada feel. Instrumental only, no vocals, no singing, no lyrics, no choir. Calm, sparse, ambient background bed to sit under spoken narration: soft dynamics, no lead melody in the midrange, long sustained tones, slow evolution, no drum kit, no build-ups, no big ending. Indian classical devotional ambient, steady throughout so it loops well."
+ },
+ "rahu": {
+  "f": "rahu.mp3",
+  "d": 53.0,
+  "src": "elevenlabs-music",
+  "prompt": "Rahu, the shadow planet: mysterious, smoky, eclipse. Dark low drone, breathy bansuri fragments far away with lots of reverb, slow bowed metal shimmer, smoky and uncertain, raga Marwa feel, never scary. Instrumental only, no vocals, no singing, no lyrics, no choir. Calm, sparse, ambient background bed to sit under spoken narration: soft dynamics, no lead melody in the midrange, long sustained tones, slow evolution, no drum kit, no build-ups, no big ending. Indian classical devotional ambient, steady throughout so it loops well."
+ },
+ "ketu": {
+  "f": "ketu.mp3",
+  "d": 53.0,
+  "src": "elevenlabs-music",
+  "prompt": "Ketu: detachment, liberation, emptiness. Extremely sparse: a single tanpura drone, an occasional singing bowl strike that fades for a long time, wide silence and space, deeply meditative. Instrumental only, no vocals, no singing, no lyrics, no choir. Calm, sparse, ambient background bed to sit under spoken narration: soft dynamics, no lead melody in the midrange, long sustained tones, slow evolution, no drum kit, no build-ups, no big ending. Indian classical devotional ambient, steady throughout so it loops well."
+ },
+ "life": {
+  "f": "life.mp3",
+  "d": 49.3,
+  "src": "elevenlabs-music",
+  "prompt": "The Life line world: a giant banyan tree over a river at sunrise, growth and flowing water. Warm tanpura drone, gentle santoor ripples like water, soft bansuri long notes low and distant, hopeful morning feel, raga Bhairavi feel. Instrumental only, no vocals, no singing, no lyrics, no choir. Calm, sparse, ambient background bed to sit under spoken narration: soft dynamics, no lead melody in the midrange, long sustained tones, slow evolution, no drum kit, no build-ups, no big ending. Indian classical devotional ambient, steady throughout so it loops well."
+ },
+ "head": {
+  "f": "head.mp3",
+  "d": 53.0,
+  "src": "elevenlabs-music",
+  "prompt": "The Head line world: a night sky full of constellations, clarity and thought. Clear crystalline swarmandal and soft bell tones, tanpura drone, sparse high glints like stars, cool and lucid, contemplative. Instrumental only, no vocals, no singing, no lyrics, no choir. Calm, sparse, ambient background bed to sit under spoken narration: soft dynamics, no lead melody in the midrange, long sustained tones, slow evolution, no drum kit, no build-ups, no big ending. Indian classical devotional ambient, steady throughout so it loops well."
+ },
+ "heart": {
+  "f": "heart.mp3",
+  "d": 51.4,
+  "src": "elevenlabs-music",
+  "prompt": "The Heart line world: a lotus pond, love and tenderness. Soft sitar and sarod played very gently, warm tanpura drone, delicate water shimmer, intimate and loving, slow, raga Kafi feel. Instrumental only, no vocals, no singing, no lyrics, no choir. Calm, sparse, ambient background bed to sit under spoken narration: soft dynamics, no lead melody in the midrange, long sustained tones, slow evolution, no drum kit, no build-ups, no big ending. Indian classical devotional ambient, steady throughout so it loops well."
+ },
+ "fate": {
+  "f": "fate.mp3",
+  "d": 52.9,
+  "src": "elevenlabs-music",
+  "prompt": "The Fate line world: a long road under a ringed planet, a journey, steady and purposeful. Tanpura drone, a slow steady soft tabla theka played very quietly like footsteps, sarangi long notes in the low register, forward motion without hurry. Instrumental only, no vocals, no singing, no lyrics, no choir. Calm, sparse, ambient background bed to sit under spoken narration: soft dynamics, no lead melody in the midrange, long sustained tones, slow evolution, no drum kit, no build-ups, no big ending. Indian classical devotional ambient, steady throughout so it loops well."
+ }
+}

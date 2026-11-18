@@ -43,10 +43,13 @@ They are bundled with the app from the `@fontsource/mukta`, `@fontsource/rozha-o
 - The four line worlds, the graha skies and the rising grahas in `src/render/worlds.ts` are entirely procedural: shaders and generated geometry (lotus petals, a banyan of tubes, a constellation, a ringed planet). There are no third-party models, textures or HDRIs. The art direction follows `research/hast-rekha-magic-design.md` §3. The Navagraha gem colours follow [Wikipedia: Navagraha](https://en.wikipedia.org/wiki/Navagraha).
 - *Magic Wonders* (2025 winner) stills were studied for glow style only; nothing from them is used or shipped.
 
+## Card palm image
+- **`public/ui/palm-right.png`** (+ `.webp`, `.json` joint map): a palm-up right hand rendered in Blender Cycles from a **MakeHuman/MPFB 2** human (MakeHuman CC0 base mesh, `middleage_african_male` CC0 skin, recoloured and with its creases softened; MPFB "default" rig, fingers straightened). Output is CC0. Built by `tools/palm/render_palm.py`; `tools/palm/debug_dots.py` checks the joint map.
+
 ## Sound and voice
 - **All sound effects are synthesised at runtime** with the Web Audio API in `src/render/audio.ts`: the bell, tick, press, swell, mount tones and drone. No audio files are used.
 - **Panditji's voice:** pre-rendered clips in `public/voice/<lang>/`, rendered by `tools/voice/render_voice.py`. The voice is an original synthetic voice created with **ElevenLabs Voice Design** from a text description ("an elderly Indian scholar…"); no real person's voice was cloned. Each clip then goes through `tools/voice/divine.sh` with our own synthetic temple impulse response and tanpura drone (`tools/voice/gen_assets.py`, from the design pack's `research/hast-rekha-audio`; generated with numpy, no third-party audio). Lines without a clip use the browser's built-in `speechSynthesis`.
-- **ElevenLabs terms:** output may be used commercially, and without attribution, on a paid plan (Starter or above, per [elevenlabs.io/pricing](https://elevenlabs.io/pricing) and the [Terms of Use](https://elevenlabs.io/terms-of-use)). The free plan requires attribution and is non-commercial. **Status:** no clips have been rendered yet (waiting on an API key), so the current build speaks with `speechSynthesis` everywhere.
+- **ElevenLabs terms:** output may be used commercially, and without attribution, on a paid plan (Starter or above, per [elevenlabs.io/pricing](https://elevenlabs.io/pricing) and the [Terms of Use](https://elevenlabs.io/terms-of-use)). The free plan requires attribution and is non-commercial. **Status:** all of Panditji's lines are rendered in English and Hindi (18 Nov 2026). The opening voice, **Aakashvani**, is a second original voice made with ElevenLabs Voice Design from its own text description (`tools/voice/voice-divine.json`); it goes through a lighter chain with no drone. Any line without a clip falls back to `speechSynthesis`.
 - **Hindi text:** translated from the English script by Claude (AI) for this app. A native-speaker review is pending.
 
 ## Software
@@ -61,3 +64,8 @@ They are bundled with the app from the `@fontsource/mukta`, `@fontsource/rozha-o
 
 ## Tools used to make the assets (not shipped)
 Blender (GPL), MPFB 2 (GPL-3.0, CC0 output), MediaPipe (Apache-2.0), OpenCV (Apache-2.0), scikit-image (BSD-3-Clause), ONNX Runtime (MIT).
+
+## Music
+- **Background music:** 14 looping instrumental beds in `public/audio/music/` (`opening`, the nine grahas `surya chandra mangal budh guru shukra shani rahu ketu`, and the four line worlds `life head heart fate`), listed in `manifest.json` with the prompt used for each track. They were generated with the **ElevenLabs Music API** (`POST /v1/music`, `force_instrumental: true`) from original text prompts in the style of Indian classical and devotional ambient music (tanpura, bansuri, santoor, sitar, sarangi, swarmandal, singing bowls, soft tabla). No existing recording, artist or song was referenced.
+- **Post-processing:** done by `tools/music/make_music.py` with ffmpeg. It trims the model's own fade-in and fade-out, crossfades the last 4 s into the head (equal power) so the file loops seamlessly, adds a high-pass at 70 Hz, cuts −4 dB around 2 kHz and applies a high shelf to leave room for the voice, applies a linear gain to −26 LUFS, and encodes the result as MP3 at 96 kbps.
+- **Licence:** ElevenLabs output was generated under this project's paid ElevenLabs subscription, which allows commercial use without attribution (the same terms as Panditji's voice above).

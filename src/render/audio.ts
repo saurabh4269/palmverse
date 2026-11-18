@@ -127,6 +127,73 @@ export class Sound {
    * A world's ambience (design pack §3.1): a soft pad in the world's notes, a slow bell, and for
    * the life world flowing water (filtered noise). `null` fades it out. Synthesised, nothing to license.
    */
+  // ── music: one looping track per moment (public/audio/music, tools/music/make_music.py) ──
+  /** music level relative to the voice: the tracks are mastered at −26 LUFS, the voice at −16 */
+  static readonly MUSIC_GAIN = 0.9;
+  private musicNow: { id: string; src: AudioBufferSourceNode; gain: GainNode } | null = null;
+  private musicWant: string | null = null;
+  /** decoded tracks, at most 3 kept (a 50 s stereo track is ~17 MB decoded) */
+  private readonly musicCache = new Map<string, Promise<AudioBuffer | null>>();
+
+  private musicBuffer(id: string): Promise<AudioBuffer | null> {
+    const c = this.ctx!;
+    let p = this.musicCache.get(id);
+    if (p) {
+      this.musicCache.delete(id);
+      this.musicCache.set(id, p); // most recent last
+      return p;
+    }
+    p = fetch(`${import.meta.env.BASE_URL}audio/music/${id}.mp3`)
+      .then((r) => (r.ok ? r.arrayBuffer() : Promise.reject(new Error(String(r.status)))))
+      .then((b) => c.decodeAudioData(b))
+      .catch(() => null);
+    this.musicCache.set(id, p);
+    while (this.musicCache.size > 3) this.musicCache.delete(this.musicCache.keys().next().value!);
+    return p;
+  }
+
+  /** Crossfade to track `id` (null: fade the music out). Loops until changed. */
+  music(id: string | null, fadeIn = 2.5): void {
+    const c = this.ctx;
+    if (!c || this.musicWant === id) return;
+    this.musicWant = id;
+    const old = this.musicNow;
+    if (old) {
+      this.musicNow = null;
+      old.gain.gain.cancelScheduledValues(c.currentTime);
+      old.gain.gain.setTargetAtTime(0, c.currentTime, 0.6);
+      setTimeout(() => {
+        try {
+          old.src.stop();
+        } catch {
+          /* stopped */
+        }
+      }, 4000);
+    }
+    if (!id) return;
+    void this.musicBuffer(id).then((buf) => {
+      if (!buf || this.musicWant !== id || !this.ctx) return;
+      const src = c.createBufferSource();
+      src.buffer = buf;
+      src.loop = true;
+      const gain = c.createGain();
+      gain.gain.value = 0;
+      gain.gain.setTargetAtTime(Sound.MUSIC_GAIN, c.currentTime, fadeIn / 3);
+      src.connect(gain).connect(c.destination);
+      src.start();
+      this.musicNow = { id, src, gain };
+    });
+  }
+
+  get musicId(): string | null {
+    return this.musicWant;
+  }
+
+  /** Warm a track so it starts on time. */
+  prefetchMusic(id: string): void {
+    if (this.ctx) void this.musicBuffer(id);
+  }
+
   setWorld(kind: 'heart' | 'life' | 'head' | 'fate' | 'graha' | null): void {
     const c = this.ctx, m = this.master;
     if (!c || !m) return;
