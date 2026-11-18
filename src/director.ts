@@ -96,6 +96,9 @@ export class HastRekhaSystem extends createSystem({}) {
   private reading: ReadingItem[] = [];
   private readingSchedule: { at: number; key: string }[] = [];
   private cardMesh: Mesh | null = null;
+  private cardT = 0;
+  private readonly cardFrom = new Vector3();
+  private readonly cardTo = new Vector3();
   private saveData: SaveData = loadSave();
   private headWorld = new Vector3();
   private headLocal = new Vector3();
@@ -222,7 +225,7 @@ export class HastRekhaSystem extends createSystem({}) {
   private layoutUI(): void {
     const H = this.H;
     this.pandit.group.position.set(0, 0, -1.45);
-    this.subs.group.position.set(0, H - 0.28, -0.95);
+    this.subs.group.position.set(0, H - 0.1, -0.95); // above the pandit's head, never over his face
     this.intro.mesh.position.set(-0.36, H - 0.08, -0.78);
     this.btnNext.mesh.position.set(0.2, H - 0.36, -0.46);
     this.btnOther.mesh.position.set(-0.14, H - 0.4, -0.46);
@@ -714,7 +717,12 @@ export class HastRekhaSystem extends createSystem({}) {
     tex.colorSpace = SRGBColorSpace;
     const mesh = new Mesh(new PlaneGeometry(0.24, 0.3), new MeshBasicMaterial({ map: tex, transparent: true, toneMapped: false }));
     mesh.name = 'share-card';
-    mesh.position.set(0, this.H - 0.2, -0.55);
+    // it rises from the pandit's side of the table and settles left of centre, so his face stays in view
+    this.cardFrom.set(0, this.H - 0.3, -0.85);
+    this.cardTo.set(-0.19, this.H - 0.2, -0.52);
+    this.cardT = 0;
+    mesh.position.copy(this.cardFrom);
+    mesh.scale.setScalar(0.35);
     mesh.renderOrder = 11;
     this.stage.add(mesh);
     mesh.lookAt(this.headWorld);
@@ -772,10 +780,18 @@ export class HastRekhaSystem extends createSystem({}) {
       const c = q(f, 0.55, 0.1);
       this.pandit.lookAt.set(c[0], c[1], c[2]);
     } else this.pandit.lookAt.copy(this.headWorld);
-    if (this.cardMesh) this.cardMesh.lookAt(this.headWorld);
+    if (this.cardMesh) {
+      this.cardT = Math.min(1, this.cardT + dt / 1.1);
+      const e = 1 - Math.pow(1 - this.cardT, 3);
+      this.cardMesh.position.lerpVectors(this.cardFrom, this.cardTo, e);
+      this.cardMesh.position.y += Math.sin(e * Math.PI) * 0.06;
+      this.cardMesh.scale.setScalar(0.35 + 0.65 * e);
+      this.cardMesh.lookAt(this.headWorld);
+    }
     const aside = this.readSide && ['scan', 'reveal', 'mounts', 'lines', 'reading'].includes(this.phase);
-    const sx = aside ? (this.readSide === 'right' ? -0.3 : 0.3) : 0;
-    this.tmpV.set(sx, this.H - (aside ? 0.14 : 0.28), aside ? -0.82 : -0.95);
+    const onCard = this.phase === 'card';
+    const sx = aside ? (this.readSide === 'right' ? -0.3 : 0.3) : onCard ? 0.3 : 0;
+    this.tmpV.set(sx, this.H - (aside ? 0.14 : onCard ? 0.18 : 0.1), aside ? -0.82 : onCard ? -0.85 : -0.95);
     this.subs.group.position.lerp(this.tmpV, 1 - Math.exp(-dt * 3));
   }
 

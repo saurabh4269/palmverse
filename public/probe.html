@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Camera Probe</title>
+<!--
+  Hast Rekha · Layer 3 feasibility probe (not part of the app).
+  Answers one question on a real Quest 3/3S in Quest Browser: can a web page see
+  the passthrough camera, and at what resolution? (Layer 3 would read real palm
+  creases from it.) Two routes are tried:
+    1. WebXR Raw Camera Access: immersive-ar with optionalFeatures ['camera-access'],
+       then XRView.camera + XRWebGLBinding.getCameraImage().
+    2. getUserMedia({video}) — lists video inputs and opens the first one.
+  Nothing is uploaded or stored: frames are only drawn to this page.
+-->
+<style>
+  :root { --bg: #1a0d08; --fg: #f6e7c8; --ok: #8fe39a; --no: #ff9a8a; --gold: #e8bc62; }
+  body { margin: 0; padding: 24px 16px; background: var(--bg); color: var(--fg); font: 18px/1.45 system-ui, sans-serif; }
+  h1 { color: var(--gold); font-size: 24px; margin: 0 0 4px; }
+  button { font: inherit; padding: 14px 22px; margin: 8px 8px 8px 0; border-radius: 10px; border: 2px solid var(--gold); background: #3a1d10; color: var(--fg); }
+  #log { white-space: pre-wrap; font-family: ui-monospace, monospace; font-size: 15px; background: #0e0704; padding: 12px; border-radius: 8px; max-width: 900px; }
+  .ok { color: var(--ok); } .no { color: var(--no); }
+  video, canvas { max-width: 100%; margin-top: 12px; border: 1px solid #553; }
+</style>
+</head>
+<body>
+<h1>Camera Probe</h1>
+<p>Layer 3 feasibility check for Hast Rekha. Nothing leaves this headset.</p>
+<button id="xr">1 · WebXR camera-access</button>
+<button id="gum">2 · getUserMedia</button>
+<div id="log"></div>
+<video id="v" playsinline muted hidden></video>
+<canvas id="c" hidden></canvas>
+<script>
+const out = document.getElementById('log');
+const say = (msg, cls) => { const s = document.createElement('div'); if (cls) s.className = cls; s.textContent = msg; out.appendChild(s); };
+say(`UA: ${navigator.userAgent}`);
+say(`secure context: ${window.isSecureContext}`);
+
+(async () => {
+  if (!navigator.xr) return say('navigator.xr missing', 'no');
+  try { say(`immersive-ar supported: ${await navigator.xr.isSessionSupported('immersive-ar')}`); }
+  catch (e) { say(`isSessionSupported threw: ${e}`, 'no'); }
+  say(`XRWebGLBinding: ${typeof XRWebGLBinding}; getCameraImage: ${typeof XRWebGLBinding !== 'undefined' && 'getCameraImage' in XRWebGLBinding.prototype}`);
+})();
+
+document.getElementById('xr').onclick = async () => {
+  const gl = document.getElementById('c').getContext('webgl2', { xrCompatible: true });
+  let session;
+  try {
+    session = await navigator.xr.requestSession('immersive-ar', { optionalFeatures: ['camera-access', 'hand-tracking'] });
+  } catch (e) { return say(`requestSession failed: ${e}`, 'no'); }
+  say(`session enabledFeatures: ${JSON.stringify(session.enabledFeatures ?? 'n/a')}`);
+  session.updateRenderState({ baseLayer: new XRWebGLLayer(session, gl) });
+  const ref = await session.requestReferenceSpace('local');
+  const binding = typeof XRWebGLBinding !== 'undefined' ? new XRWebGLBinding(session, gl) : null;
+  let frames = 0, seen = false;
+  const onFrame = (t, frame) => {
+    frames++;
+    const pose = frame.getViewerPose(ref);
+    if (pose) for (const view of pose.views) {
+      if (view.camera && !seen) {
+        seen = true;
+        say(`XRView.camera present: ${view.camera.width}×${view.camera.height}`, 'ok');
+        if (binding && binding.getCameraImage) {
+          try { say(`getCameraImage → ${binding.getCameraImage(view.camera) ? 'WebGLTexture' : 'null'}`, 'ok'); }
+          catch (e) { say(`getCameraImage threw: ${e}`, 'no'); }
+        }
+      }
+    }
+    if (frames < 180) session.requestAnimationFrame(onFrame);
+    else {
+      if (!seen) say('no XRView.camera in 180 frames → raw camera access not exposed', 'no');
+      session.end();
+    }
+  };
+  session.requestAnimationFrame(onFrame);
+  session.addEventListener('end', () => say(`session ended after ${frames} frames`));
+};
+
+document.getElementById('gum').onclick = async () => {
+  if (!navigator.mediaDevices?.getUserMedia) return say('getUserMedia missing', 'no');
+  let stream;
+  try { stream = await navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 1280 }, height: { ideal: 960 } } }); }
+  catch (e) { return say(`getUserMedia failed: ${e.name}: ${e.message}`, 'no'); }
+  const devs = (await navigator.mediaDevices.enumerateDevices()).filter((d) => d.kind === 'videoinput');
+  say(`video inputs (${devs.length}): ${devs.map((d) => d.label || '(no label)').join(' | ')}`);
+  const tr = stream.getVideoTracks()[0];
+  say(`track: ${tr.label} ${JSON.stringify(tr.getSettings())}`, 'ok');
+  const v = document.getElementById('v');
+  v.srcObject = stream; v.hidden = false; await v.play();
+  say('look at your palm: are the creases visible in the preview above? (judge sharpness by eye)');
+};
+</script>
+</body>
+</html>
