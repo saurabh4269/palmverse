@@ -37,4 +37,6 @@ export const PANDIT: PanditScript = {
   compare: 'Your two hands differ here: {diff}. The tradition reads such differences as the journey from the given to the chosen.',
   farewell: 'Thank you for sitting with an old scholar. Whatever your lines say, the hand that writes the story is yours. Namaste!',
   trackingLost: 'I cannot see your hand just now. Please hold it up again, palm toward you.',
+  explore: 'Now your lines are written in light. Touch one with a fingertip of your other hand, or pinch near it, and it will open.',
+  exploreMore: 'Touch another line if you like. When you are ready, press Continue and I will put it all together.',
 };

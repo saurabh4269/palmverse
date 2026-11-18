@@ -70,6 +70,56 @@ export class Sound {
     for (let i = 0; i < 6; i++) this.tone(262 * Math.pow(2, BHUPALI[i] / 12) * 2, 1.4, 0.05, 'sine', i * 0.16);
   }
 
+  /** Hover over a glowing line: a faint high shimmer, brighter as the finger nears. */
+  shimmer(prox = 0.5): void {
+    const f = 1760 * (1 + 0.25 * prox);
+    this.tone(f, 0.35, 0.025 + 0.03 * prox, 'sine');
+    this.tone(f * 1.5, 0.25, 0.015, 'sine', 0.03);
+  }
+
+  /** Touching a line: a small bell struck at the contact point, with a soft 80 ms thump under it. */
+  touchBell(i = 0): void {
+    this.ting(i + 3);
+    this.thump(0.12, 0.08);
+  }
+
+  /** Low sine thump (the "felt" part of a contact, standing in for haptics). */
+  thump(gain = 0.25, dur = 0.12): void {
+    const c = this.ctx, m = this.master;
+    if (!c || !m) return;
+    const t0 = c.currentTime;
+    const o = c.createOscillator(), g = c.createGain();
+    o.frequency.setValueAtTime(110, t0);
+    o.frequency.exponentialRampToValueAtTime(45, t0 + dur);
+    g.gain.setValueAtTime(gain, t0);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur + 0.05);
+    o.connect(g).connect(m);
+    o.start(t0);
+    o.stop(t0 + dur + 0.1);
+  }
+
+  /** Selecting a line: a singing bowl (slightly beating partials, long ring) over a sub drop. */
+  bowl(base = 196, gain = 0.16): void {
+    for (const [r, g, d] of [[1, 1, 6], [1.006, 0.6, 6], [2.71, 0.45, 3.5], [2.72, 0.3, 3.5], [5.15, 0.15, 1.8]] as const) this.tone(base * r, d, gain * g);
+    const c = this.ctx, m = this.master;
+    if (!c || !m) return;
+    const t0 = c.currentTime;
+    const o = c.createOscillator(), g = c.createGain();
+    o.frequency.setValueAtTime(90, t0);
+    o.frequency.exponentialRampToValueAtTime(32, t0 + 0.9);
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.linearRampToValueAtTime(0.35, t0 + 0.03);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + 1.1);
+    o.connect(g).connect(m);
+    o.start(t0);
+    o.stop(t0 + 1.2);
+  }
+
+  /** A world folding back into the palm: the swell, reversed (falling notes). */
+  fold(): void {
+    for (let i = 0; i < 5; i++) this.tone(262 * Math.pow(2, BHUPALI[5 - i] / 12) * 2, 1.0, 0.04, 'sine', i * 0.1);
+  }
+
   /** Tanpura-like drone (Pa–Sa–Sa–Sa), very soft, while the pavilion is up. */
   setDrone(on: boolean): void {
     const c = this.ctx, m = this.master;

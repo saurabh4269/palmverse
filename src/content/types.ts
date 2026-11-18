@@ -124,4 +124,6 @@ export interface PanditScript {
   compare: string; // template {diff}
   farewell: string;
   trackingLost: string; // "I lost sight of your hand. Hold it up again."
+  explore: string; // the lines glow: "touch one, or pinch near it, and it opens"
+  exploreMore: string; // after a line has been heard: "touch another, or Continue"
 }

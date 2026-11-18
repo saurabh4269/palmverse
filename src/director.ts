@@ -4,7 +4,8 @@
  * palm frame of the reading hand, and feeds four uniforms to the overlay so
  * the lines and mounts stay on the real skin.
  *
- *  welcome → raise → scan → reveal → mounts → lines → reading → card → (other hand | end)
+ *  welcome → raise → scan → reveal → mounts → lines → explore → reading → card → (other hand | end)
+ *  (explore: the chosen lines glow; touch or pinch one and it opens)
  *
  * Dev-only structured logs for the emulator harness:
  *   [hast] #<page>.<seq> <event> key=value … layout={json}
@@ -17,6 +18,7 @@ import { LINE_ORDER, LINE_VALUES, shapeFor, TEMPLATE } from './core/line-shapes.
 import { aggregate, measureOnce, profileFrom, type RawMeasure } from './core/measure.js';
 import { dist as vdist, isReadablePalm, type Joints, palmFrame, type PalmFrame, q, toPalm, type V3, facing } from './core/palm-frame.js';
 import { OneEuroFilter3 } from './core/one-euro.js';
+import { LineToucher, nearestLine, type LineHit, type TouchEvent, type TouchLine } from './core/line-touch.js';
 import { buildReading, type ReadingItem, type RulesJson, todaysMountIndex } from './core/rules.js';
 import { load as loadSave, otherHand, save as storeSave, type SaveData } from './core/save.js';
 import regionsJson from './data/palm-regions.json';
@@ -31,7 +33,7 @@ import { gpuStats } from './render/gpu-stats.js';
 import { FONT_BODY, Label, loadFonts } from './render/text.js';
 import { Hint, Subtitles } from './render/ui.js';
 
-type Phase = 'boot' | 'welcome' | 'raise' | 'scan' | 'reveal' | 'mounts' | 'lines' | 'reading' | 'card' | 'end';
+type Phase = 'boot' | 'welcome' | 'raise' | 'scan' | 'reveal' | 'mounts' | 'lines' | 'explore' | 'reading' | 'card' | 'end';
 
 const TAG = '[hast]';
 const PAGE = Math.random().toString(36).slice(2, 7);
@@ -43,6 +45,9 @@ const MOUNT_TEXT = MOUNT_ORDER.map((id) => MOUNTS.find((m) => m.id === id)!);
 const SCAN_SAMPLES = 45;
 const POKE_RADIUS = 0.017; // m, on the palm plane
 const POKE_DWELL = 0.25; // s
+const PINCH_ON = 0.018; // m, thumb tip to index tip
+type TouchId = 'heart' | 'head' | 'life' | 'fate';
+const TOUCH_IDS: TouchId[] = ['life', 'head', 'heart', 'fate'];
 
 function log(event: string, kv: Record<string, unknown> = {}, layout?: unknown): void {
   if (!import.meta.env.DEV) return;
@@ -119,6 +124,15 @@ export class HastRekhaSystem extends createSystem({}) {
   private retrySaid = false;
   private lostSaid = 0;
   private readCount = 0;
+  // explore: touch a glowing line
+  private toucher = new LineToucher<TouchId>();
+  private touchEvents: TouchEvent<TouchId>[] = [];
+  private touchLines: TouchLine<TouchId>[] = [];
+  private tipHit: LineHit<TouchId> = { id: 'heart', dist: 0, h: 0, u: 0 };
+  private pinchHit: LineHit<TouchId> = { id: 'heart', dist: 0, h: 0, u: 0 };
+  private linesHeard = new Set<TouchId>();
+  private exploreMoreSaid = false;
+  private shimmerT = 0;
 
   init(): void {
     void loadFonts();
@@ -429,8 +443,14 @@ export class HastRekhaSystem extends createSystem({}) {
         this.say(PANDIT.linesIntro);
         this.showLineCards();
         break;
+      case 'explore':
+        this.hideCards();
+        this.enterExplore();
+        break;
       case 'reading':
         this.hideCards();
+        this.hint.hide();
+        for (const id of TOUCH_IDS) this.overlay.lines.get(id)!.breathTarget = 0;
         this.startReading();
         break;
       case 'card':
@@ -509,6 +529,9 @@ export class HastRekhaSystem extends createSystem({}) {
         break;
       case 'lines':
         this.updateLines(nextPressed);
+        break;
+      case 'explore':
+        this.updateExplore(dt, nextPressed);
         break;
       case 'reading':
         this.updateReading(nextPressed);
@@ -683,8 +706,111 @@ export class HastRekhaSystem extends createSystem({}) {
     this.talkUntil = this.time;
     this.say(`${['Good.', 'I see.', 'Ah.', 'Yes.', 'Hmm, good.'][this.lineIdx % 5]} ${opt?.label ?? ''}.`);
     this.lineIdx++;
-    if (this.lineIdx >= LINE_ORDER.length) this.go('reading');
+    if (this.lineIdx >= LINE_ORDER.length) this.go('explore');
     else this.showLineCards();
+  }
+
+  // ───────────────────────── explore: touch a glowing line ─────────────────────────
+
+  private enterExplore(): void {
+    this.toucher.reset();
+    this.linesHeard.clear();
+    this.exploreMoreSaid = false;
+    this.touchLines = [];
+    for (const id of TOUCH_IDS) {
+      const v = this.choices[id];
+      const r = this.overlay.lines.get(id)!;
+      if (!v || shapeFor(id, v).length === 0) {
+        this.overlay.dimLine(id, 0);
+        continue;
+      }
+      this.overlay.showLine(id, shapeFor(id, v), `${id}:${v}`, false);
+      this.overlay.dimLine(id, 1);
+      r.breathTarget = 1;
+      this.touchLines.push({ id, strokes: r.smooth });
+    }
+    this.overlay.dimLine('join', 0.35);
+    this.overlay.sigils.glowTarget.fill(0.12);
+    this.sound.swell();
+    this.say(PANDIT.explore);
+    this.hint.show('Touch or pinch a glowing line  ✨', new Vector3(0, this.H - 0.32, -0.45), 0);
+    log('explore', { lines: this.touchLines.map((l) => l.id).join(',') });
+  }
+
+  /** Thumb tip to index tip, on the toucher hand. */
+  private pinching(h: HandRead): boolean {
+    return h.tracked && vdist(h.joints[4], h.joints[9]) < PINCH_ON;
+  }
+
+  private updateExplore(dt: number, next: boolean): void {
+    const t = this.phaseT;
+    const f = this.readable(this.readSide);
+    const other = this.hands[this.readSide === 'left' ? 'right' : 'left'];
+    let tip: LineHit<TouchId> | null = null, pinch: LineHit<TouchId> | null = null;
+    if (f && other.tracked && this.touchLines.length) {
+      tip = nearestLine(f, other.joints[9], this.touchLines, this.tipHit);
+      if (this.pinching(other)) {
+        const a = other.joints[4], b = other.joints[9];
+        pinch = nearestLine(f, [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2, (a[2] + b[2]) / 2], this.touchLines, this.pinchHit);
+      }
+    }
+    this.toucher.step(dt, tip, pinch, this.touchEvents);
+    // dev keys: 1..4 select life/head/heart/fate
+    const k = ['1', '2', '3', '4'].findIndex((d) => this.keys.has(d));
+    if (k >= 0 && this.touchLines.some((l) => l.id === TOUCH_IDS[k])) this.touchEvents.push({ kind: 'select', id: TOUCH_IDS[k], u: 0.5, by: 'touch' });
+    for (const e of this.touchEvents) {
+      const r = this.overlay.lines.get(e.id)!;
+      switch (e.kind) {
+        case 'hover':
+          r.hoverTarget = 1;
+          this.sound.shimmer(0.3);
+          this.shimmerT = 0;
+          log('line-hover', { line: e.id });
+          break;
+        case 'unhover':
+          r.hoverTarget = 0;
+          break;
+        case 'touch':
+          r.ripple(e.u);
+          this.sound.touchBell(TOUCH_IDS.indexOf(e.id));
+          log('line-touch', { line: e.id, u: e.u });
+          break;
+        case 'select':
+          r.flash = 1;
+          r.ripple(e.u);
+          this.sound.bowl();
+          log('line-select', { line: e.id, by: e.by });
+          this.openLine(e.id);
+          break;
+      }
+    }
+    // the hovered line answers the finger's distance; a faint shimmer repeats while hovering
+    if (this.toucher.hover) {
+      this.overlay.lines.get(this.toucher.hover)!.hoverTarget = 0.5 + 0.5 * this.toucher.proximity;
+      this.shimmerT += dt;
+      if (this.shimmerT > 0.45) {
+        this.shimmerT = 0;
+        this.sound.shimmer(this.toucher.proximity);
+      }
+    }
+    if (this.linesHeard.size > 0 && !this.exploreMoreSaid && this.talkLeft() <= 0) {
+      this.exploreMoreSaid = true;
+      this.say(PANDIT.exploreMore);
+    }
+    this.btnNext.show(this.linesHeard.size > 0 || t > 20 || this.touchLines.length === 0);
+    if (this.pressed === 'next' || next) this.go('reading');
+  }
+
+  /** A line was selected: Panditji tells what the tradition reads in it. */
+  private openLine(id: TouchId): void {
+    const item = buildReading(RULES, READINGS, this.profile!, this.choices).find((r) => r.key === `${id}:${this.choices[id]}`);
+    this.subs.clear();
+    this.voice.stop();
+    this.talkUntil = this.time;
+    if (item) this.say(item.text);
+    this.linesHeard.add(id);
+    this.exploreMoreSaid = false;
+    this.hint.hide();
   }
 
   // ───────────────────────── reading ─────────────────────────
@@ -695,6 +821,8 @@ export class HastRekhaSystem extends createSystem({}) {
     this.readingSchedule = [];
     let at = this.talkLeft();
     for (const it of this.reading.slice(1)) {
+      // a line already told inside its own world is not repeated
+      if (this.linesHeard.has(it.key.split(':')[0] as TouchId)) continue;
       // element was already read during the reveal
       this.readingSchedule.push({ at, key: it.key });
       at += this.say(it.text);
@@ -803,7 +931,7 @@ export class HastRekhaSystem extends createSystem({}) {
 
   private updateOverlay(dt: number): void {
     const f = this.readable(this.readSide);
-    const show = !!f && ['scan', 'reveal', 'mounts', 'lines', 'reading', 'card'].includes(this.phase);
+    const show = !!f && ['scan', 'reveal', 'mounts', 'lines', 'explore', 'reading', 'card'].includes(this.phase);
     if (f) this.overlay.setFrame(f);
     this.overlay.presenceTarget = show ? 1 : 0;
     this.overlay.update(dt, this.time);
@@ -835,7 +963,7 @@ export class HastRekhaSystem extends createSystem({}) {
       this.cardMesh.scale.setScalar(0.35 + 0.65 * e);
       this.cardMesh.lookAt(this.headWorld);
     }
-    const aside = this.readSide && ['scan', 'reveal', 'mounts', 'lines', 'reading'].includes(this.phase);
+    const aside = this.readSide && ['scan', 'reveal', 'mounts', 'lines', 'explore', 'reading'].includes(this.phase);
     const onCard = this.phase === 'card';
     const sx = aside ? (this.readSide === 'right' ? -0.3 : 0.3) : onCard ? 0.3 : 0;
     this.tmpV.set(sx, this.H - (aside ? 0.14 : onCard ? 0.18 : 0.1), aside ? -0.82 : onCard ? -0.85 : -0.95);
@@ -847,7 +975,7 @@ export class HastRekhaSystem extends createSystem({}) {
   private pressed: string | null = null;
 
   private updateButtons(dt: number): void {
-    if (!['welcome', 'mounts', 'reading', 'end'].includes(this.phase)) this.btnNext.show(false);
+    if (!['welcome', 'mounts', 'explore', 'reading', 'end'].includes(this.phase)) this.btnNext.show(false);
     this.btnOther.show(this.phase === 'card' && this.phaseT > 2);
     this.btnFinish.show(this.phase === 'card' && this.phaseT > 2);
     for (const b of [this.btnNext, this.btnOther, this.btnFinish]) {
@@ -873,6 +1001,7 @@ export class HastRekhaSystem extends createSystem({}) {
         cards: this.cards.map((c) => ({ id: c.id, p: w(c.mesh) })),
         mounts: f ? MOUNT_ORDER.map((id, i) => ({ id, p: r3(q(f, MOUNT_CENTROIDS[i][0], MOUNT_CENTROIDS[i][1], 0.004)), n: r3(f.N) })) : [],
         palm: f ? { O: r3(f.O), len: +f.length.toFixed(3), wid: +f.width.toFixed(3) } : null,
+        lines: f && this.phase === 'explore' ? this.touchLines.map((l) => { const s = l.strokes[0]; const m = s.pts[Math.floor(s.pts.length / 2)]; return { id: l.id, p: r3(q(f, m[0], m[1], 0.004)), n: r3(f.N) }; }) : [],
       },
     );
   }

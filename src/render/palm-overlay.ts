@@ -27,6 +27,7 @@ import {
   Mesh,
   OneFactor,
   OneMinusSrcAlphaFactor,
+  Points,
   ShaderMaterial,
   SRGBColorSpace,
   Vector3,
@@ -43,6 +44,8 @@ export const LINE_COLORS: Record<LineId, string> = {
   fate: '#9dffb0', // leaf
   join: '#ffe08a',
 };
+
+const LINE_IDS: LineId[] = ['life', 'heart', 'head', 'fate', 'join'];
 
 export const MOUNT_ORDER: MountId[] = ['jupiter', 'saturn', 'sun_apollo', 'mercury', 'mars_upper', 'luna_moon', 'venus'];
 
@@ -82,6 +85,14 @@ class Ribbon {
   opacity = 0;
   opacityTarget = 0;
   key = '';
+  /** smoothed strokes (for touch tests and sparkles) */
+  smooth: { pts: [number, number][]; u: number[] }[] = [];
+  /** explore-mode feel: hover 0..1, a ripple from a touch, a select flash, a slow breathing pulse */
+  hover = 0;
+  hoverTarget = 0;
+  flash = 0;
+  breath = 0;
+  breathTarget = 0;
 
   constructor(palm: PalmUniforms, color: string) {
     this.mat = glowBlend(
@@ -93,10 +104,15 @@ class Ribbon {
           uOpacity: { value: 0 },
           uWidth: { value: 0.0028 },
           uTime: { value: 0 },
+          uHover: { value: 0 },
+          uRipU: { value: 0 },
+          uRipT: { value: 99 },
+          uFlash: { value: 0 },
+          uBreath: { value: 0 },
         },
         vertexShader: /* glsl */ `
           ${PALM_UNIFORMS_GLSL}
-          uniform float uWidth;
+          uniform float uWidth; uniform float uHover; uniform float uFlash;
           attribute vec2 ab; attribute vec2 tan; attribute float side; attribute float u;
           varying float vSide; varying float vU;
           void main(){
@@ -104,18 +120,28 @@ class Ribbon {
             vec3 T = normalize(tan.x * uEy + tan.y * uEx);
             vec3 B = normalize(cross(uN, T));
             // a glow halo 3x the core width
-            vec3 pos = P + B * side * uWidth * 3.0;
+            // hover widens the halo (the line 'leans' toward the finger); a select flares it
+            vec3 pos = P + B * side * uWidth * 3.0 * (1.0 + 0.7 * uHover + 0.9 * uFlash);
             vSide = side; vU = u;
             gl_Position = projectionMatrix * viewMatrix * vec4(pos, 1.0);
           }`,
         fragmentShader: /* glsl */ `
           precision highp float;
           uniform vec3 uColor; uniform float uProgress; uniform float uOpacity; uniform float uTime;
+          uniform float uHover; uniform float uRipU; uniform float uRipT; uniform float uFlash; uniform float uBreath;
           varying float vSide; varying float vU;
           void main(){
-            float d = abs(vSide) * 3.0;           // 0 centre .. 3 halo edge, in core half-widths
+            float k = 1.0 + 0.7 * uHover + 0.9 * uFlash;
+            float d = abs(vSide) * 3.0 * k;       // 0 centre .. 3 halo edge, in core half-widths
             float core = (1.0 - smoothstep(0.55, 1.15, d));
-            float halo = exp(-d * d * 0.55) * 0.55;
+            // breathing: a slow pulse, and energy flowing along the line toward its end
+            float flow = 0.5 + 0.5 * sin(vU * 26.0 - uTime * 4.0);
+            float breath = uBreath * (0.25 + 0.2 * sin(uTime * 1.7) + 0.35 * flow * flow);
+            // a touch sends a ring of light both ways along the line from the contact point
+            float ripD = abs(vU - uRipU) - uRipT * 0.9;
+            float ripple = exp(-ripD * ripD * 900.0) * exp(-uRipT * 2.2);
+            float halo = exp(-d * d * 0.55) * (0.55 + breath + 0.8 * uHover + 1.4 * ripple + 1.2 * uFlash);
+            core *= 1.0 + 0.6 * uHover + 1.5 * ripple + 1.2 * uFlash;
             float shown = (1.0 - smoothstep(uProgress - 0.02, uProgress + 0.002, vU));
             float tip = exp(-pow((vU - uProgress) * 28.0, 2.0)) * step(uProgress, 0.999);
             float shimmer = 0.85 + 0.15 * sin(vU * 40.0 - uTime * 3.0);
@@ -135,6 +161,7 @@ class Ribbon {
 
   setStrokes(strokes: Stroke[], key: string): void {
     this.key = key;
+    this.smooth = [];
     const ab: number[] = [], tan: number[] = [], side: number[] = [], u: number[] = [], idx: number[] = [];
     let base = 0;
     for (const s of strokes) {
@@ -154,6 +181,7 @@ class Ribbon {
         }
       }
       base += pts.length * 2;
+      this.smooth.push({ pts, u: us });
     }
     const g = this.mesh.geometry;
     g.setAttribute('ab', new BufferAttribute(new Float32Array(ab), 2));
@@ -174,6 +202,87 @@ class Ribbon {
     this.mat.uniforms.uProgress.value = this.progress;
     this.mat.uniforms.uOpacity.value = this.opacity * global;
     this.mat.uniforms.uTime.value = t;
+    this.hover += (this.hoverTarget - this.hover) * (1 - Math.exp(-dt * 10));
+    this.breath += (this.breathTarget - this.breath) * (1 - Math.exp(-dt * 2));
+    this.flash = Math.max(0, this.flash - dt * 1.6);
+    this.mat.uniforms.uHover.value = this.hover;
+    this.mat.uniforms.uBreath.value = this.breath;
+    this.mat.uniforms.uFlash.value = this.flash;
+    this.mat.uniforms.uRipT.value += dt;
+  }
+
+  ripple(u: number): void {
+    this.mat.uniforms.uRipU.value = u;
+    this.mat.uniforms.uRipT.value = 0;
+  }
+}
+
+/**
+ * Embers rising off the glowing lines: one Points draw call for all lines.
+ * Each mote is born on a line sample, drifts up off the skin along the palm
+ * normal and fades; brightness per line follows that line's hover and breath.
+ */
+class LineSparkles {
+  readonly mesh: Points;
+  readonly mat: ShaderMaterial;
+  readonly level = new Float32Array(5);
+  dirty = true;
+
+  constructor(palm: PalmUniforms) {
+    this.mat = glowBlend(
+      new ShaderMaterial({
+        uniforms: { ...palm, uLevel: { value: this.level }, uTime: { value: 0 }, uOpacity: { value: 0 }, uColors: { value: LINE_IDS.map((id) => new Color(LINE_COLORS[id])) } },
+        vertexShader: /* glsl */ `
+          ${PALM_UNIFORMS_GLSL}
+          uniform float uLevel[5]; uniform float uTime; uniform vec3 uColors[5];
+          attribute vec2 ab; attribute float li; attribute float phase;
+          varying vec3 vCol; varying float vA;
+          void main(){
+            int i = int(li + 0.5);
+            float life = fract(uTime * 0.45 + phase);
+            vec3 P = palmQ(ab) + uN * (0.002 + life * 0.022) + uEx * sin(phase * 40.0 + uTime) * 0.01 * life;
+            vec4 mv = viewMatrix * vec4(P, 1.0);
+            float tw = 0.6 + 0.4 * sin(uTime * 7.0 + phase * 60.0);
+            vA = uLevel[i] * (1.0 - life) * smoothstep(0.0, 0.12, life) * tw;
+            vCol = mix(uColors[i], vec3(1.0, 0.95, 0.8), 0.5);
+            gl_PointSize = clamp(0.0035 * projectionMatrix[1][1] * 600.0 / -mv.z, 1.0, 14.0);
+            gl_Position = projectionMatrix * mv;
+          }`,
+        fragmentShader: /* glsl */ `
+          precision highp float;
+          uniform float uOpacity; varying vec3 vCol; varying float vA;
+          void main(){
+            vec2 c = gl_PointCoord * 2.0 - 1.0;
+            float m = exp(-dot(c, c) * 3.5);
+            float a = clamp(m * vA * uOpacity, 0.0, 1.0);
+            gl_FragColor = vec4(vCol * a, a);
+          }`,
+      }),
+    );
+    this.mesh = new Points(new BufferGeometry(), this.mat);
+    this.mesh.frustumCulled = false;
+    this.mesh.renderOrder = 23;
+    this.mesh.matrixAutoUpdate = false;
+  }
+
+  rebuild(ribbons: Map<LineId, Ribbon>): void {
+    this.dirty = false;
+    const ab: number[] = [], li: number[] = [], ph: number[] = [];
+    LINE_IDS.forEach((id, i) => {
+      for (const s of ribbons.get(id)!.smooth)
+        for (let k = 0; k < s.pts.length; k++)
+          for (let r = 0; r < 2; r++) {
+            ab.push(s.pts[k][0], s.pts[k][1]);
+            li.push(i);
+            ph.push(Math.random());
+          }
+    });
+    const g = this.mesh.geometry;
+    g.setAttribute('ab', new BufferAttribute(new Float32Array(ab), 2));
+    g.setAttribute('li', new BufferAttribute(new Float32Array(li), 1));
+    g.setAttribute('phase', new BufferAttribute(new Float32Array(ph), 1));
+    g.setAttribute('position', new BufferAttribute(new Float32Array(ab.length * 1.5), 3));
+    this.mesh.visible = ab.length > 0;
   }
 }
 
@@ -371,13 +480,14 @@ export class PalmOverlay {
   readonly lines = new Map<LineId, Ribbon>();
   readonly sigils: MountSigils;
   readonly sheen: PalmSheen;
+  readonly sparkles: LineSparkles;
   /** 0..1 master fade (palm visible and facing) */
   presence = 0;
   presenceTarget = 0;
 
   constructor(centroids: [number, number][], sigils: string[]) {
     this.group.name = 'palm-overlay';
-    for (const id of ['life', 'heart', 'head', 'fate', 'join'] as LineId[]) {
+    for (const id of LINE_IDS) {
       const r = new Ribbon(this.palm, LINE_COLORS[id]);
       r.mesh.name = `line-${id}`;
       this.lines.set(id, r);
@@ -389,6 +499,9 @@ export class PalmOverlay {
     this.sheen = new PalmSheen(this.palm);
     this.sheen.mesh.name = 'palm-sheen';
     this.group.add(this.sheen.mesh);
+    this.sparkles = new LineSparkles(this.palm);
+    this.sparkles.mesh.name = 'line-sparkles';
+    this.group.add(this.sparkles.mesh);
   }
 
   setFrame(f: PalmFrame): void {
@@ -403,6 +516,7 @@ export class PalmOverlay {
     const r = this.lines.get(id)!;
     if (r.key !== key) {
       r.setStrokes(strokes, key);
+      this.sparkles.dirty = true;
       if (reveal) r.progress = 0;
     }
     r.target = 1;
@@ -425,6 +539,13 @@ export class PalmOverlay {
   update(dt: number, t: number): void {
     this.presence += (this.presenceTarget - this.presence) * (1 - Math.exp(-dt * 8));
     for (const r of this.lines.values()) r.update(dt, t, this.presence);
+    if (this.sparkles.dirty) this.sparkles.rebuild(this.lines);
+    LINE_IDS.forEach((id, i) => {
+      const r = this.lines.get(id)!;
+      this.sparkles.level[i] = r.opacity * (0.15 + r.breath * 0.6 + r.hover * 1.2 + r.flash * 2.0);
+    });
+    this.sparkles.mat.uniforms.uTime.value = t;
+    this.sparkles.mat.uniforms.uOpacity.value = this.presence;
     this.sigils.mat.uniforms.uOpacity.value = this.presence;
     this.sigils.update(dt);
     this.sheen.update(dt, this.presence);

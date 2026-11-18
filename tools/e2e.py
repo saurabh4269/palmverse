@@ -177,6 +177,32 @@ for i, line in enumerate(['heart', 'head', 'join', 'life', 'fate']):
     tip_to(POKE, towards_head(target['p'], 0.08), 0.3)
 park_poker()
 
+# ---- explore: the lines glow; touch the heart line with the other hand's fingertip
+m = wait_for(r'explore lines=(\S+)', 8)
+check('explore: lines glow', 'heart' in m.group(1), m.group(0))
+m = wait_for(r'layout phase=explore .*"lines":\[\{', 10)
+ls = {x['id']: x for x in field(m, 'layout')['lines']}
+p, n = ls['heart']['p'], ls['heart']['n']
+mark()
+tip_to(POKE, [p[i] + n[i] * 0.05 for i in range(3)], 0.4)
+tip_to(POKE, [p[i] + n[i] * 0.02 for i in range(3)], 0.3)
+check('heart line: hover', bool(wait_for(r'line-hover line=heart', 4)))
+time.sleep(0.3)
+shot('line-hover')
+tip_to(POKE, jit([p[i] + n[i] * 0.003 for i in range(3)]), 0.25)
+check('heart line: touch', bool(wait_for(r'line-touch line=heart', 4)))
+m = wait_for(r'line-select line=(\w+) by=(\w+)', 4)
+check('heart line: select', m and m.group(1) == 'heart', m.group(0) if m else '')
+time.sleep(0.35)
+shot('line-select')
+tip_to(POKE, [p[i] + n[i] * 0.08 for i in range(3)], 0.3)
+park_poker()
+m = wait_for(r'layout phase=explore .*"next":\[', 25)
+btn = field(m, 'layout')['buttons']['next']
+mark()
+poke(btn)
+check('continue poked (explore)', bool(wait_for(r'phase from=explore to=reading', 6)))
+
 m = wait_for(r'reading items=(\d+) keys=(\S+)', 8)
 check('reading built', int(m.group(1)) >= 6, m.group(0))
 dropped = [msg for _, msg in logs(since=CUR['since'] - 20000) if 'reading-dropped' in msg or 'reading-missing' in msg]
