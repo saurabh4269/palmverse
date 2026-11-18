@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/media/hero.gif" alt="A real Quest 3 capture: lines of light drawn on the player's own palm; touching the fate line opens Shani's ringed planet around them" width="720">
+  <img src="docs/media/hero.gif" alt="A real Quest 3 capture: the heart line glows on the player's own palm, then a pinch opens it into a lotus world on dark water" width="720">
 </p>
 
 <h1 align="center">Palmverse</h1>
