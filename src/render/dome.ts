@@ -9,6 +9,9 @@
 import {
   BackSide,
   BoxGeometry,
+  BufferGeometry,
+  Float32BufferAttribute,
+  Matrix4,
   Color,
   CylinderGeometry,
   DirectionalLight,
@@ -120,6 +123,55 @@ function makeDiya(clay: MeshStandardMaterial, flameMat: ShaderMaterial): { group
   return { group: g, flame };
 }
 
+/**
+ * Merge every static MeshStandardMaterial mesh under `root` into one mesh per material
+ * (geometry baked into root space). The setting is ~21 small props; this saves ~16 draw calls.
+ */
+function mergeStatic(root: Group): void {
+  root.updateMatrixWorld(true);
+  const inv = new Matrix4().copy(root.matrixWorld).invert();
+  const byMat = new Map<MeshStandardMaterial, Mesh[]>();
+  root.traverse((o) => {
+    const m = o as Mesh;
+    if (m.isMesh && m.material instanceof MeshStandardMaterial) {
+      const list = byMat.get(m.material) ?? [];
+      list.push(m);
+      byMat.set(m.material, list);
+    }
+  });
+  const rel = new Matrix4();
+  for (const [mat, meshes] of byMat) {
+    if (meshes.length < 2) continue;
+    const pos: number[] = [], nrm: number[] = [], uv: number[] = [], idx: number[] = [];
+    for (const m of meshes) {
+      const g = m.geometry.clone();
+      rel.multiplyMatrices(inv, m.matrixWorld);
+      g.applyMatrix4(rel);
+      const base = pos.length / 3;
+      const P = g.getAttribute('position'), N = g.getAttribute('normal'), U = g.getAttribute('uv');
+      for (let i = 0; i < P.count; i++) {
+        pos.push(P.getX(i), P.getY(i), P.getZ(i));
+        nrm.push(N.getX(i), N.getY(i), N.getZ(i));
+        uv.push(U ? U.getX(i) : 0, U ? U.getY(i) : 0);
+      }
+      const I = g.getIndex();
+      if (I) for (let i = 0; i < I.count; i++) idx.push(base + I.getX(i));
+      else for (let i = 0; i < P.count; i++) idx.push(base + i);
+      g.dispose();
+      m.geometry.dispose();
+      m.removeFromParent();
+    }
+    const merged = new BufferGeometry();
+    merged.setAttribute('position', new Float32BufferAttribute(pos, 3));
+    merged.setAttribute('normal', new Float32BufferAttribute(nrm, 3));
+    merged.setAttribute('uv', new Float32BufferAttribute(uv, 2));
+    merged.setIndex(idx);
+    const mesh = new Mesh(merged, mat);
+    mesh.name = `setting-merged-${meshes[0].name || 'props'}`;
+    root.add(mesh);
+  }
+}
+
 export class Setting {
   readonly group = new Group();
   readonly dome = new Dome();
@@ -224,6 +276,7 @@ export class Setting {
     const key = new DirectionalLight(new Color('#ffe7c8'), 1.1);
     key.position.set(0.6, 1.8, 0.8);
     this.group.add(key);
+    mergeStatic(this.group); // before the dome (a ShaderMaterial) so it is untouched
     this.group.add(this.dome.mesh);
   }
 
