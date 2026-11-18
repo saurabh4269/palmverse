@@ -10,9 +10,11 @@ import { ELEMENTS, LINE_OPTIONS, MOUNTS, READINGS } from './readings.js';
 import { PANDIT } from './script.js';
 import type { ElementText, LineId, MountText } from './types.js';
 import { WORLD_NARRATION } from './worlds.js';
+import { HINDI } from './hindi.js';
 
 export const todaysMountLine = (m: MountText): string => PANDIT.todaysMount.replace('{mount}', `${m.name_roman} (${m.name_hi}), ${m.short.toLowerCase()}`);
-export const elementIntroLine = (el: ElementText): string => PANDIT.elementIntro.replace('{element_en}', el.name_en).replace('{element_hi}', `${el.name_hi}, ${el.name_roman}`);
+export const elementIntroLine = (el: ElementText): string =>
+  PANDIT.elementIntro.replace('an {element_en}', `${/^[aeiou]/i.test(el.name_en) ? 'an' : 'a'} ${el.name_en}`).replace('{element_hi}', `${el.name_hi}, ${el.name_roman}`);
 export const otherHandRaiseLine = (): string => PANDIT.otherHand.split('?')[0] + '? Hold it up, palm toward you.';
 const ACKS = ['Good.', 'I see.', 'Ah.', 'Yes.', 'Hmm, good.'];
 /** Panditji's acknowledgement after the i-th line question is answered. */
@@ -20,7 +22,7 @@ export const pickedLine = (i: number, label: string): string => `${ACKS[i % ACKS
 export const CARD_LINE = 'Here is your Rekha card. It is saved on this headset only. After you leave, you can download it from this page.';
 
 export function allSpokenLines(lang: 'en' | 'hi'): string[] {
-  if (lang !== 'en') return [];
+  if (lang === 'hi') return allSpokenLines('en').map((t) => HINDI[t]).filter((t): t is string => !!t);
   const out: string[] = [];
   const add = (t: string) => {
     if (t && !out.includes(t)) out.push(t);

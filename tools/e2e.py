@@ -107,6 +107,24 @@ park_poker()
 cli('xr', 'set-transform', payload={'device': READ, 'position': {'x': 0.25 * SX, 'y': 0.7, 'z': 0.05}})
 check('welcome', bool(wait_for(r'phase from=boot to=welcome', 15)))
 check('stage anchored', bool(wait_for(r'^ ?anchor ', 10)))
+m = wait_for(r'layout phase=welcome .*"lang":\[', 12)
+lb = field(m, 'layout')['buttons']['lang']
+langs = []
+for _ in range(2):
+    mark()
+    poke(lb)
+    m = wait_for(r'lang lang=(\w+)', 6)
+    langs.append(m.group(1) if m else '?')
+    if langs[-1] == 'hi':
+        m = wait_for(r'say .*layout=\{"text":"(.)', 4)
+        check('Panditji greets in Hindi', m and '\u0900' <= m.group(1) <= '\u097f', m.group(0)[:80] if m else '')
+        time.sleep(1.5)
+        shot('welcome-hindi')
+check('language button toggles en/hi', sorted(langs) == ['en', 'hi'], ','.join(langs))
+if langs[-1] == 'hi':  # leave the browser in English for the rest of the run
+    mark()
+    poke(lb)
+    wait_for(r'lang lang=en', 6)
 m = wait_for(r'layout phase=welcome .*"next":\[', 12)
 btn = field(m, 'layout')['buttons']['next']
 time.sleep(0.6)

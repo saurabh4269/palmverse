@@ -5,6 +5,7 @@
  * cards with download links (a file download can't happen inside XR).
  */
 import { load } from './core/save.js';
+import { getLang, setLang, type Lang } from './core/lang.js';
 
 export function initPage(launch: () => void): void {
   const page = document.getElementById('page');
@@ -26,6 +27,10 @@ export function initPage(launch: () => void): void {
     if (isEmulated || import.meta.env.DEV) page.classList.add('hidden');
   })();
   btn.addEventListener('click', () => launch());
+  const langs = Array.from(document.querySelectorAll<HTMLButtonElement>('button.lang'));
+  const mark = () => langs.forEach((b) => b.classList.toggle('on', b.dataset.lang === getLang()));
+  langs.forEach((b) => b.addEventListener('click', () => (setLang(b.dataset.lang as Lang), mark())));
+  mark();
   const render = () => {
     const box = document.getElementById('cards');
     const none = document.getElementById('nocards');

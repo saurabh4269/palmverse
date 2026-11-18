@@ -159,7 +159,13 @@ export class Voice {
   enabled = true;
   private voice: SpeechSynthesisVoice | null = null;
   speaking = false;
-  readonly clips = new ClipVoice(`${import.meta.env.BASE_URL}voice/en/`);
+  private readonly clipsBy = { en: new ClipVoice(`${import.meta.env.BASE_URL}voice/en/`), hi: new ClipVoice(`${import.meta.env.BASE_URL}voice/hi/`) };
+  private hiVoice: SpeechSynthesisVoice | null = null;
+  /** language of the line being spoken: picks the clip set and the fallback voice */
+  lang: 'en' | 'hi' = 'en';
+  get clips(): ClipVoice {
+    return this.clipsBy[this.lang];
+  }
   private sound: Sound | null = null;
 
   /** Clips play through the effects' AudioContext (unlocked on Enter). */
@@ -168,7 +174,8 @@ export class Voice {
   }
 
   constructor() {
-    void this.clips.load();
+    void this.clipsBy.en.load();
+    void this.clipsBy.hi.load();
     try {
       const pick = () => {
         const vs = speechSynthesis.getVoices();
@@ -177,6 +184,7 @@ export class Voice {
           vs.find((v) => /en[-_]IN/i.test(v.lang)) ??
           vs.find((v) => /^en/i.test(v.lang)) ??
           null;
+        this.hiVoice = vs.find((v) => /hi[-_]IN/i.test(v.lang)) ?? null;
       };
       pick();
       speechSynthesis.addEventListener?.('voiceschanged', pick);
@@ -186,8 +194,9 @@ export class Voice {
   }
 
   /** Speak a line. Returns the clip's duration (seconds) when a pre-rendered clip plays, else null. */
-  say(text: string): number | null {
+  say(text: string, lang: 'en' | 'hi' = 'en'): number | null {
     if (!this.enabled) return null;
+    this.lang = lang;
     const ctx = this.sound?.ctx;
     if (ctx && ctx.state !== 'closed') {
       const d = this.clips.play(ctx, text, () => this.speak(text));
@@ -204,10 +213,12 @@ export class Voice {
   private speak(text: string): void {
     try {
       // Speak Devanagari words by their roman form: strip the Devanagari, keep the rest.
-      const spoken = text.replace(/[ऀ-ॿ]+[,\s]*/g, '').replace(/\s+/g, ' ').trim();
+      const hi = this.lang === 'hi';
+      const spoken = hi ? text : text.replace(/[ऀ-ॿ]+[,\s]*/g, '').replace(/\s+/g, ' ').trim();
       const u = new SpeechSynthesisUtterance(spoken);
-      if (this.voice) u.voice = this.voice;
-      u.lang = this.voice?.lang ?? 'en-IN';
+      const v = hi ? this.hiVoice : this.voice;
+      if (v) u.voice = v;
+      u.lang = v?.lang ?? (hi ? 'hi-IN' : 'en-IN');
       u.rate = 0.93;
       u.pitch = 0.85;
       u.onstart = () => (this.speaking = true);
@@ -219,7 +230,8 @@ export class Voice {
   }
 
   stop(): void {
-    this.clips.stop();
+    this.clipsBy.en.stop();
+    this.clipsBy.hi.stop();
     try {
       speechSynthesis.cancel();
     } catch {

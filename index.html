@@ -17,6 +17,8 @@
       .frame { border: 1px solid rgba(242,196,108,0.6); border-radius: 14px; padding: 14px 18px; margin: 18px 0; background: rgba(30,10,5,0.6); text-align: left; }
       button { font: 700 20px 'Mukta', sans-serif; padding: 14px 28px; border-radius: 999px; border: 2px solid var(--gold); background: #6d2a10; color: var(--ink); cursor: pointer; }
       button:disabled { opacity: 0.5; cursor: default; }
+      button.lang { font-size: 15px; padding: 6px 14px; background: transparent; }
+      button.lang.on { background: #6d2a10; }
       #cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; margin-top: 12px; }
       #cards figure { margin: 0; }
       #cards img { width: 100%; border-radius: 8px; box-shadow: 0 4px 18px rgba(0,0,0,0.5); }
@@ -34,6 +36,7 @@
         <p>Panditji sits across your table. Hold up your real palm: glowing lines appear on your hand, the seven mounts light up, and you touch each one to hear what the tradition says. Pick the line shapes you see on your own palm, and leave with a Rekha card.</p>
         <p><button id="enter" disabled>Checking for Quest…</button></p>
         <p id="xrnote" class="small"></p>
+        <p class="small" id="langrow">Panditji speaks: <button class="lang" data-lang="en">English</button> <button class="lang" data-lang="hi">हिन्दी</button></p>
         <div class="frame">
           <b>Culture, not prediction.</b> Hast Rekha (part of Samudrika Shastra) is presented as a heritage tradition and for fun. Readings are "what the tradition says", drawn from Cheiro (1916), Benham (1900), the Brihat Samhita and modern Indian guides. Teachers disagree, and nothing here is a forecast or advice.<br /><br />
           <b>Privacy.</b> No camera is used. The app reads only the positions of your hand joints, on this device. Nothing is uploaded. Your past cards are stored in this browser only.

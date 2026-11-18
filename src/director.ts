@@ -32,6 +32,8 @@ import { renderShareCard } from './render/share-card.js';
 import { gpuStats } from './render/gpu-stats.js';
 import { GRAHA, GrahaOrb, WorldPortal, type WorldId } from './render/worlds.js';
 import { WORLD_NARRATION } from './content/worlds.js';
+import { HINDI } from './content/hindi.js';
+import { getLang, setLang, type Lang } from './core/lang.js';
 import { CARD_LINE, elementIntroLine, otherHandRaiseLine, pickedLine, todaysMountLine } from './content/spoken.js';
 import { FONT_BODY, Label, loadFonts } from './render/text.js';
 import { Hint, Subtitles } from './render/ui.js';
@@ -107,6 +109,8 @@ export class HastRekhaSystem extends createSystem({}) {
   private btnNext!: TextButton;
   private btnOther!: TextButton;
   private btnFinish!: TextButton;
+  private btnLang!: TextButton;
+  private lang: Lang = getLang();
   private intro!: Label;
   private plate = new MountPlate();
   private mountSeq = -1;
@@ -199,7 +203,8 @@ export class HastRekhaSystem extends createSystem({}) {
     this.btnNext = new TextButton('next', 'Continue ›', 'आगे बढ़ें');
     this.btnOther = new TextButton('other', 'Read my other hand', 'दूसरा हाथ', 0.2, 0.06);
     this.btnFinish = new TextButton('finish', 'Finish', 'समाप्त', 0.13, 0.06);
-    for (const b of [this.btnNext, this.btnOther, this.btnFinish, this.plate.card]) this.stage.add(b.mesh);
+    this.btnLang = new TextButton('lang', 'हिन्दी', 'Hindi voice', 0.13, 0.06);
+    for (const b of [this.btnNext, this.btnOther, this.btnFinish, this.btnLang, this.plate.card]) this.stage.add(b.mesh);
 
     window.addEventListener('keydown', (e) => this.keys.add(e.key.toLowerCase()));
     const unlock = () => this.sound.unlock();
@@ -223,6 +228,8 @@ export class HastRekhaSystem extends createSystem({}) {
       log('xr', { presenting });
       if (presenting) {
         this.sound.unlock();
+        this.lang = getLang();
+        this.btnLang.setLabel(this.lang === 'hi' ? 'English' : 'हिन्दी', this.lang === 'hi' ? 'अंग्रेज़ी आवाज़' : 'Hindi voice');
         this.voice.prefetch(PANDIT.greeting);
         this.anchored = false;
         this.logXRRender();
@@ -284,6 +291,20 @@ export class HastRekhaSystem extends createSystem({}) {
     });
   }
 
+  /** Welcome card: switch Panditji between English and Hindi, and greet again in the new language. */
+  private switchLang(): void {
+    this.lang = this.lang === 'hi' ? 'en' : 'hi';
+    setLang(this.lang);
+    this.btnLang.setLabel(this.lang === 'hi' ? 'English' : 'हिन्दी', this.lang === 'hi' ? 'अंग्रेज़ी आवाज़' : 'Hindi voice');
+    this.subs.clear();
+    this.voice.stop();
+    this.talkUntil = this.time;
+    this.phaseT = 2.6;
+    log('lang', { lang: this.lang });
+    for (const l of PANDIT.greeting) this.say(l);
+    this.say(todaysMountLine(MOUNT_TEXT[todaysMountIndex(new Date())]));
+  }
+
   // ───────────────────────── stage ─────────────────────────
 
   private placeStageDesktop(): void {
@@ -319,7 +340,8 @@ export class HastRekhaSystem extends createSystem({}) {
     this.btnNext.mesh.position.set(0.2, H - 0.36, -0.46);
     this.btnOther.mesh.position.set(-0.14, H - 0.4, -0.46);
     this.btnFinish.mesh.position.set(0.14, H - 0.4, -0.46);
-    for (const b of [this.btnNext, this.btnOther, this.btnFinish]) this.tiltToHead(b.mesh);
+    this.btnLang.mesh.position.set(0.01, H - 0.36, -0.46);
+    for (const b of [this.btnNext, this.btnOther, this.btnFinish, this.btnLang]) this.tiltToHead(b.mesh);
   }
 
   private tiltToHead(o: Mesh): void {
@@ -393,10 +415,13 @@ export class HastRekhaSystem extends createSystem({}) {
   // ───────────────────────── speech ─────────────────────────
 
   private say(text: string): number {
-    const clip = this.voice.say(text);
-    const dur = this.subs.say(text, 'pandit', clip ?? undefined);
+    // in Hindi, the caption and the voice both use the Hindi line (English if a line has none)
+    const hi = this.lang === 'hi' ? HINDI[text] : undefined;
+    const shown = hi ?? text;
+    const clip = this.voice.say(shown, hi ? 'hi' : 'en');
+    const dur = this.subs.say(shown, 'pandit', clip ?? undefined);
     this.talkUntil = Math.max(this.talkUntil, this.time) + dur;
-    log('say', { dur, clip: clip ? 1 : 0 }, { text });
+    log('say', { dur, clip: clip ? 1 : 0, lang: hi ? 'hi' : 'en' }, { text: shown });
     return dur;
   }
 
@@ -507,6 +532,7 @@ export class HastRekhaSystem extends createSystem({}) {
       case 'welcome':
         this.intro.opacity = Math.min(1, t / 1.2);
         this.btnNext.show(t > 2.5);
+        if (this.pressed === 'lang' || this.keys.has('l')) this.switchLang();
         if ((t > 3 && this.talkLeft() <= 0) || nextPressed || this.pressed === 'next') this.go('raise');
         break;
       case 'raise': {
@@ -1163,7 +1189,8 @@ export class HastRekhaSystem extends createSystem({}) {
     if (!['welcome', 'mounts', 'explore', 'reading', 'end'].includes(this.phase)) this.btnNext.show(false);
     this.btnOther.show(this.phase === 'card' && this.phaseT > 2);
     this.btnFinish.show(this.phase === 'card' && this.phaseT > 2);
-    for (const b of [this.btnNext, this.btnOther, this.btnFinish]) {
+    this.btnLang.show(this.phase === 'welcome' && this.phaseT > 1.5);
+    for (const b of [this.btnNext, this.btnOther, this.btnFinish, this.btnLang]) {
       if (b.update(dt, this.tipsArr)) {
         this.pressed = b.id;
         this.sound.press();
@@ -1197,7 +1224,7 @@ export class HastRekhaSystem extends createSystem({}) {
       { phase: this.phase, facing: f ? facing(f, this.eye()) : -2 },
       {
         head: r3(this.headWorld),
-        buttons: Object.fromEntries([this.btnNext, this.btnOther, this.btnFinish].filter((b) => b.enabled).map((b) => [b.id, w(b.mesh)])),
+        buttons: Object.fromEntries([this.btnNext, this.btnOther, this.btnFinish, this.btnLang].filter((b) => b.enabled).map((b) => [b.id, w(b.mesh)])),
         cards: this.cards.map((c) => ({ id: c.id, p: w(c.mesh) })),
         mounts: f ? MOUNT_ORDER.map((id, i) => ({ id, p: r3(q(f, MOUNT_CENTROIDS[i][0], MOUNT_CENTROIDS[i][1], 0.004)), n: r3(f.N) })) : [],
         palm: f ? { O: r3(f.O), len: +f.length.toFixed(3), wid: +f.width.toFixed(3) } : null,
